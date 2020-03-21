@@ -1,26 +1,42 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
 import { Notifications } from 'expo';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
+import useCounter from './useCounter'
+
 
 export default function App() {
+  const { count, setCount, start, stop } = useCounter(1000, false);
+  const [ids, setId] = useState([])
+
   const onSubmit = () => {
     const localNotification = {
       title: 'Title',
-      body: 'Body'
+      body: 'New ',
+      android: {
+        sticky: true
+      }
     };
 
     const schedulingOptions = {
       time: (new Date()).getTime()
     }
 
-    Notifications.presentLocalNotificationAsync(localNotification);
+    Notifications.presentLocalNotificationAsync(localNotification).then(notifcationId => setId([...ids, notifcationId]))
+  }
+
+  const clear = () => {
+    if (ids && ids.length > 0) {
+      ids.map((id, index) => Notifications.dismissNotificationAsync(id).then(() => setId(ids.splice(index, 1))))
+    }
   }
 
   const handleNotification = () => {
     console.warn('ok! got your notif');
   }
+
+
   useEffect(() => {
     async function getPermission() {
       // We need to ask for Notification permissions for ios devices
@@ -35,13 +51,27 @@ export default function App() {
       Notifications.addListener(handleNotification);
     }
     getPermission()
-    
+
   }, [])
+
+  useEffect(() => {
+    // onSubmit()
+  }, [count])
+
+  useEffect(() => {
+    console.log(ids)
+  }, [ids])
 
   return (
     <View style={styles.container}>
-      <Text>Hello!</Text>
-      <Button title='Notify' onPress={() => onSubmit()} />
+      <Text>{count}</Text>
+      <Button title='Start' onPress={() => {
+        setCount(0)
+        start()
+        onSubmit()
+      }} />
+      <Button title='Stop' onPress={() => stop()} />
+      <Button title='Clear' onPress={() => clear()} />
     </View>
   );
 }
