@@ -13,13 +13,16 @@ export default function App() {
 
   const notif = new NotifService(onNotif.bind());
 
+  useEffect(() => {
+    if(count) notif.localNotif('Count : ' + count)
+  }, [count])
+
   return (
     <View style={styles.container}>
       <Text>{count}</Text>
       <Button title='Start' onPress={() => {
         setCount(0)
         start()
-        notif.localNotif()
       }} />
       <Button title='Stop' onPress={() => stop()} />
       <Button title='Clear' onPress={() => { setCount(0); notif.cancelAll() }} />
