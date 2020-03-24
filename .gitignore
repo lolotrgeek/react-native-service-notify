@@ -14,7 +14,7 @@ web-report/
 /.expo
 /.expo-shared
 
-/android
+/android/app/build
 /ios
 # macOS
 .DS_Store
