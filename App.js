@@ -5,7 +5,7 @@ import useCounter from './useCounter'
 import Heartbeat from './Heartbeat';
 
 export default function App() {
-  const { count, setCount, start, stop } = useCounter(1000, false);
+  const [count, setCount] = useState(0)
 
   function onNotif(notif) {
     console.log(notif);
@@ -17,7 +17,7 @@ export default function App() {
   useEffect(() => {
     if (deviceEmitter) {
       deviceEmitter.addListener('Heartbeat', event => {
-        if (typeof event === 'number') setCount(count => count + event)
+        if (event) setCount(event)
       })
     }
   })

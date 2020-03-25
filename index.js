@@ -7,8 +7,15 @@ import { setHeartBeat, store } from './store';
 
 const MyHeadlessTask = async () => {
   console.log('Receiving HeartBeat!');
-  return 1
+  let state = store.getState()
+  if (state.App.heartBeat === false) { store.dispatch(setHeartBeat(0)); }
+  else {
+    store.dispatch(setHeartBeat(state.App.heartBeat + 1));
+  }
+  console.log('State: ', state.App.heartBeat, typeof state.App.heartBeat)
+
 };
+
 
 const RNRedux = () => (
   <Provider store={store}>
