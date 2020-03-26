@@ -17,11 +17,7 @@ react-native run-android
 ```
 
 ## Notes
-Decoupling is achieved by using redux for the service state and useEffect for the app state. The Service state is accessed with a deviceEvent listener.
-
-This allows for greater flexibility on the front-end and predictablity on the backend.
-
-If decoupling doesn't matter then the Service state (defined in index.js) can shared with the app state by passing it via a prop.
+It is possible to increase efficiency to 'couple' the Service State and App State. The app state will update much faster. This creates a timing issue where the App state is ahead of the Service State. Only couple if timing doesn't matter between the Service and App. A coupled version can be found in the `/couple` directory.
 
 ## ToDo
 - decouple HeartbeatModule from timer example
