@@ -3,6 +3,7 @@ import { AppRegistry, Platform } from 'react-native';
 import { Provider } from 'react-redux';
 import App from './App';
 import { name as appName } from './app.json';
+import Heartbeat from './Heartbeat';
 import { setHeartBeat, store } from './store';
 
 const MyHeadlessTask = async () => {
@@ -11,7 +12,10 @@ const MyHeadlessTask = async () => {
   if (state.App.heartBeat === false) { store.dispatch(setHeartBeat(0)); }
   else {
     store.dispatch(setHeartBeat(state.App.heartBeat + 1));
+    let tick = state.App.heartBeat
+    Heartbeat.notificationUpdate(tick.toString())
   }
+  
   console.log('State: ', state.App.heartBeat, typeof state.App.heartBeat)
 
 };
