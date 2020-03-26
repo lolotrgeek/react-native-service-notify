@@ -6,6 +6,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
+import android.app.PendingIntent;
 import android.app.NotificationManager;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -43,9 +44,12 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void notificationUpdate(String tick) {
+        Intent notificationIntent = new Intent(this.reactContext, MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(getName()).setContentText(tick)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
 
