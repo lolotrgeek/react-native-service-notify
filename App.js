@@ -10,9 +10,10 @@ export default function App() {
 
   useEffect(() => {
     if (deviceEmitter) {
+      console.log('listening...')
       deviceEmitter.addListener("Heartbeat", event => {
         console.log('device Event: ', event)
-        // if (event) setCount(event)
+        if (event) setCount(event)
       })
     }
   })
