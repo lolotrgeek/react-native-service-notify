@@ -1,23 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Button, NativeEventEmitter } from 'react-native';
-import NotifService from './NotifService';
-import useCounter from './useCounter'
+import { StyleSheet, Text, View, Button, NativeEventEmitter, EventEmitter } from 'react-native';
 import Heartbeat from './Heartbeat';
 
 export default function App() {
   const [count, setCount] = useState(0)
 
-  function onNotif(notif) {
-    console.log(notif);
-    // Alert.alert(notif.title, notif.message);
-  }
-  const notif = new NotifService(onNotif.bind());
+
   const deviceEmitter = new NativeEventEmitter
 
   useEffect(() => {
     if (deviceEmitter) {
-      deviceEmitter.addListener('Heartbeat', event => {
-        if (event) setCount(event)
+      deviceEmitter.addListener("Heartbeat", event => {
+        console.log('device Event: ', event)
+        // if (event) setCount(event)
       })
     }
   })
@@ -27,14 +22,7 @@ export default function App() {
       <Text>{count}</Text>
       <Button title='Start' style={styles.button} onPress={() => Heartbeat.startService()} />
       <Button title=' Stop Service' style={styles.button} onPress={() => Heartbeat.stopService()} />
-
-      {/* <Button title='Start' onPress={() => {
-        setCount(0)
-        start()
-        notif.localNotif('Hello')
-      }} />
-      <Button title='Stop' onPress={() => stop()} /> */}
-      <Button title='Clear' onPress={() => { setCount(0); notif.cancelAll() }} />
+      <Button title='Clear' onPress={() => { setCount(0); }} />
     </View>
   );
 }

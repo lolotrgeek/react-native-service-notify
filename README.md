@@ -16,8 +16,12 @@ react-native run-android
 
 ## ToDo
 - decouple HeartbeatModule from timer example
+- rename things for clarity
+- cleanup unused files in repo
 
 ## Reference 
 [Article](https://medium.com/reactbrasil/how-to-create-an-unstoppable-service-in-react-native-using-headless-js-93656b6fd5d1)
+
 [Github](https://github.com/mathias5r/rn-heartbeat)
+
 [Notification Docs](https://developer.android.com/training/notify-user/build-notification.html#Updating)
