@@ -16,6 +16,7 @@ export default function App() {
         if (event) setCount(event)
       })
     }
+    return () => { setCount(0); console.log('stop listening')}
   },[])
 
   return (

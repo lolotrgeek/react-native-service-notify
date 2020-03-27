@@ -21,6 +21,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     private static ReactApplicationContext reactContext;
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
+    private static String TITLE = "Title";
 
     public HeartbeatModule(@Nonnull ReactApplicationContext reactContext) {
         super(reactContext);
@@ -34,8 +35,13 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void configService(String title) {
+        TITLE = title;
+    }
+
+    @ReactMethod
     public void startService() {
-        this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class));
+        this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
     }
 
     @ReactMethod
@@ -54,8 +60,11 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(getName()).setContentText(tick)
-                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(TITLE)
+                .setContentText(tick)
+                .setContentIntent(contentIntent)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
 

@@ -67,11 +67,13 @@ public class HeartbeatService extends Service {
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        String title = intent.getStringExtra("TITLE");
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Heartbeat service")
+                .setContentTitle(title)
                 .setContentText("Running...")
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentIntent(contentIntent)
+                .setOnlyAlertOnce(true)
                 .setOngoing(true)
                 .build();
         startForeground(SERVICE_NOTIFICATION_ID, notification);
