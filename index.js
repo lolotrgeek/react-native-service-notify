@@ -1,22 +1,8 @@
 import React from 'react';
 import { AppRegistry, Platform } from 'react-native';
 import App from './App';
+import MyHeadlessTask from './MyHeadlessTask'
 import { name as appName } from './app.json';
-import Heartbeat from './Heartbeat';
-import { setHeartBeat, store } from './store';
-
-const MyHeadlessTask = async () => {
-  console.log('Receiving HeartBeat!');
-  let state = store.getState()
-  if (state.App.heartBeat === false) { store.dispatch(setHeartBeat(0)); }
-  else {
-    store.dispatch(setHeartBeat(state.App.heartBeat + 1));
-    let tick = state.App.heartBeat
-    Heartbeat.notificationUpdate(tick.toString())
-  }
-  console.log('State: ', state.App.heartBeat, typeof state.App.heartBeat)
-};
-
 
 AppRegistry.registerHeadlessTask('Heartbeat', () => MyHeadlessTask);
 AppRegistry.registerComponent('Notify', () => App);

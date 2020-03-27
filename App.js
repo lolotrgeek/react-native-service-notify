@@ -21,7 +21,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>{count}</Text>
-      <Button title='Start' style={styles.button} onPress={() => Heartbeat.startService()} />
+      <Button title='Start' style={styles.button} onPress={() => {store.dispatch(setHeartBeat(1)); Heartbeat.startService()}} />
       <Button title='Stop Service' style={styles.button} onPress={() => Heartbeat.stopService()} />
       <Button title='Clear' onPress={() => { store.dispatch(setHeartBeat(0)); setCount(0); }} />
     </View>

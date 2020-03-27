@@ -18,6 +18,7 @@ public class HeartbeatService extends Service {
 
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
+    private static final int HANDLE_TIME = 1000;
 
     private Handler handler = new Handler();
     private Runnable runnableCode = new Runnable() {
@@ -28,7 +29,7 @@ public class HeartbeatService extends Service {
             context.startService(myIntent);
             HeadlessJsTaskService.acquireWakeLockNow(context);
             // Here is the 'actual' logic of the service
-            handler.postDelayed(this, 2000);
+            handler.postDelayed(this, HANDLE_TIME);
         }
     };
     private void createNotificationChannel() {
@@ -76,5 +77,4 @@ public class HeartbeatService extends Service {
         startForeground(SERVICE_NOTIFICATION_ID, notification);
         return START_STICKY;
     }
-
 }

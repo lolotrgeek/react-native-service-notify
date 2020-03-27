@@ -2,7 +2,7 @@ import { createStore, combineReducers } from 'redux';
 import { createAction, handleActions } from 'redux-actions';
 
 const appInitialState = {
-  heartBeat: false,
+  heartBeat: 0,
 };
 
 const SET_HEART_BEAT = 'SET_HEART_BEAT';
