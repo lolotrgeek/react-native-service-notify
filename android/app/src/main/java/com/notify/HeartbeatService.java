@@ -20,6 +20,7 @@ public class HeartbeatService extends Service {
     private static final String CHANNEL_ID = "HEARTBEAT";
     private static final int HANDLE_TIME = 1000;
     private static HeartbeatService instance;
+    // private int CURRENT_TICK = 0;
 
     private Handler handler = new Handler();
     private Runnable runnableCode = new Runnable() {
@@ -38,9 +39,14 @@ public class HeartbeatService extends Service {
         return instance;
     }
 
+    public void resume () {
+        this.handler.post(this.runnableCode);
+    }
+
     public void pause () {
         this.handler.removeCallbacks(this.runnableCode);
     }
+
 
 
 
@@ -80,14 +86,6 @@ public class HeartbeatService extends Service {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Intent stopIntent = new Intent(this, HeartbeatService.class);
-        PendingIntent stopPendingIntent = PendingIntent.getActivity(this, 0, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        NotificationCompat.Action stopAction = new NotificationCompat.Action.Builder(
-            R.mipmap.ic_launcher,
-                "Stop",
-                stopPendingIntent)
-                .build();
-
         String title = intent.getStringExtra("TITLE");
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(title)
@@ -96,7 +94,6 @@ public class HeartbeatService extends Service {
                 .setContentIntent(contentIntent)
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
-                .addAction(stopAction)
                 .build();
         startForeground(SERVICE_NOTIFICATION_ID, notification);
         return START_STICKY;
