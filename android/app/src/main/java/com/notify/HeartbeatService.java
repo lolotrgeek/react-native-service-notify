@@ -19,6 +19,7 @@ public class HeartbeatService extends Service {
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
     private static final int HANDLE_TIME = 1000;
+    private static HeartbeatService instance;
 
     private Handler handler = new Handler();
     private Runnable runnableCode = new Runnable() {
@@ -32,6 +33,17 @@ public class HeartbeatService extends Service {
             handler.postDelayed(this, HANDLE_TIME);
         }
     };
+
+    public static HeartbeatService getInstance() {
+        return instance;
+    }
+
+    public void pause () {
+        this.handler.removeCallbacks(this.runnableCode);
+    }
+
+
+
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
@@ -51,8 +63,8 @@ public class HeartbeatService extends Service {
 
     @Override
     public void onCreate() {
+        instance = this;
         super.onCreate();
-
     }
 
     @Override
@@ -66,7 +78,16 @@ public class HeartbeatService extends Service {
         this.handler.post(this.runnableCode);
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Intent stopIntent = new Intent(this, HeartbeatService.class);
+        PendingIntent stopPendingIntent = PendingIntent.getActivity(this, 0, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        NotificationCompat.Action stopAction = new NotificationCompat.Action.Builder(
+            R.mipmap.ic_launcher,
+                "Stop",
+                stopPendingIntent)
+                .build();
+
         String title = intent.getStringExtra("TITLE");
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(title)
@@ -75,6 +96,7 @@ public class HeartbeatService extends Service {
                 .setContentIntent(contentIntent)
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
+                .addAction(stopAction)
                 .build();
         startForeground(SERVICE_NOTIFICATION_ID, notification);
         return START_STICKY;

@@ -50,6 +50,11 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void pause() {
+        HeartbeatService.getInstance().pause();
+    }
+
+    @ReactMethod
     public void notificationUpdate(String tick) {
         // send tick event
         this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("Heartbeat", tick);
@@ -58,14 +63,22 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
+
+        Intent stopIntent = new Intent(this.reactContext, HeartbeatService.class);
+        PendingIntent stopPendingIntent = PendingIntent.getActivity(this.reactContext, 0, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        NotificationCompat.Action stopAction = new NotificationCompat.Action.Builder(
+            R.mipmap.ic_launcher,
+                "Stop",
+                stopPendingIntent)
+                .build();
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(TITLE)
                 .setContentText(tick)
                 .setContentIntent(contentIntent)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .addAction(stopAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
 
         // send notification
