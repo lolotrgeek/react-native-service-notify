@@ -90,13 +90,13 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void startService() {
         instance = this;
-        STATUS = "stop";
+        STATUS = "started";
         this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
     }
 
     @ReactMethod
     public void stopService() {
-        STATUS = "start";
+        STATUS = "stopped";
         this.reactContext.stopService(new Intent(this.reactContext, HeartbeatService.class));
     }
 
@@ -105,11 +105,24 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         // make sure service is running first
         try {
             HeartbeatService.getInstance().pause();
+            STATUS = "stopped";
             notificationPaused();  
         } catch (Exception e) {
             //TODO: handle exception
         }
+    }
 
+    @ReactMethod
+    public void resume() {
+        // make sure service is running first
+        if(STATUS == "stopped") {
+            try {
+                HeartbeatService.getInstance().resume(); 
+                STATUS = "started"; 
+            } catch (Exception e) {
+                //TODO: handle exception
+            }
+        }
     }
 
     @ReactMethod

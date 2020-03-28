@@ -27,7 +27,7 @@ public class HeartbeatActionReceiver extends BroadcastReceiver {
     }
 
     public void start() {
-        HeartbeatService.getInstance().resume();
+        HeartbeatModule.getInstance().resume();
     }
 
 }
