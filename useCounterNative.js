@@ -4,9 +4,8 @@ import Heartbeat from './Heartbeat';
 
 const deviceEmitter = new NativeEventEmitter
 
-export default function useCounter() {
+export default function useCounter(countdown) {
   const [count, setCount] = useState(0)
-
     useEffect(() => {
         if (deviceEmitter) {
           console.log('listening...')
@@ -18,9 +17,9 @@ export default function useCounter() {
         return () => { setCount(0); console.log('stop listening')}
       },[])
 
-      const start = () => count === 0 ? Heartbeat.startService() : Heartbeat.resume()
-      const stop = () => Heartbeat.pause()
-      const end = () => Heartbeat.stopService()
+      const start = () => Heartbeat.startService()
+      const stop = () => Heartbeat.stopService()
+      const reset = () => {stop; setCount(0)}
 
-      return { count, setCount, start, stop, end };
+      return { count, setCount, start, stop, reset };
 }

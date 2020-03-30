@@ -1,29 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Button, NativeEventEmitter } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View, Button } from 'react-native';
 import { setHeartBeat, store } from './store';
-import Heartbeat from './Heartbeat';
-
-const deviceEmitter = new NativeEventEmitter
+import useCounter from './useCounterNative'
 
 export default function App() {
-  const [count, setCount] = useState(0)
-
-  useEffect(() => {
-    if (deviceEmitter) {
-      console.log('listening...')
-      deviceEmitter.addListener("Heartbeat", event => {
-        console.log('device Event: ', event)
-        if (event) setCount(event)
-      })
-    }
-    return () => { setCount(0); console.log('stop listening')}
-  },[])
+  const { count, setCount, start, stop } = useCounter()
 
   return (
     <View style={styles.container}>
       <Text>{count}</Text>
-      <Button title='Start Service' style={styles.button} onPress={() => {Heartbeat.startService()}} />
-      <Button title='Stop Service' style={styles.button} onPress={() => Heartbeat.stopService()} />
+      <Button title='Start Service' style={styles.button} onPress={() => {start()}} />
+      <Button title='Stop Service' style={styles.button} onPress={() => stop()} />
       <Button title='Clear' onPress={() => { store.dispatch(setHeartBeat(0)); setCount(0); }} />
     </View>
   );

@@ -90,6 +90,11 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void setTimerInterval(int ms) {
+        HeartbeatService.getInstance().setRunnableInterval(ms);
+    }
+
+    @ReactMethod
     public void startService() {
         instance = this;
         if(STATUS == "STOPPED") {
@@ -114,31 +119,6 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             }
         }
     }
-
-    // @ReactMethod
-    // public void pause() {
-    //     // make sure service is running first
-    //     try {
-    //         HeartbeatService.getInstance().pause();
-    //         STATUS = "stopped";
-    //         notificationPaused();  
-    //     } catch (Exception e) {
-    //         //TODO: handle exception
-    //     }
-    // }
-
-    // @ReactMethod
-    // public void resume() {
-    //     // make sure service is running first
-    //     if(STATUS == "stopped") {
-    //         try {
-    //             HeartbeatService.getInstance().resume(); 
-    //             STATUS = "started"; 
-    //         } catch (Exception e) {
-    //             //TODO: handle exception
-    //         }
-    //     }
-    // }
 
     @ReactMethod
     public void notificationUpdate(String tick) {

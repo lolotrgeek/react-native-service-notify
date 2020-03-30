@@ -18,7 +18,7 @@ public class HeartbeatService extends Service {
 
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
-    private static final int HANDLE_TIME = 1000;
+    private static int INTERVAL = 1000;
     private static HeartbeatService instance;
     // private int CURRENT_TICK = 0;
 
@@ -31,12 +31,16 @@ public class HeartbeatService extends Service {
             context.startService(myIntent);
             HeadlessJsTaskService.acquireWakeLockNow(context);
             // Here is the 'actual' logic of the service
-            handler.postDelayed(this, HANDLE_TIME);
+            handler.postDelayed(this, INTERVAL);
         }
     };
 
     public static HeartbeatService getInstance() {
         return instance;
+    }
+
+    public void setRunnableInterval (int ms) {
+        INTERVAL = ms; 
     }
 
     // resumes the service, use carefully, can cause service to step on itself

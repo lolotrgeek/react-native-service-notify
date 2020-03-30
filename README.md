@@ -22,7 +22,7 @@ react-native run-android
 ```
 
 ## Notes
-It is possible to increase efficiency to 'couple' the Service State and App State. The app state will update much faster. This creates a timing issue where the App state is ahead of the Service State. Only couple if timing doesn't matter between the Service and App. A coupled version can be found in the `/couple` directory.
+Using Redux instead of useEffects so counter is predicatable and exists outside of app state.
 
 ## ToDo
 - decouple HeartbeatModule from timer example
