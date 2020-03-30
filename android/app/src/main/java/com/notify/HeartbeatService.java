@@ -39,24 +39,26 @@ public class HeartbeatService extends Service {
         return instance;
     }
 
+    // resumes the service, use carefully, can cause service to step on itself
     public void resume () {
         this.handler.post(this.runnableCode);
     }
 
+    // suspends the service, use carefully, can cause service to step on itself
     public void pause () {
         this.handler.removeCallbacks(this.runnableCode);
     }
-
-
 
 
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "HEARTBEAT", importance);
             channel.setDescription("CHANEL DESCRIPTION");
+            channel.setSound(null, null);
+            channel.setShowBadge(false);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
@@ -93,6 +95,7 @@ public class HeartbeatService extends Service {
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentIntent(contentIntent)
                 .setOnlyAlertOnce(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setOngoing(true)
                 .build();
         startForeground(SERVICE_NOTIFICATION_ID, notification);

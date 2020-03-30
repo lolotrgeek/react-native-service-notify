@@ -11,6 +11,11 @@ Create a reboot tolerant persistent service for react native that runs in foregr
 - service task defined in JS
 - uses redux for headless data store
 
+## Install
+```
+npm i
+```
+
 ## Running 
 ```
 react-native run-android

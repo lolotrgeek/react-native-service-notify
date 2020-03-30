@@ -23,11 +23,11 @@ public class HeartbeatActionReceiver extends BroadcastReceiver {
     }
 
     public void stop() {
-        HeartbeatModule.getInstance().pause();
+        HeartbeatModule.getInstance().stopService();
     }
 
     public void start() {
-        HeartbeatModule.getInstance().resume();
+        HeartbeatModule.getInstance().startService();
     }
 
 }

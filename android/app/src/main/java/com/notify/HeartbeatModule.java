@@ -24,7 +24,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
     private static String TITLE = "Title";
-    private static String STATUS = "stop";
+    private static String STATUS = "STOPPED";
     private static String TICK;
     private static HeartbeatModule instance;
 
@@ -73,15 +73,17 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             .setContentTitle(TITLE)
             .setContentText(TICK)
             .setContentIntent(contentIntent)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOnlyAlertOnce(true)
+            .setOngoing(false)
             .addAction(buttonAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
 
         // send notification
         // SERVICE_NOTIFICATION_ID is a unique int for each notification that you must define
         notificationManager.notify(SERVICE_NOTIFICATION_ID, builder.build());
-
     }
+
     @ReactMethod
     public void configService(String title) {
         TITLE = title;
@@ -90,40 +92,53 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void startService() {
         instance = this;
-        STATUS = "started";
-        this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
-    }
-
-    @ReactMethod
-    public void stopService() {
-        STATUS = "stopped";
-        this.reactContext.stopService(new Intent(this.reactContext, HeartbeatService.class));
-    }
-
-    @ReactMethod
-    public void pause() {
-        // make sure service is running first
-        try {
-            HeartbeatService.getInstance().pause();
-            STATUS = "stopped";
-            notificationPaused();  
-        } catch (Exception e) {
-            //TODO: handle exception
-        }
-    }
-
-    @ReactMethod
-    public void resume() {
-        // make sure service is running first
-        if(STATUS == "stopped") {
+        if(STATUS == "STOPPED") {
             try {
-                HeartbeatService.getInstance().resume(); 
-                STATUS = "started"; 
+                this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
+                STATUS = "STARTED";
             } catch (Exception e) {
                 //TODO: handle exception
             }
         }
     }
+
+    @ReactMethod
+    public void stopService() {
+        if(STATUS == "STARTED") {
+            try {
+                this.reactContext.stopService(new Intent(this.reactContext, HeartbeatService.class));
+                STATUS = "STOPPED";
+                notificationPaused();
+            } catch (Exception e) {
+                //TODO: handle exception
+            }
+        }
+    }
+
+    // @ReactMethod
+    // public void pause() {
+    //     // make sure service is running first
+    //     try {
+    //         HeartbeatService.getInstance().pause();
+    //         STATUS = "stopped";
+    //         notificationPaused();  
+    //     } catch (Exception e) {
+    //         //TODO: handle exception
+    //     }
+    // }
+
+    // @ReactMethod
+    // public void resume() {
+    //     // make sure service is running first
+    //     if(STATUS == "stopped") {
+    //         try {
+    //             HeartbeatService.getInstance().resume(); 
+    //             STATUS = "started"; 
+    //         } catch (Exception e) {
+    //             //TODO: handle exception
+    //         }
+    //     }
+    // }
 
     @ReactMethod
     public void notificationUpdate(String tick) {
@@ -151,7 +166,9 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
                 .setContentTitle(TITLE)
                 .setContentText(tick)
                 .setContentIntent(contentIntent)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOnlyAlertOnce(true)
+                .setOngoing(true)
                 .addAction(buttonAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
 
