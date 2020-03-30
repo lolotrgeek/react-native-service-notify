@@ -1,7 +1,7 @@
 import Heartbeat from './Heartbeat';
 import { setHeartBeat, store } from './store';
 
-Heartbeat.configService('CHnage')
+Heartbeat.configService('My Headless Task')
 
 export default MyHeadlessTask = async () => {
   console.log('Receiving HeartBeat!');
