@@ -1,10 +1,10 @@
 import React from 'react';
 import { AppRegistry, Platform } from 'react-native';
-import App from './App';
-import MyHeadlessTask from './MyHeadlessTask'
-import { name as appName } from './app.json';
+import App from './src/App';
+import HeartbeatTask from './src/HeartbeatTask'
+import { name as appName } from './src/app.json';
 
-AppRegistry.registerHeadlessTask('Heartbeat', () => MyHeadlessTask);
+AppRegistry.registerHeadlessTask('Heartbeat', () => HeartbeatTask);
 AppRegistry.registerComponent('Notify', () => App);
 
 if (Platform.OS === 'web') {
