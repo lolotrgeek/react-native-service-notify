@@ -23,7 +23,8 @@ public class HeartbeatService extends Service {
     private static HeartbeatService instance;
     // private int CURRENT_TICK = 0;
 
-    private Handler handler = new Handler();
+    private Handler countHandler = new Handler();
+    private Handler msgHandler = new Handler();
     private Runnable runnableCode = new Runnable() {
         @Override
         public void run() {
@@ -32,8 +33,7 @@ public class HeartbeatService extends Service {
             context.startService(myIntent);
             HeadlessJsTaskService.acquireWakeLockNow(context);
             // Here is the 'actual' logic of the service
-            // handler.postDelayed(this, INTERVAL);
-            // handler.post(this);
+            countHandler.postDelayed(this, INTERVAL);
         }
     };
 
@@ -41,25 +41,27 @@ public class HeartbeatService extends Service {
         return instance;
     }
 
-    public void setRunnableInterval (int ms) {
-        INTERVAL = ms; 
+    public void setRunnableInterval(int ms) {
+        INTERVAL = ms;
     }
 
-    // resumes the service, use carefully, can cause service to step on itself
-    public void resume () {
-        this.handler.post(this.runnableCode);
+    // resumes the countHandler, use carefully, can cause service to step on itself
+    // TODO: make this a closure
+    public void resume() {
+        this.countHandler.post(this.runnableCode);
     }
 
-    // suspends the service, use carefully, can cause service to step on itself
-    public void pause () {
-        this.handler.removeCallbacks(this.runnableCode);
+    // suspends the countHandler, use carefully, can cause service to step on itself
+    // TODO: make this a closure
+    public void pause() {
+        this.countHandler.removeCallbacks(this.runnableCode);
     }
 
-    public void updateTick (int tick) {
+    public void postInt(int num) {
         Message message = new Message();
         message.what = SERVICE_NOTIFICATION_ID;
-        message.arg1 = tick;
-        this.handler.sendMessage(message);
+        message.arg1 = num;
+        this.msgHandler.sendMessage(message);
     }
 
     private void createNotificationChannel() {
@@ -90,27 +92,22 @@ public class HeartbeatService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        this.handler.removeCallbacks(this.runnableCode);
+        this.countHandler.removeCallbacks(this.runnableCode);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        this.handler.post(this.runnableCode);
+        // this.countHandler.post(this.runnableCode);
         // this.runnableCode.run();
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
 
         String title = intent.getStringExtra("TITLE");
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(title)
-                .setContentText("Running...")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(contentIntent)
-                .setOnlyAlertOnce(true)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setOngoing(true)
-                .build();
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID).setContentTitle(title)
+                .setContentText("Running...").setSmallIcon(R.mipmap.ic_launcher).setContentIntent(contentIntent)
+                .setOnlyAlertOnce(true).setPriority(NotificationCompat.PRIORITY_LOW).setOngoing(true).build();
         startForeground(SERVICE_NOTIFICATION_ID, notification);
         return START_STICKY;
     }

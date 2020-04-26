@@ -26,6 +26,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     private static final String CHANNEL_ID = "HEARTBEAT";
     private static String TITLE = "Title";
     private static String STATUS = "STOPPED";
+    private static String COUNT = "PAUSED";
     private static String TICK;
     private static HeartbeatModule instance;
 
@@ -52,32 +53,27 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     public void notificationPaused() {
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this.reactContext, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
         // Intend and Build Action Buttons
         Intent startIntent = new Intent(this.reactContext, HeartbeatActionReceiver.class);
         startIntent.putExtra("ACTION", "start");
-        PendingIntent startPendingIntent = PendingIntent.getBroadcast(this.reactContext, 1, startIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-    
-        NotificationCompat.Action buttonAction = new NotificationCompat.Action.Builder(
-            R.mipmap.ic_launcher,
-                "Start",
-                startPendingIntent)
-                .build();
+        PendingIntent startPendingIntent = PendingIntent.getBroadcast(this.reactContext, 1, startIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Action buttonAction = new NotificationCompat.Action.Builder(R.mipmap.ic_launcher, "Start",
+                startPendingIntent).build();
 
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(TITLE)
-            .setContentText(TICK)
-            .setContentIntent(contentIntent)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setOnlyAlertOnce(true)
-            .setOngoing(false)
-            .addAction(buttonAction);
+                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(TITLE).setContentText(TICK)
+                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_LOW).setOnlyAlertOnce(true)
+                .setOngoing(false).addAction(buttonAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
 
         // send notification
-        // SERVICE_NOTIFICATION_ID is a unique int for each notification that you must define
+        // SERVICE_NOTIFICATION_ID is a unique int for each notification that you must
+        // define
         notificationManager.notify(SERVICE_NOTIFICATION_ID, builder.build());
     }
 
@@ -91,51 +87,66 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         try {
             successCallback.invoke(instance.STATUS);
         } catch (Exception e) {
-            
+
         }
     }
 
     @ReactMethod
-    public void setTimerInterval(int ms) {
-        HeartbeatService.getInstance().setRunnableInterval(ms);
+    public void getCountStatus(Callback successCallback) {
+        try {
+            successCallback.invoke(instance.COUNT);
+        } catch (Exception e) {
+
+        }
     }
 
     @ReactMethod
     public void startService() {
         instance = this;
-        if(STATUS == "STOPPED") {
+        if (STATUS == "STOPPED") {
             try {
                 this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
                 STATUS = "STARTED";
-                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS", STATUS);
+                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS",
+                        STATUS);
             } catch (Exception e) {
-                //TODO: handle exception, consider callback
+                // TODO: handle exception, consider callback
             }
         }
     }
 
     @ReactMethod
     public void stopService() {
-        if(STATUS == "STARTED") {
+        if (STATUS == "STARTED") {
             try {
                 this.reactContext.stopService(new Intent(this.reactContext, HeartbeatService.class));
-                // HeartbeatService.getInstance().pause();
                 STATUS = "STOPPED";
                 notificationPaused();
-                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS", STATUS);
+                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS",
+                        STATUS);
             } catch (Exception e) {
-                //TODO: handle exception, consider callback
+                // TODO: handle exception, consider callback
             }
         }
     }
 
     @ReactMethod
     public void startAction() {
-        this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "start");
+        if (COUNT == "PAUSED") {
+            HeartbeatService.getInstance().resume();
+            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "start");
+            COUNT = "RUNNING";
+        }
     }
+
     @ReactMethod
     public void stopAction() {
-        this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "stop");
+        if (COUNT == "RUNNING") {
+            HeartbeatService.getInstance().pause();
+            notificationPaused();
+            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "stop");
+            COUNT = "PAUSED";
+        }
     }
 
     @ReactMethod
@@ -143,37 +154,30 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         TICK = Integer.toString(tick);
         // send tick event
         this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("Heartbeat", tick);
-        // update tick in service thread
-        // HeartbeatService.getInstance().updateTick(tick);
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this.reactContext, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
 
         // Intend and Build Action Buttons
         Intent actionIntent = new Intent(this.reactContext, HeartbeatActionReceiver.class);
         actionIntent.putExtra("ACTION", "stop");
-        PendingIntent actionPendingIntent = PendingIntent.getBroadcast(this.reactContext, 1, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-    
-        NotificationCompat.Action buttonAction = new NotificationCompat.Action.Builder(
-            R.mipmap.ic_launcher,
-                "Stop",
-                actionPendingIntent)
-                .build();
+        PendingIntent actionPendingIntent = PendingIntent.getBroadcast(this.reactContext, 1, actionIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Action buttonAction = new NotificationCompat.Action.Builder(R.mipmap.ic_launcher, "Stop",
+                actionPendingIntent).build();
 
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(TITLE)
-                .setContentText(TICK)
-                .setContentIntent(contentIntent)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setOnlyAlertOnce(true)
-                .setOngoing(true)
-                .addAction(buttonAction);
+                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(TITLE).setContentText(TICK)
+                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_LOW).setOnlyAlertOnce(true)
+                .setOngoing(true).addAction(buttonAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
 
         // send notification
-        // SERVICE_NOTIFICATION_ID is a unique int for each notification that you must define
+        // SERVICE_NOTIFICATION_ID is a unique int for each notification that you must
+        // define
         notificationManager.notify(SERVICE_NOTIFICATION_ID, builder.build());
 
     }

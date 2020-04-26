@@ -17,9 +17,11 @@ export default function useCounter(countdown) {
         return () => { setCount(0); console.log('stop listening')}
       },[])
 
-      const start = () => Heartbeat.startService()
-      const stop = () => Heartbeat.stopService()
+      const startService = () => Heartbeat.startService()
+      const start = () => Heartbeat.startAction()
+      const stop = () => Heartbeat.stopAction()
+      const stopService = () => Heartbeat.stopService()
       const reset = () => {stop; setCount(0)}
 
-      return { count, setCount, start, stop, reset };
+      return { count, setCount, start, stop, reset, startService, stopService };
 }
