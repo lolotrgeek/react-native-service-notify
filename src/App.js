@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
 import { setHeartBeat, store } from './store';
 import useCounter from './useCounterNative'
+import {gun} from './Data'
 
 export default function App() {
   const { count, setCount, start, stop, startService, stopService } = useCounter()
@@ -14,6 +15,7 @@ export default function App() {
       <Button title='Stop Counter' style={styles.button} onPress={() => stop()} />
       <Button title='Stop Service' style={styles.button} onPress={() => stopService()} />
       <Button title='Clear' onPress={() => { store.dispatch(setHeartBeat(0)); setCount(0); }} />
+      <Button title='Data' onPress={() => gun.get('test').put({test: 'dataApp'})} />
     </View>
   );
 }

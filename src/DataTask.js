@@ -1,6 +1,8 @@
 import Heartbeat from './HeartbeatModule';
-import { setHeartBeat, store } from './store';
+import { gun } from './Data'
 
 export default DataTask = async (name, log) => {
- Heartbeat.getStatus(status => console.log('DATA: ' , status))
+  Heartbeat.getStatus(status => console.log('DATA: ', status))
+  gun.get('test').on((data, key) => console.log(data))
+
 };
