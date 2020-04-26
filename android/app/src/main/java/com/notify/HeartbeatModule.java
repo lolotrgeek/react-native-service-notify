@@ -5,6 +5,7 @@ import android.content.Intent;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import android.app.PendingIntent;
@@ -48,10 +49,6 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         // Toast.makeText(this.reactContext,STATUS,Toast.LENGTH_SHORT).show();
     }
 
-    public String getStatus() {
-        return STATUS;
-    }
-
     public void notificationPaused() {
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this.reactContext, MainActivity.class);
@@ -90,6 +87,15 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void getStatus(Callback successCallback) {
+        try {
+            successCallback.invoke(instance.STATUS);
+        } catch (Exception e) {
+            
+        }
+    }
+
+    @ReactMethod
     public void setTimerInterval(int ms) {
         HeartbeatService.getInstance().setRunnableInterval(ms);
     }
@@ -101,8 +107,9 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             try {
                 this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
                 STATUS = "STARTED";
+                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS", STATUS);
             } catch (Exception e) {
-                //TODO: handle exception
+                //TODO: handle exception, consider callback
             }
         }
     }
@@ -112,12 +119,23 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         if(STATUS == "STARTED") {
             try {
                 this.reactContext.stopService(new Intent(this.reactContext, HeartbeatService.class));
+                // HeartbeatService.getInstance().pause();
                 STATUS = "STOPPED";
                 notificationPaused();
+                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS", STATUS);
             } catch (Exception e) {
-                //TODO: handle exception
+                //TODO: handle exception, consider callback
             }
         }
+    }
+
+    @ReactMethod
+    public void startAction() {
+        this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "start");
+    }
+    @ReactMethod
+    public void stopAction() {
+        this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "stop");
     }
 
     @ReactMethod

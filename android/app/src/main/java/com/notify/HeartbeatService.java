@@ -31,7 +31,8 @@ public class HeartbeatService extends Service {
             context.startService(myIntent);
             HeadlessJsTaskService.acquireWakeLockNow(context);
             // Here is the 'actual' logic of the service
-            handler.postDelayed(this, INTERVAL);
+            // handler.postDelayed(this, INTERVAL);
+            // handler.post(this);
         }
     };
 
@@ -87,7 +88,8 @@ public class HeartbeatService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        this.handler.post(this.runnableCode);
+        // this.handler.post(this.runnableCode);
+        this.runnableCode.run();
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,PendingIntent.FLAG_CANCEL_CURRENT);

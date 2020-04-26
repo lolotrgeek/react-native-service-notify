@@ -15,7 +15,7 @@ public class HeartbeatEventService extends HeadlessJsTaskService {
         return new HeadlessJsTaskConfig(
                 "Heartbeat",
                 extras != null ? Arguments.fromBundle(extras) : Arguments.createMap(),
-                5000,
+                9999,
                 true);
     }
 }
