@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NativeEventEmitter } from 'react-native';
-import Heartbeat from './Heartbeat';
+import Heartbeat from './HeartbeatModule';
 
 const deviceEmitter = new NativeEventEmitter
 

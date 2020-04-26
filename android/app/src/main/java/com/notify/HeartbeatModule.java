@@ -139,10 +139,12 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void notificationUpdate(String tick) {
-        TICK = tick;
+    public void notificationUpdate(int tick) {
+        TICK = Integer.toString(tick);
         // send tick event
         this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("Heartbeat", tick);
+        // update tick in service thread
+        // HeartbeatService.getInstance().updateTick(tick);
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this.reactContext, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -162,7 +164,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(TITLE)
-                .setContentText(tick)
+                .setContentText(TICK)
                 .setContentIntent(contentIntent)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setOnlyAlertOnce(true)

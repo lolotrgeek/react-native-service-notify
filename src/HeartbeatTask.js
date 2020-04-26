@@ -1,4 +1,4 @@
-import Heartbeat from './Heartbeat';
+import Heartbeat from './HeartbeatModule';
 import { setHeartBeat, store } from './store';
 
 export default HeartbeatTask = async (name, log) => {
@@ -6,9 +6,11 @@ export default HeartbeatTask = async (name, log) => {
   if(log == true) console.log('Receiving HeartBeat!')
   let state = store.getState()
 
-  store.dispatch(setHeartBeat(state.App.heartBeat + 1));
-  let tick = state.App.heartBeat
-  Heartbeat.notificationUpdate(tick.toString())
+  setInterval(() => {
+    store.dispatch(setHeartBeat(state.App.heartBeat++))
+    let tick = state.App.heartBeat
+    Heartbeat.notificationUpdate(tick)
+  }, 1000)
 
   if(log == true) console.log('State: ', state.App.heartBeat, typeof state.App.heartBeat)
 };

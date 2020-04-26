@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat;
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.os.Build;
+import android.os.Message;
 
 import com.facebook.react.HeadlessJsTaskService;
 
@@ -54,6 +55,12 @@ public class HeartbeatService extends Service {
         this.handler.removeCallbacks(this.runnableCode);
     }
 
+    public void updateTick (int tick) {
+        Message message = new Message();
+        message.what = SERVICE_NOTIFICATION_ID;
+        message.arg1 = tick;
+        this.handler.sendMessage(message);
+    }
 
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
@@ -88,8 +95,8 @@ public class HeartbeatService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // this.handler.post(this.runnableCode);
-        this.runnableCode.run();
+        this.handler.post(this.runnableCode);
+        // this.runnableCode.run();
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,PendingIntent.FLAG_CANCEL_CURRENT);
