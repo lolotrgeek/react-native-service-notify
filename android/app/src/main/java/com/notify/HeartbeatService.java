@@ -104,12 +104,12 @@ public class HeartbeatService extends Service {
     public void onDestroy() {
         super.onDestroy();
         this.countHandler.removeCallbacks(this.runnableCode);
+        this.dataHandler.removeCallbacks(this.runnableDataCode);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         this.dataHandler.post(this.runnableDataCode);
-        // this.runnableDataCode.run();
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
