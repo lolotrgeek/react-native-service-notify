@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { NativeEventEmitter } from 'react-native';
 import Heartbeat from './HeartbeatModule';
 import { store } from './store';
+import { gun } from './Data'
+
 
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
 
@@ -42,8 +44,8 @@ export default function useCounter(countdown) {
   }, [])
 
   const startService = () => Heartbeat.startService()
-  const start = () => Heartbeat.startAction()
-  const stop = () => Heartbeat.stopAction()
+  const start = () => gun.get('test').get('running').put("RUNNING") 
+  const stop = () => gun.get('test').get('running').put("PAUSED")  
   const stopService = () => Heartbeat.stopService()
   const reset = () => { stop; setCount(0) }
 
