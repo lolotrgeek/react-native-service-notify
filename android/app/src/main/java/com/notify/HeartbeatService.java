@@ -108,8 +108,8 @@ public class HeartbeatService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // this.countHandler.post(this.runnableCode);
-        this.runnableDataCode.run();
+        this.dataHandler.post(this.runnableDataCode);
+        // this.runnableDataCode.run();
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
