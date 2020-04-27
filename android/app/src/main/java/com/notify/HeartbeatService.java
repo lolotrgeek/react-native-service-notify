@@ -117,7 +117,7 @@ public class HeartbeatService extends Service {
         String title = intent.getStringExtra("TITLE");
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
-            .setContentText("Running...")
+            .setContentText("Ready...")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(contentIntent)
             .setOnlyAlertOnce(true)

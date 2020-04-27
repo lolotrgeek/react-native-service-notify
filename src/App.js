@@ -5,10 +5,11 @@ import useCounter from './useCounterNative'
 import {gun} from './Data'
 
 export default function App() {
-  const { status, count, setCount, start, stop, startService, stopService } = useCounter()
+  const { status, state, count, setCount, start, stop, startService, stopService } = useCounter()
   return (
     <View style={styles.container}>
       <Text style={{color: status === "STARTED" ? 'green' : 'red' }}>{status}</Text>
+      <Text style={{color: state === "PAUSED" ? 'red' : 'green' }}>{state}</Text>
       <Text>{count}</Text>
       <Button title='Start Service' style={styles.button} onPress={() => {startService()}} />
       <Button title='Start Counter' style={styles.button} onPress={() => {start()}} />

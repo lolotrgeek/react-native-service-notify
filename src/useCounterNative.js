@@ -8,6 +8,7 @@ const deviceEmitter = new NativeEventEmitter(Heartbeat)
 export default function useCounter(countdown) {
   const [count, setCount] = useState(0)
   const [status, setStatus] = useState('Waiting...')
+  const [state, setState] = useState('PAUSED')
 
   useEffect(() => {
     let state = store.getState()
@@ -31,11 +32,20 @@ export default function useCounter(countdown) {
     return () => { setStatus(''); deviceEmitter.removeAllListeners("STATUS") }
   }, [])
 
+  useEffect(() => {
+    Heartbeat.getCountStatus(state => setState(state))
+    deviceEmitter.addListener("ACTION", event => {
+      console.log('Action: ', event)
+      Heartbeat.getCountStatus(state => setState(state))
+    })
+    return () => { setStatus(''); deviceEmitter.removeAllListeners("ACTION") }
+  }, [])
+
   const startService = () => Heartbeat.startService()
   const start = () => Heartbeat.startAction()
   const stop = () => Heartbeat.stopAction()
   const stopService = () => Heartbeat.stopService()
   const reset = () => { stop; setCount(0) }
 
-  return { status, count, setCount, start, stop, reset, startService, stopService };
+  return { status, state, count, setCount, start, stop, reset, startService, stopService };
 }

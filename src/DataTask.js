@@ -3,6 +3,15 @@ import { gun } from './Data'
 
 export default DataTask = async (name, log) => {
   Heartbeat.getStatus(status => console.log('DATA: ', status))
-  gun.get('test').on((data, key) => console.log(data))
-
+  gun.get('test').on((data, key) => {
+    console.log(data)
+  })
+  gun.get('test').get('running').on((data, key) => {
+    if (data && data === 'RUNNING') {
+      console.log(data)
+      Heartbeat.startAction()
+    } else {
+      Heartbeat.stopAction()
+    }
+  })
 };
