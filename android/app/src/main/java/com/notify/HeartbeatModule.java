@@ -105,7 +105,8 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         instance = this;
         if (STATUS == "STOPPED") {
             try {
-                this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
+                this.reactContext
+                        .startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
                 STATUS = "STARTED";
                 this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS",
                         STATUS);
@@ -121,7 +122,8 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             try {
                 this.reactContext.stopService(new Intent(this.reactContext, HeartbeatService.class));
                 STATUS = "STOPPED";
-                notificationPaused();
+                COUNT = "PAUSED";
+                // notificationPaused();
                 this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS",
                         STATUS);
             } catch (Exception e) {
@@ -135,21 +137,32 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         if (STATUS == "STOPPED") {
             startService();
         }
-        if (COUNT == "PAUSED") {
-            HeartbeatService.getInstance().resume();
-            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "start");
-            COUNT = "RUNNING";
+        if (COUNT == "PAUSED" & STATUS == "STARTED") {
+            try {
+                HeartbeatService.getInstance().resume();
+                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "start");
+                COUNT = "RUNNING";
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
         }
     }
 
     @ReactMethod
     public void stopAction() {
-        if (COUNT == "RUNNING") {
-            HeartbeatService.getInstance().pause();
-            notificationPaused();
-            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "stop");
-            COUNT = "PAUSED";
+        if (STATUS == "STOPPED") {
+            startService();
         }
+        if (COUNT == "RUNNING" & STATUS == "STARTED") {
+            try {
+                HeartbeatService.getInstance().pause();
+                notificationPaused();
+                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "stop");
+                COUNT = "PAUSED";
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+        } 
     }
 
     @ReactMethod
