@@ -112,13 +112,18 @@ public class HeartbeatService extends Service {
         // this.runnableDataCode.run();
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         String title = intent.getStringExtra("TITLE");
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID).setContentTitle(title)
-                .setContentText("Running...").setSmallIcon(R.mipmap.ic_launcher).setContentIntent(contentIntent)
-                .setOnlyAlertOnce(true).setPriority(NotificationCompat.PRIORITY_LOW).setOngoing(true).build();
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText("Running...")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(contentIntent)
+            .setOnlyAlertOnce(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .build();
         startForeground(SERVICE_NOTIFICATION_ID, notification);
         return START_STICKY;
     }

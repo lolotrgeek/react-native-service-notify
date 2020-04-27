@@ -13,9 +13,10 @@ public class DataEventService extends HeadlessJsTaskService {
     protected HeadlessJsTaskConfig getTaskConfig(Intent intent) {
         Bundle extras = intent.getExtras();
         return new HeadlessJsTaskConfig(
-                "Data",
-                extras != null ? Arguments.fromBundle(extras) : Arguments.createMap(),
-                9999,
-                true);
+            "Data",
+            extras != null ? Arguments.fromBundle(extras) : Arguments.createMap(),
+            9999,
+            true
+        );
     }
 }
