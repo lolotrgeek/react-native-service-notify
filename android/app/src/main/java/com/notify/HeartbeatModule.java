@@ -165,6 +165,36 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void startActionRemote() {
+        if (STATUS == "STOPPED") {
+            startService();
+        }
+        if (COUNT == "PAUSED" & STATUS == "STARTED") {
+            try {
+                HeartbeatService.getInstance().resume();
+                COUNT = "RUNNING";
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+        }
+    }
+
+    @ReactMethod
+    public void stopActionRemote() {
+        if (STATUS == "STOPPED") {
+            startService();
+        }
+        if (COUNT == "RUNNING" & STATUS == "STARTED") {
+            try {
+                HeartbeatService.getInstance().pause();
+                COUNT = "PAUSED";
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+        }
+    }
+
+    @ReactMethod
     public void notificationUpdate(int tick) {
         TICK = Integer.toString(tick);
         // send tick event

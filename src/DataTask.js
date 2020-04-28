@@ -24,10 +24,10 @@ export default DataTask = async (name, log) => {
   gun.get('test').get('running').on((data, key) => {
     if (data && data === 'RUNNING') {
       console.log('Starting from remote...')
-      Heartbeat.startAction()
+      Heartbeat.startActionRemote()
     } else {
       console.log('Stopping from remote...')
-      Heartbeat.stopAction()
+      Heartbeat.stopActionRemote()
     }
   })
 
