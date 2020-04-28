@@ -44,8 +44,8 @@ export default function useCounter(countdown) {
   }, [])
 
   const startService = () => Heartbeat.startService()
-  const start = () => gun.get('test').get('running').put("RUNNING") 
-  const stop = () => gun.get('test').get('running').put("PAUSED")  
+  const start = () =>  Heartbeat.startAction()
+  const stop = () =>  Heartbeat.stopAction() 
   const stopService = () => Heartbeat.stopService()
   const reset = () => { stop; setCount(0) }
 

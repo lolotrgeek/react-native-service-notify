@@ -1,17 +1,44 @@
 import Heartbeat from './HeartbeatModule';
+import { NativeEventEmitter } from 'react-native';
 import { gun } from './Data'
 
+const deviceEmitter = new NativeEventEmitter(Heartbeat)
+
 export default DataTask = async (name, log) => {
-  Heartbeat.getStatus(status => console.log('DATA: ', status))
-  gun.get('test').on((data, key) => {
-    console.log(data)
+
+  // local
+  // FIX triggers remote 'on' listener and triggers action
+  // inefficient and introduces circular logic
+  deviceEmitter.addListener("ACTION", event => {
+    console.log('Action: ', event)
+    Heartbeat.getCountStatus(state => {
+      if (state === 'RUNNING') {
+        gun.get('test').get('running').put("RUNNING")
+
+      } else {
+        gun.get('test').get('running').put("STOPPED")
+      }
+    })
   })
+  // remote
   gun.get('test').get('running').on((data, key) => {
     if (data && data === 'RUNNING') {
-      console.log(data)
+      console.log('Starting from remote...')
       Heartbeat.startAction()
     } else {
+      console.log('Stopping from remote...')
       Heartbeat.stopAction()
     }
   })
+
+  // Status
+  deviceEmitter.addListener("STATUS", event => {
+    if(event === 'STOPPED') {
+      console.log('Removing Listeners')
+      gun.get('test').off()
+      deviceEmitter.removeAllListeners('ACTION')
+      deviceEmitter.removeAllListeners('STATUS')
+    }
+  })
+
 };

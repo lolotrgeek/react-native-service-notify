@@ -124,8 +124,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
                 STATUS = "STOPPED";
                 COUNT = "PAUSED";
                 // notificationPaused();
-                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS",
-                        STATUS);
+                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS", STATUS);
             } catch (Exception e) {
                 // TODO: handle exception, consider callback
             }
