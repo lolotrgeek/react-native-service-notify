@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
-import { setHeartBeat, store } from './store';
-import useCounter from './useCounterNative'
-import {gun} from './Data'
+import { setHeartBeat, store } from './service/LocalStore';
+import useCounter from './hooks/useCounterNative'
+import {gun} from './constants/Data'
 
 export default function App() {
   const { status, state, count, setCount, start, stop, startService, stopService } = useCounter()

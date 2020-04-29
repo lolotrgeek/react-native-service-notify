@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { NativeEventEmitter } from 'react-native';
-import Heartbeat from './HeartbeatModule';
-import { store } from './store';
-import { gun } from './Data'
+import Heartbeat from '../service/HeartbeatModule';
+import { store } from '../service/LocalStore';
+import { gun } from '../constants/Data'
 
 
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
