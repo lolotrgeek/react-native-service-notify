@@ -35,55 +35,45 @@ const setTitle = (runningProject) => {
   )
 }
 
+
+
 /**
  * Task for heartbeat service to sync timers
  */
 const DataTask = async (name, log) => {
-  let state = store.getState()
-  let runningTimerState = state.App.timer
-  let runningProjectState = state.App.project
+  debug && console.log('DATA TASK: running')
 
-  console.log('SERVICE: running')
-
-  // Local
-  // FIX triggers remote 'on' listener and triggers actionRemote
-  // inefficient and introduces circular logic
+  // Service Notification Button Actions
   deviceEmitter.addListener("ACTION", event => {
-    // console.log('SERVICE: ', event)
-    Heartbeat.getCountStatus(status => {
-      if (status === 'RUNNING') {
-        debug && console.log('SERVICE: Starting', runningTimerState)
-        start(runningTimerState)
-      }
-      else {
-        debug && console.log('SERVICE: Stopping', runningTimerState)
-        stop(runningTimerState)
-      }
-    })
+    let state = store.getState()
+    if (state.App.timer[1] && state.App.timer[1].status === 'running') {
+      debug && console.log('DATA TASK: Starting', state.App.timer)
+      createTimer(state.App.timer[1].project)
+    }
+    else {
+      debug && console.log('DATA TASK: Stopping', state.App.timer)
+      finishTimer(store.getState().App.timer)
+    }
   })
 
-  // Remote
+
   gun.get('running').on((runningTimer, runningTimerKey) => {
     if (runningTimer && isRunning(runningTimer)) {
       gun.get('projects').get(runningTimer[1].project).on((projectValue, projectKey) => {
-        debug && console.log('SERVICE: Running Project Found', projectValue)
+        debug && console.log('DATA TASK: Running Project Found', projectValue)
         let foundProject = [projectKey, projectValue]
-        setTitle(foundProject)
+        // setTitle(foundProject)
         store.dispatch(setProject(foundProject))
       })
-      console.log(' SERVICE: Starting from remote...')
+      debug && console.log(' DATA TASK: Storing...')
       store.dispatch(setTimer([runningTimer.id, runningTimer]))
-      Heartbeat.startActionRemote()
-    } else {
-      console.log('SERVICE: Stopping from remote...')
-      Heartbeat.stopActionRemote()
     }
   })
 
   // Cleanup
   deviceEmitter.addListener("STATUS", event => {
     if (event === 'STOPPED') {
-      debug && console.log('SERVICE: Removing Listeners')
+      debug && console.log('DATA TASK: Removing Listeners')
       gun.get('running').off()
       gun.get('projects').off()
       deviceEmitter.removeAllListeners('ACTION')

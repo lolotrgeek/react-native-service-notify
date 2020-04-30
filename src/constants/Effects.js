@@ -2,7 +2,7 @@ import { gun } from './Store'
 import { elapsedTime, trimSoul, totalTime } from './Functions'
 import { isRunning, isTimer } from './Validators'
 
-const debug = true
+const debug = false
 
 const parent = gun.get('app')
 

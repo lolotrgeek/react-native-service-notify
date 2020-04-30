@@ -45,12 +45,9 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         return REACT_CLASS;
     }
 
-    public void setStatus(String status) {
-        STATUS = status;
-        // Toast.makeText(this.reactContext,STATUS,Toast.LENGTH_SHORT).show();
-    }
 
-    public void notificationPaused() {
+    @ReactMethod
+    public void notificationPaused(String title) {
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this.reactContext, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent,
@@ -66,7 +63,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(TITLE).setContentText(TICK)
+                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(title).setContentText(TICK)
                 .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_LOW).setOnlyAlertOnce(true)
                 .setOngoing(false).addAction(buttonAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
@@ -92,6 +89,12 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void setCountStatus(String status) {
+        COUNT = status;
+        Toast.makeText(this.reactContext,COUNT,Toast.LENGTH_SHORT).show();
+    }
+
+    @ReactMethod
     public void getCountStatus(Callback successCallback) {
         try {
             successCallback.invoke(instance.COUNT);
@@ -105,11 +108,9 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         instance = this;
         if (STATUS == "STOPPED") {
             try {
-                this.reactContext
-                        .startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
+                this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE)); 
                 STATUS = "STARTED";
-                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS",
-                        STATUS);
+                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS", STATUS);
             } catch (Exception e) {
                 // TODO: handle exception, consider callback
             }
@@ -122,9 +123,9 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             try {
                 this.reactContext.stopService(new Intent(this.reactContext, HeartbeatService.class));
                 STATUS = "STOPPED";
-                COUNT = "PAUSED";
-                // notificationPaused();
-                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS", STATUS);
+                // notificationPaused(TITLE);
+                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS",
+                        STATUS);
             } catch (Exception e) {
                 // TODO: handle exception, consider callback
             }
@@ -136,14 +137,10 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         if (STATUS == "STOPPED") {
             startService();
         }
-        if (COUNT == "PAUSED" & STATUS == "STARTED") {
-            try {
-                HeartbeatService.getInstance().resume();
-                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "start");
-                COUNT = "RUNNING";
-            } catch (Exception e) {
-                // TODO: handle exception
-            }
+        try {
+            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "start");
+        } catch (Exception e) {
+            // TODO: handle exception
         }
     }
 
@@ -152,50 +149,41 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         if (STATUS == "STOPPED") {
             startService();
         }
-        if (COUNT == "RUNNING" & STATUS == "STARTED") {
-            try {
-                HeartbeatService.getInstance().pause();
-                notificationPaused();
-                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "stop");
-                COUNT = "PAUSED";
-            } catch (Exception e) {
-                // TODO: handle exception
-            }
-        } 
+        try {
+            notificationPaused(TITLE);
+            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "stop");
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
     }
 
     @ReactMethod
-    public void startActionRemote() {
+    public void resumeCounting() {
         if (STATUS == "STOPPED") {
             startService();
         }
-        if (COUNT == "PAUSED" & STATUS == "STARTED") {
-            try {
-                HeartbeatService.getInstance().resume();
-                COUNT = "RUNNING";
-            } catch (Exception e) {
-                // TODO: handle exception
-            }
+        try {
+            HeartbeatService.getInstance().resume();
+        } catch (Exception e) {
+            // TODO: handle exception
         }
+
     }
 
     @ReactMethod
-    public void stopActionRemote() {
+    public void pauseCounting() {
         if (STATUS == "STOPPED") {
             startService();
         }
-        if (COUNT == "RUNNING" & STATUS == "STARTED") {
-            try {
-                HeartbeatService.getInstance().pause();
-                COUNT = "PAUSED";
-            } catch (Exception e) {
-                // TODO: handle exception
-            }
+        try {
+            HeartbeatService.getInstance().pause();
+        } catch (Exception e) {
+            // TODO: handle exception
         }
     }
 
     @ReactMethod
-    public void notificationUpdate(int tick) {
+    public void notificationUpdate(int tick, String title) {
         TICK = Integer.toString(tick);
         // send tick event
         this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("Heartbeat", tick);
@@ -214,7 +202,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(TITLE).setContentText(TICK)
+                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(title).setContentText(TICK)
                 .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_LOW).setOnlyAlertOnce(true)
                 .setOngoing(true).addAction(buttonAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
