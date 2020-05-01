@@ -114,7 +114,7 @@ public class HeartbeatService extends Service {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        String title = intent.getStringExtra("TITLE");
+        String title = intent.getStringExtra("Timer");
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
             .setContentText("Ready...")

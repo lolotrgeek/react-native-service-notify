@@ -8,35 +8,6 @@ import { setProject, setTimer, store } from './LocalStore'
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
 const debug = true
 
-const stop = (function () {
-  var executed = false;
-  return function (runningTimer) {
-    if (!executed) {
-      executed = true;
-      finishTimer(runningTimer)
-    }
-  };
-})();
-
-const start = (function () {
-  var executed = false;
-  return function (runningTimer) {
-    if (!executed) {
-      executed = true;
-      createTimer(runningTimer[1].project)
-    }
-  };
-})();
-
-const setTitle = (runningProject) => {
-  Heartbeat.configService(
-    projectValid(runningProject) && runningProject[1].status !== 'deleted' ?
-      runningProject[1].name : 'Running Timer'
-  )
-}
-
-
-
 /**
  * Task for heartbeat service to sync timers
  */
