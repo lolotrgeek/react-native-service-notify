@@ -34,7 +34,7 @@ public class HeartbeatService extends Service {
             context.startService(myIntent);
             HeadlessJsTaskService.acquireWakeLockNow(context);
             // Here is the 'actual' logic of the service
-            // countHandler.postDelayed(this, INTERVAL);
+            countHandler.postDelayed(this, INTERVAL);
         }
     };
     private Runnable runnableDataCode = new Runnable() {
@@ -110,7 +110,6 @@ public class HeartbeatService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         this.dataHandler.post(this.runnableDataCode);
-        this.countHandler.post(this.runnableCode);
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);

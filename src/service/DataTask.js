@@ -46,13 +46,21 @@ const DataTask = async (name, log) => {
   // Service Notification Button Actions
   deviceEmitter.addListener("ACTION", event => {
     let state = store.getState()
-    if (state.App.timer[1] && state.App.timer[1].status === 'running') {
+    let project = state.App.project[1]
+    let runningTimer = state.App.timer[1]
+    let title = project && typeof project.name === 'string' ? project.name : 'Heartbeat Task'
+    if (event === 'start' && runningTimer && typeof runningTimer === 'object' && runningTimer.status === 'running') {
       debug && console.log('DATA TASK: Starting', state.App.timer)
-      createTimer(state.App.timer[1].project)
+      createTimer(runningTimer.project)
+      Heartbeat.resumeCounting()
+      Heartbeat.notificationUpdate(state.App.heartBeat, title)
+
     }
-    else {
+    else if(event === 'stop' && state.App.timer && state.App.timer.length === 2) {
       debug && console.log('DATA TASK: Stopping', state.App.timer)
       finishTimer(state.App.timer)
+      Heartbeat.pauseCounting()
+      Heartbeat.notificationPaused(title)
     }
   })
 

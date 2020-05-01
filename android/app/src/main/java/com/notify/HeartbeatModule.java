@@ -123,7 +123,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             try {
                 this.reactContext.stopService(new Intent(this.reactContext, HeartbeatService.class));
                 STATUS = "STOPPED";
-                // notificationPaused(TITLE);
+                notificationPaused(TITLE);
                 this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS",
                         STATUS);
             } catch (Exception e) {
@@ -164,6 +164,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         }
         try {
             HeartbeatService.getInstance().resume();
+            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("COUNT", "resume");
         } catch (Exception e) {
             // TODO: handle exception
         }
@@ -177,6 +178,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         }
         try {
             HeartbeatService.getInstance().pause();
+            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("COUNT", "pause");
         } catch (Exception e) {
             // TODO: handle exception
         }
