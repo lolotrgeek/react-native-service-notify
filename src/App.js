@@ -14,7 +14,7 @@ export default function App() {
   const [runningTimer, setRunningTimer] = useState([])
   const [runningProject, setRunningProject] = useState([])
 
-  useEffect(() => stopService(), [])
+  // useEffect(() => stopService(), [])
   useEffect(() => getProjects({ setProjects }), [online])
   useEffect(() => getRunningTimer({ setCount, start, stop, setRunningTimer }), [online])
   useEffect(() => getRunningProject({ setRunningProject, runningTimer }), [runningTimer])
@@ -23,7 +23,7 @@ export default function App() {
     if (runningTimer && runningTimer.length === 2 && typeof runningTimer[1] === 'object') store.dispatch(setTimer(runningTimer))
   }, [runningTimer])
   useEffect(() => {
-    store.dispatch(setProject(runningProject))
+    if (runningProject && runningProject.length === 2 && typeof runningProject[1] === 'object')store.dispatch(setProject(runningProject))
   },[runningProject])
 
   return (

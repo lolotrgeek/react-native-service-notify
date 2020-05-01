@@ -123,7 +123,6 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             try {
                 this.reactContext.stopService(new Intent(this.reactContext, HeartbeatService.class));
                 STATUS = "STOPPED";
-                notificationPaused(TITLE);
                 this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS",
                         STATUS);
             } catch (Exception e) {

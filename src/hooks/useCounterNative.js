@@ -31,17 +31,27 @@ export default function useCounter(countdown) {
     return () => unsubscribe()
   },[])
 
+  const getTitle = () => {
+    let state = store.getState()
+    let project = state.App.project[1]
+    return project && typeof project.name === 'string' ? project.name : 'Ready...'
+  }
 
-  const startService = () => Heartbeat.startService()
+  const startService = () => {
+    Heartbeat.startService()
+  }
   const start = (title) =>  {
-    Heartbeat.notificationUpdate(0, title)
+    Heartbeat.notificationUpdate(0, title ? title : getTitle())
     Heartbeat.resumeCounting()
   }
   const stop = (title) =>  {
-    Heartbeat.notificationPaused(title)
+    Heartbeat.notificationPaused(title ? title : getTitle())
     Heartbeat.pauseCounting()
   }
-  const stopService = () => Heartbeat.stopService()
+  const stopService = (title) => {
+    Heartbeat.stopService()
+    if(title) Heartbeat.notificationPaused(title ? title : getTitle())
+  }
 
   return { status, count, setCount, start, stop, startService, stopService };
 }
