@@ -150,7 +150,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             startService();
         }
         try {
-            notificationPaused(TITLE);
+            // notificationPaused(TITLE);
             this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "stop");
         } catch (Exception e) {
             // TODO: handle exception

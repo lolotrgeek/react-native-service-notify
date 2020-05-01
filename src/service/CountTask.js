@@ -12,9 +12,11 @@ const CountTask = async (name, log) => {
 
   function checkRunning(state) {
     if (state.App.timer[1] && state.App.timer[1].status === 'running') {
+      console.log('COUNT: running - ', state.App.timer[1])
       title = state.App.project[1] && state.App.project[1].name ? state.App.project[1].name : 'Running...'
       running = true
     } else {
+      console.log('COUNT: no running found')
       title = 'Paused'
       running = false
     }
@@ -27,26 +29,25 @@ const CountTask = async (name, log) => {
 
   function stateListener() {
     let state = store.getState()
-    if (state.App.timer[1] && state.App.timer[1].status === 'running') {
-      title = state.App.project[1] && state.App.project[1].name ? state.App.project[1].name : 'Running...'
-      running = true
-    } else {
-      title = 'Paused'
-      running = false
-    }
-    let tick = state.App.heartBeat
-    Heartbeat.notificationUpdate(tick, title)
+    console.log('COUNT: state updated')
+    checkRunning(state)
   }
 
   // Named `unsubscribe` because calling the function returned by subscribe will unsubscribe the listener.
-  const unsubscribe = store.subscribe(stateListener)
+store.subscribe(stateListener)
 
   const counter = setInterval(() => {
-    if (!running) clearInterval(counter)
+    if (!running) {
+      clearInterval(counter)
+      Heartbeat.notificationPaused(title)
+    }
+    let state = store.getState()
     store.dispatch(setHeartBeat(state.App.heartBeat + 1))
+    let tick = state.App.heartBeat
+    Heartbeat.notificationUpdate(tick, title)
+    console.log('State: ', state.App.heartBeat, typeof state.App.heartBeat)
   }, 1000)
 
-  if (log == true) console.log('State: ', state.App.heartBeat, typeof state.App.heartBeat)
 };
 
 export default CountTask

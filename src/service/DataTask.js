@@ -1,7 +1,7 @@
 import Heartbeat from './HeartbeatModule';
 import { NativeEventEmitter } from 'react-native';
 import { finishTimer, createTimer, } from '../constants/Data'
-import { gun } from '../constants/Store.native'
+import { gun } from '../constants/Store'
 import { isTimer, projectValid, isRunning } from '../constants/Validators'
 import { setProject, setTimer, store, } from './LocalStore'
 
@@ -52,10 +52,9 @@ const DataTask = async (name, log) => {
     }
     else {
       debug && console.log('DATA TASK: Stopping', state.App.timer)
-      finishTimer(store.getState().App.timer)
+      finishTimer(state.App.timer)
     }
   })
-
 
   gun.get('running').on((runningTimer, runningTimerKey) => {
     if (runningTimer && isRunning(runningTimer)) {

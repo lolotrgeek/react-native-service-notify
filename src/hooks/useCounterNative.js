@@ -10,7 +10,7 @@ const deviceEmitter = new NativeEventEmitter(Heartbeat)
 export default function useCounter(countdown) {
 
   let state = store.getState()
-  let count
+  let count = 0
   const setCount = count => store.dispatch(setHeartBeat(count))
   const [status, setStatus] = useState('')
 
