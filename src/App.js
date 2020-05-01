@@ -21,7 +21,7 @@ export default function App() {
   useEffect(() => getTimers({ current, timers, setCurrent, setTimers }), [online])
   useEffect(() => {
     store.dispatch(setProject(runningProject))
-    store.dispatch(setTimer(runningTimer))
+    if (runningTimer && runningTimer.length === 2 && typeof runningTimer[1] === 'object') store.dispatch(setTimer(runningTimer))
   }, [runningTimer])
 
   return (
@@ -39,7 +39,7 @@ export default function App() {
           let project = projects[0]
           let title = project && project[1] ? project[1].name : 'Title'
           createTimer(project[0])
-          start(title)
+          // start(title)
         }
       }} />
       <Button title='Stop Timer' style={styles.button} onPress={() => {

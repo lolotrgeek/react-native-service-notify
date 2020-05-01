@@ -163,6 +163,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             startService();
         }
         try {
+            HeartbeatService.getInstance().pause(); // want to clear any remaining counters before we resume
             HeartbeatService.getInstance().resume();
             this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("COUNT", "resume");
         } catch (Exception e) {

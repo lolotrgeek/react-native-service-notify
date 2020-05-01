@@ -3,7 +3,7 @@ import { NativeEventEmitter } from 'react-native';
 import { finishTimer, createTimer, } from '../constants/Data'
 import { gun } from '../constants/Store'
 import { isTimer, projectValid, isRunning } from '../constants/Validators'
-import { setProject, setTimer, store, } from './LocalStore'
+import { setProject, setTimer, store } from './LocalStore'
 
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
 const debug = true
@@ -49,14 +49,15 @@ const DataTask = async (name, log) => {
     let project = state.App.project[1]
     let runningTimer = state.App.timer[1]
     let title = project && typeof project.name === 'string' ? project.name : 'Heartbeat Task'
-    if (event === 'start' && runningTimer && typeof runningTimer === 'object' && runningTimer.status === 'running') {
+    if (event === 'start' && runningTimer && typeof runningTimer === 'object' && runningTimer.status === 'done') {
       debug && console.log('DATA TASK: Starting', state.App.timer)
       createTimer(runningTimer.project)
+      //Heartbeat.pauseCounting() 
       Heartbeat.resumeCounting()
       Heartbeat.notificationUpdate(state.App.heartBeat, title)
 
     }
-    else if(event === 'stop' && state.App.timer && state.App.timer.length === 2) {
+    else if (event === 'stop' && state.App.timer && state.App.timer.length === 2) {
       debug && console.log('DATA TASK: Stopping', state.App.timer)
       finishTimer(state.App.timer)
       Heartbeat.pauseCounting()
