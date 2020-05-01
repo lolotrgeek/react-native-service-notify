@@ -20,9 +20,11 @@ export default function App() {
   useEffect(() => getRunningProject({ setRunningProject, runningTimer }), [runningTimer])
   useEffect(() => getTimers({ current, timers, setCurrent, setTimers }), [online])
   useEffect(() => {
-    store.dispatch(setProject(runningProject))
     if (runningTimer && runningTimer.length === 2 && typeof runningTimer[1] === 'object') store.dispatch(setTimer(runningTimer))
   }, [runningTimer])
+  useEffect(() => {
+    store.dispatch(setProject(runningProject))
+  },[runningProject])
 
   return (
     <View style={styles.container}>
