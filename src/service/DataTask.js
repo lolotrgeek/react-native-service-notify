@@ -21,12 +21,12 @@ const DataTask = async (name, log) => {
     let runningTimer = state.App.timer[1]
     let title = project && typeof project.name === 'string' ? project.name : 'Heartbeat Task'
     if (event === 'start' && runningTimer && typeof runningTimer === 'object' && runningTimer.status === 'done') {
-      debug && console.log('DATA TASK: Starting', state.App.timer)
-      createTimer(runningTimer.project)
-      //Heartbeat.pauseCounting() 
+      const timer = createTimer(runningTimer.project)
+      debug && console.log('DATA TASK: Starting', timer)
       Heartbeat.resumeCounting()
       Heartbeat.notificationUpdate(state.App.heartBeat, title)
-
+      debug && console.log(' DATA TASK: Storing...')
+      store.dispatch(setTimer(timer))
     }
     else if (event === 'stop' && state.App.timer && state.App.timer.length === 2) {
       debug && console.log('DATA TASK: Stopping', state.App.timer)
@@ -37,8 +37,9 @@ const DataTask = async (name, log) => {
   })
 
   gun.get('running').on((runningTimer, runningTimerKey) => {
+    debug && console.log('DATA TASK: Running Timer Found', runningTimer)
     if (runningTimer && isRunning(runningTimer)) {
-      gun.get('projects').get(runningTimer[1].project).on((projectValue, projectKey) => {
+      gun.get('projects').get(runningTimer.project).on((projectValue, projectKey) => {
         debug && console.log('DATA TASK: Running Project Found', projectValue)
         let foundProject = [projectKey, projectValue]
         // setTitle(foundProject)

@@ -78,7 +78,7 @@ export const createTimer = (projectId) => {
   gun.get('running').put(timer[1])
   gun.get('history').get('timers').get(projectId).get(timer[0]).set(timer[1])
   // gun.get('timers').get(projectId).get(timer[0]).put(timer[1])
-  return true
+  return timer
 }
 
 export const runTimer = (timer) => {
