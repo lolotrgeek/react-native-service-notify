@@ -26,6 +26,8 @@ public class HeartbeatService extends Service {
     private Handler countHandler = new Handler();
     private Handler msgHandler = new Handler();
     private Handler dataHandler = new Handler();
+    private Handler actionHandler = new Handler();
+
     private Runnable runnableCode = new Runnable() {
         @Override
         public void run() {
@@ -42,6 +44,17 @@ public class HeartbeatService extends Service {
         public void run() {
             Context context = getApplicationContext();
             Intent myIntent = new Intent(context, DataEventService.class);
+            context.startService(myIntent);
+            HeadlessJsTaskService.acquireWakeLockNow(context);
+            // Here is the 'actual' logic of the service
+        }
+    };
+
+    private Runnable runnableActionCode = new Runnable() {
+        @Override
+        public void run() {
+            Context context = getApplicationContext();
+            Intent myIntent = new Intent(context, ActionEventService.class);
             context.startService(myIntent);
             HeadlessJsTaskService.acquireWakeLockNow(context);
             // Here is the 'actual' logic of the service
@@ -110,6 +123,7 @@ public class HeartbeatService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         this.dataHandler.post(this.runnableDataCode);
+        this.actionHandler.post(this.runnableActionCode);
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
