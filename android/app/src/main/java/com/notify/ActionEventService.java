@@ -13,7 +13,7 @@ public class ActionEventService extends HeadlessJsTaskService {
     protected HeadlessJsTaskConfig getTaskConfig(Intent intent) {
         Bundle extras = intent.getExtras();
         return new HeadlessJsTaskConfig(
-            "Data",
+            "Action",
             extras != null ? Arguments.fromBundle(extras) : Arguments.createMap(),
             2592000,
             true

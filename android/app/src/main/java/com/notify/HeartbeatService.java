@@ -118,6 +118,8 @@ public class HeartbeatService extends Service {
         super.onDestroy();
         this.countHandler.removeCallbacks(this.runnableCode);
         this.dataHandler.removeCallbacks(this.runnableDataCode);
+        this.actionHandler.removeCallbacks(this.runnableActionCode);
+
     }
 
     @Override
