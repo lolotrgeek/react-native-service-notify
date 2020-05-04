@@ -3,7 +3,7 @@ import { NativeEventEmitter } from 'react-native';
 import Heartbeat from '../service/HeartbeatModule';
 import { store, setHeartBeat } from '../service/LocalStore';
 
-
+const debug = false
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
 
 export default function useCounter(countdown) {
@@ -15,16 +15,16 @@ export default function useCounter(countdown) {
     Heartbeat.getStatus(state => setStatus(state))
     deviceEmitter.addListener("STATUS", event => {
       setStatus(event)
-      console.log('Status: ', event)
+      debug && console.log('Status: ', event)
     })
-    return () => { deviceEmitter.removeAllListeners("STATUS") }
+    return () => deviceEmitter.removeAllListeners("STATUS") 
   }, [])
 
   useEffect(() => {
     function stateListener() {
       let state = store.getState()
       setLocalCount(state.App.heartBeat)
-      console.log('State: ', state.App)
+      debug && console.log('State: ', state.App)
     }
   
     const unsubscribe = store.subscribe(stateListener)
@@ -34,7 +34,7 @@ export default function useCounter(countdown) {
   const getTitle = () => {
     let state = store.getState()
     let project = state.App.project[1]
-    return project && typeof project.name === 'string' ? project.name : 'Ready...'
+    return project && typeof project.name === 'string' ? project.name : 'App Name'
   }
 
   const startService = () => {

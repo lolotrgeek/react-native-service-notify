@@ -13,9 +13,10 @@ const debug = true
  */
 const DataTask = async (name, log) => {
   debug && console.log('DATA TASK: running')
+  // const alive = setInterval(() => console.log('alive'), 1000)
 
   gun.get('running').on((runningTimer, runningTimerKey) => {
-    debug && console.log('DATA TASK: Running Triggered')
+    debug && console.log('DATA TASK: Timer Check Triggered')
     if (!runningTimer || runningTimer.id === 'none') {
       debug && console.log('DATA TASK: No Running Timer Found')
       let state = store.getState()
@@ -47,9 +48,11 @@ const DataTask = async (name, log) => {
       else if (runningTimer.status === 'running') {
         if (isRunning(runningTimerFound)) {
           debug && console.log('DATA TASK: New Running Timer Found', runningTimerFound)
-          Heartbeat.resumeCounting()
-          debug && console.log('DATA TASK: Updating Notification', foundProject[1].name)
-          Heartbeat.notificationUpdate(0, foundProject[1].name)
+          if (foundProject && foundProject.length === 2 && typeof foundProject[1] === 'object') {
+            debug && console.log('DATA TASK: Updating Notification', foundProject[1].name)
+            Heartbeat.resumeCounting()
+            Heartbeat.notificationUpdate(0, foundProject[1].name)
+          }
           store.dispatch(setTimer(runningTimerFound))
         }
       }
@@ -63,6 +66,7 @@ const DataTask = async (name, log) => {
       debug && console.log('DATA TASK: Removing Listeners')
       gun.get('running').off()
       gun.get('projects').off()
+      // clearInterval(alive)
       deviceEmitter.removeAllListeners('STATUS')
     }
   })

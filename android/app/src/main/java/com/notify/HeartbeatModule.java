@@ -64,7 +64,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(title).setContentText(TICK)
-                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_LOW).setOnlyAlertOnce(true)
+                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_HIGH).setOnlyAlertOnce(true)
                 .setOngoing(false).addAction(buttonAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
 
@@ -108,7 +108,8 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         instance = this;
         if (STATUS == "STOPPED") {
             try {
-                this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE)); 
+                this.reactContext.startForegroundService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE)); 
+                // this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE)); 
                 STATUS = "STARTED";
                 this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS", STATUS);
             } catch (Exception e) {
@@ -205,7 +206,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(title).setContentText(TICK)
-                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_LOW).setOnlyAlertOnce(true)
+                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_HIGH).setOnlyAlertOnce(true)
                 .setOngoing(true).addAction(buttonAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
 

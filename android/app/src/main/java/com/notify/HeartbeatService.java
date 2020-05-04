@@ -137,7 +137,7 @@ public class HeartbeatService extends Service {
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(contentIntent)
             .setOnlyAlertOnce(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setOngoing(true)
             .build();
         startForeground(SERVICE_NOTIFICATION_ID, notification);
