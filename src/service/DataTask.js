@@ -17,11 +17,11 @@ const DataTask = async (name, log) => {
   // Service Notification Button Actions
   deviceEmitter.addListener("ACTION", event => {
     let state = store.getState()
-    let project = state.App.project[1]
-    let runningTimer = state.App.timer[1]
-    let title = project && typeof project.name === 'string' ? project.name : 'Heartbeat Task'
-    if (event === 'start' && runningTimer && typeof runningTimer === 'object' && runningTimer.status === 'done') {
-      const timer = createTimer(runningTimer.project)
+    let project = state.App.project
+    let foundTimer = state.App.timer[1]
+    let title = project[1] && typeof project[1].name === 'string' ? project.name : 'Heartbeat Task'
+    if (event === 'start') {
+      const timer = createTimer(project[0])
       debug && console.log('DATA TASK: Starting', timer)
       Heartbeat.resumeCounting()
       Heartbeat.notificationUpdate(state.App.heartBeat, title)
@@ -36,19 +36,39 @@ const DataTask = async (name, log) => {
     }
   })
 
+
   gun.get('running').on((runningTimer, runningTimerKey) => {
-    debug && console.log('DATA TASK: Running Timer Found', runningTimer)
-    if (runningTimer && isRunning(runningTimer)) {
+    if (!runningTimer || runningTimer.id === 'none') {
+      debug && console.log('DATA TASK: No Running Timer Found')
+      let state = store.getState()
+      let project = state.App.project
+      Heartbeat.notificationPaused(project ? project.name : 'Ready...')
+    } else if (typeof runningTimer === 'object' && runningTimer.project) {
+      let runningTimerFound = [runningTimer.id, runningTimer]
+      let foundProject
       gun.get('projects').get(runningTimer.project).on((projectValue, projectKey) => {
-        debug && console.log('DATA TASK: Running Project Found', projectValue)
-        let foundProject = [projectKey, projectValue]
-        // setTitle(foundProject)
-        store.dispatch(setProject(foundProject))
+        foundProject = [projectKey, projectValue]
+        debug && console.log('DATA TASK: Running Project Found', foundProject)
+        if(projectValue && projectValue.name) {
+          store.dispatch(setProject(foundProject))
+
+        }
       })
-      debug && console.log(' DATA TASK: Storing...')
-      store.dispatch(setTimer([runningTimer.id, runningTimer]))
+      if (runningTimer.id === 'none' || runningTimer.status === 'done') {
+        debug && console.log('DATA TASK: Last Running Timer Found', runningTimer)
+        Heartbeat.pauseCounting()
+        Heartbeat.notificationPaused(foundProject[1].name)
+        store.dispatch(setTimer(runningTimerFound))
+      }
+      else if (runningTimer.status === 'running') {
+        if (isRunning(runningTimerFound)) {
+          debug && console.log('DATA TASK: New Running Timer Found', runningTimerFound)
+          store.dispatch(setTimer(runningTimerFound))
+        }
+      }
     }
-  })
+
+  }, { change: true })
 
   // Cleanup
   deviceEmitter.addListener("STATUS", event => {
