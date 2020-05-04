@@ -17,21 +17,23 @@ const ActionTask = async (name, log) => {
   deviceEmitter.addListener("ACTION", event => {
     let state = store.getState()
     let project = state.App.project
-    let foundTimer = state.App.timer[1]
-    let title = project[1] && typeof project[1].name === 'string' ? project.name : 'Heartbeat Task'
-    if (event === 'start') {
+    let timer = state.App.timer
+    let title = project[1] && typeof project[1].name === 'string' ? project[1].name : 'App Name'
+    if (event === 'start' && timer.length === 2 && project.length === 2) {
       const timer = createTimer(project[0])
       debug && console.log('ACTION TASK: Starting', timer)
       Heartbeat.resumeCounting()
+      debug && console.log('ACTION TASK: Updating Notification', title)
       Heartbeat.notificationUpdate(state.App.heartBeat, title)
       debug && console.log(' ACTION TASK: Storing...', timer)
       store.dispatch(setTimer(timer))
     }
-    else if (event === 'stop' && state.App.timer && state.App.timer.length === 2) {
-      debug && console.log('ACTION TASK: Stopping', state.App.timer)
-      finishTimer(state.App.timer)
+    else if (event === 'stop' && timer.length === 2 && project.length === 2) {
+      debug && console.log('ACTION TASK: Stopping')
       Heartbeat.pauseCounting()
+      debug && console.log('ACTION TASK: Pausing Notification', title)
       Heartbeat.notificationPaused(title)
+      finishTimer(timer)
     }
   })
 

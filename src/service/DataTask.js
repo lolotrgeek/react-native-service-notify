@@ -3,7 +3,7 @@ import { NativeEventEmitter } from 'react-native';
 import { finishTimer, createTimer, } from '../constants/Data'
 import { gun } from '../constants/Store'
 import { isTimer, projectValid, isRunning } from '../constants/Validators'
-import { setProject, setTimer, store } from './LocalStore'
+import { setProject, setTimer, setHeartBeat, store } from './LocalStore'
 
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
 const debug = true
@@ -20,14 +20,19 @@ const DataTask = async (name, log) => {
       debug && console.log('DATA TASK: No Running Timer Found')
       let state = store.getState()
       let project = state.App.project
-      Heartbeat.notificationPaused(project ? project.name : 'Ready...')
+      let title = 'App Name'
+      if (project && project.length === 2 && typeof project[1] === 'object') {
+        title = project[1].name
+      }
+      debug && console.log('DATA TASK: Pausing Notification', title)
+      Heartbeat.notificationPaused(title)
     } else if (typeof runningTimer === 'object' && runningTimer.project) {
       let runningTimerFound = [runningTimer.id, runningTimer]
       let foundProject
       gun.get('projects').get(runningTimer.project).on((projectValue, projectKey) => {
         foundProject = [projectKey, projectValue]
         debug && console.log('DATA TASK: Running Project Found', foundProject)
-        if(projectValue && projectValue.name) {
+        if (projectValue && projectValue.name) {
           store.dispatch(setProject(foundProject))
 
         }
@@ -35,12 +40,16 @@ const DataTask = async (name, log) => {
       if (runningTimer.id === 'none' || runningTimer.status === 'done') {
         debug && console.log('DATA TASK: Last Running Timer Found', runningTimer)
         Heartbeat.pauseCounting()
+        debug && console.log('DATA TASK: Pausing Notification', foundProject[1].name)
         Heartbeat.notificationPaused(foundProject[1].name)
-        store.dispatch(setTimer(runningTimerFound))
+        if (foundProject && foundProject.length === 2 && typeof foundProject[1] === 'object') store.dispatch(setProject(foundProject))
       }
       else if (runningTimer.status === 'running') {
         if (isRunning(runningTimerFound)) {
           debug && console.log('DATA TASK: New Running Timer Found', runningTimerFound)
+          Heartbeat.resumeCounting()
+          debug && console.log('DATA TASK: Updating Notification', foundProject[1].name)
+          Heartbeat.notificationUpdate(0, foundProject[1].name)
           store.dispatch(setTimer(runningTimerFound))
         }
       }
