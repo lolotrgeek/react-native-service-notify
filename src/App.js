@@ -26,14 +26,14 @@ export default function App() {
   useEffect(() => getRunningTimer({ setCount, start, stop, setRunningTimer }), [online])
   useEffect(() => getRunningProject({ setRunningProject, runningTimer }), [runningTimer])
   useEffect(() => getTimers({ current, timers, setCurrent, setTimers }), [online])
-  useEffect(() => {
-    if (runningTimer && runningTimer.length === 2 && typeof runningTimer[1] === 'object') store.dispatch(setTimer(runningTimer))
-    return () => runningTimer
-  }, [runningTimer])
-  useEffect(() => {
-    if (runningProject && runningProject.length === 2 && typeof runningProject[1] === 'object') store.dispatch(setProject(runningProject))
-    return () => runningProject
-  }, [runningProject])
+  // useEffect(() => {
+  //   if (runningTimer && runningTimer.length === 2 && typeof runningTimer[1] === 'object') store.dispatch(setTimer(runningTimer))
+  //   return () => runningTimer
+  // }, [runningTimer])
+  // useEffect(() => {
+  //   if (runningProject && runningProject.length === 2 && typeof runningProject[1] === 'object') store.dispatch(setProject(runningProject))
+  //   return () => runningProject
+  // }, [runningProject])
 
   return (
     <View style={styles.container}>
@@ -78,7 +78,6 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   status: {
-
     fontSize: 30,
   }
 });

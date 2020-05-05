@@ -16,7 +16,7 @@ public class DataEventService extends HeadlessJsTaskService {
             "Data",
             extras != null ? Arguments.fromBundle(extras) : Arguments.createMap(),
             2592000,
-            true
+            false
         );
     }
 }

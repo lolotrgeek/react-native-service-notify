@@ -50,8 +50,8 @@ const DataTask = async (name, log) => {
           debug && console.log('DATA TASK: New Running Timer Found', runningTimerFound)
           if (foundProject && foundProject.length === 2 && typeof foundProject[1] === 'object') {
             debug && console.log('DATA TASK: Updating Notification', foundProject[1].name)
-            Heartbeat.resumeCounting()
-            Heartbeat.notificationUpdate(0, foundProject[1].name)
+            // Heartbeat.resumeCounting()
+            // Heartbeat.notificationUpdate(0, foundProject[1].name)
           }
           store.dispatch(setTimer(runningTimerFound))
         }

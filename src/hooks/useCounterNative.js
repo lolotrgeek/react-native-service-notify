@@ -50,7 +50,7 @@ export default function useCounter(countdown) {
   }
   const stopService = (title) => {
     Heartbeat.stopService()
-    if(title) Heartbeat.notificationPaused(title ? title : getTitle())
+    Heartbeat.notificationPaused(title ? title : getTitle())
   }
 
   return { status, count, setCount, start, stop, startService, stopService };

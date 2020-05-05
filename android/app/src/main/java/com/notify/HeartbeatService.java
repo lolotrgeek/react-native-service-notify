@@ -23,9 +23,10 @@ public class HeartbeatService extends Service {
     private static HeartbeatService instance;
     // private int CURRENT_TICK = 0;
 
+
+
     private Handler countHandler = new Handler();
     private Handler msgHandler = new Handler();
-    private Handler dataHandler = new Handler();
     private Handler actionHandler = new Handler();
 
     private Runnable runnableCode = new Runnable() {
@@ -35,18 +36,7 @@ public class HeartbeatService extends Service {
             Intent myIntent = new Intent(context, HeartbeatEventService.class);
             context.startService(myIntent);
             HeadlessJsTaskService.acquireWakeLockNow(context);
-            // Here is the 'actual' logic of the service
             countHandler.postDelayed(this, INTERVAL);
-        }
-    };
-    private Runnable runnableDataCode = new Runnable() {
-        @Override
-        public void run() {
-            Context context = getApplicationContext();
-            Intent myIntent = new Intent(context, DataEventService.class);
-            context.startService(myIntent);
-            HeadlessJsTaskService.acquireWakeLockNow(context);
-            // Here is the 'actual' logic of the service
         }
     };
 
@@ -57,7 +47,6 @@ public class HeartbeatService extends Service {
             Intent myIntent = new Intent(context, ActionEventService.class);
             context.startService(myIntent);
             HeadlessJsTaskService.acquireWakeLockNow(context);
-            // Here is the 'actual' logic of the service
         }
     };
 
@@ -80,6 +69,7 @@ public class HeartbeatService extends Service {
     public void pause() {
         this.countHandler.removeCallbacks(this.runnableCode);
     }
+
 
     public void postInt(int num) {
         Message message = new Message();
@@ -117,29 +107,22 @@ public class HeartbeatService extends Service {
     public void onDestroy() {
         super.onDestroy();
         this.countHandler.removeCallbacks(this.runnableCode);
-        this.dataHandler.removeCallbacks(this.runnableDataCode);
         this.actionHandler.removeCallbacks(this.runnableActionCode);
-
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        this.dataHandler.post(this.runnableDataCode);
+
         this.actionHandler.post(this.runnableActionCode);
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
 
         String title = intent.getStringExtra("Timer");
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(title)
-            .setContentText("Ready...")
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentIntent(contentIntent)
-            .setOnlyAlertOnce(true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setOngoing(true)
-            .build();
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID).setContentTitle(title)
+                .setContentText("Ready...").setSmallIcon(R.mipmap.ic_launcher).setContentIntent(contentIntent)
+                .setOnlyAlertOnce(true).setPriority(NotificationCompat.PRIORITY_HIGH).setOngoing(true).build();
         startForeground(SERVICE_NOTIFICATION_ID, notification);
         return START_STICKY;
     }

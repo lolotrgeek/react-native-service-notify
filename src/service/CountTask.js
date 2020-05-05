@@ -11,6 +11,7 @@ const CountTask = async (name, log) => {
   let tick = state.App.heartBeat
   Heartbeat.notificationUpdate(tick, title)
   // console.log('State: ', state.App)
+  
 
 };
 

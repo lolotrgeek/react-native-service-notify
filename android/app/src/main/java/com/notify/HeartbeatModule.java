@@ -156,7 +156,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             // TODO: handle exception
         }
     }
-
+    
     @ReactMethod
     public void resumeCounting() {
         if (STATUS == "STOPPED") {
