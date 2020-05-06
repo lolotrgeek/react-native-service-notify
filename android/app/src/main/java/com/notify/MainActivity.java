@@ -18,21 +18,36 @@ public class MainActivity extends ReactActivity {
     return "Notify";
   }
 
+  // @Override
+  // public void onStart() {
+  //   Context context = getApplicationContext();
+  //   context.stopService(new Intent(context, DataEventService.class));
+  //   super.onStart();
+  // }
+
   @Override
-  public void onStart() {
+  public void onResume() {
     Context context = getApplicationContext();
     context.stopService(new Intent(context, DataEventService.class));
     super.onStart();
   }
+
+  // @Override
+  // public void onStop() {
+  //   super.onStop();
+  //   Context context = getApplicationContext();
+  //   context.startService(new Intent(context, DataEventService.class));
+  //   HeadlessJsTaskService.acquireWakeLockNow(context);
+  // }
+
   @Override
-  public void onStop() {
+  public void onPause() {
     super.onStop();
     Context context = getApplicationContext();
     context.startService(new Intent(context, DataEventService.class));
     HeadlessJsTaskService.acquireWakeLockNow(context);
   }
 
-  
   // private boolean isAppOnForeground(Context context) {
   //   /**
   //    * We need to check if app is in foreground otherwise the app will crash.

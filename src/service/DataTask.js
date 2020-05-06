@@ -13,7 +13,7 @@ const debug = true
  */
 const DataTask = async (name, log) => {
   debug && console.log('DATA TASK: running')
-  // const alive = setInterval(() => console.log('alive'), 1000)
+  const alive = setInterval(() => console.log('alive'), 1000)
 
   gun.get('running').on((runningTimer, runningTimerKey) => {
     debug && console.log('DATA TASK: Timer Check Triggered')
@@ -66,7 +66,7 @@ const DataTask = async (name, log) => {
       debug && console.log('DATA TASK: Removing Listeners')
       gun.get('running').off()
       gun.get('projects').off()
-      // clearInterval(alive)
+      clearInterval(alive)
       deviceEmitter.removeAllListeners('STATUS')
     }
   })
