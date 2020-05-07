@@ -1,6 +1,5 @@
 package com.notify;
 
-
 import android.app.Service;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -21,6 +20,12 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.HttpURLConnection;
+import java.io.BufferedInputStream;
+import java.net.URL;
+import java.io.InputStream;
+import java.lang.StringBuilder;
+import java.net.MalformedURLException;
 
 public class ListenerService extends Service {
 
@@ -40,22 +45,33 @@ public class ListenerService extends Service {
     Runnable conn = new Runnable() {
         public void run() {
             try {
-                socket = new Socket(SERVER_IP, SERVER_PORT);
-                Log.i(TAG, "Connected!");
-                while (true) {
-                    ObjectInputStream in = new InputStream(socket.getInputStream());
-
-                    String msg = (String) in.readObject();
-
-                    Log.i(TAG, msg);
-
-                    in.close();
-                    // socket.close();
+                URL url = new URL("http://192.168.1.109:8765/gun");
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                try {
+                    while (true) {
+                        Log.i(TAG, "Connected!");
+                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                        BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                        StringBuilder total = new StringBuilder();
+                        for (String line; (line = r.readLine()) != null;) {
+                            total.append(line).append('\n');
+                            Log.i(TAG, line);
+                        }
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, e.getMessage());
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                } finally {
+                    urlConnection.disconnect();
                 }
+            } catch (MalformedURLException e) {
+                Log.e(TAG, e.getMessage());
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
+
             }
         }
     };
