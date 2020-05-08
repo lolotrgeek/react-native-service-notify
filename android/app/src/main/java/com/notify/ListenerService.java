@@ -48,21 +48,22 @@ public class ListenerService extends Service {
                 URL url = new URL("http://192.168.1.109:8765/gun");
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 try {
-                    while (true) {
-                        Log.i(TAG, "Connected!");
-                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                        BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                        StringBuilder total = new StringBuilder();
-                        for (String line; (line = r.readLine()) != null;) {
-                            total.append(line).append('\n');
-                            Log.i(TAG, line);
-                        }
+                    Log.i(TAG, "Connected!");
+
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                    BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder total = new StringBuilder();
+                    for (String line; (line = r.readLine()) != null;) {
+                        total.append(line).append('\n');
+                        Log.i(TAG, line);
                     }
+
                 } catch (IOException e) {
                     Log.e(TAG, e.getMessage());
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                 } finally {
+                    Log.i(TAG, "Disconnected!");
                     urlConnection.disconnect();
                 }
             } catch (MalformedURLException e) {

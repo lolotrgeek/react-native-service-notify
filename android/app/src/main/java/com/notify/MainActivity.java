@@ -24,7 +24,7 @@ public class MainActivity extends ReactActivity {
   @Override
   public void onResume() {
     Context context = getApplicationContext();
-    context.stopService(new Intent(context, ListenerService.class));
+    context.stopService(new Intent(context, DataService.class));
     Log.i(TAG, "Stopping Listener...");
     super.onStart();
 
@@ -34,10 +34,9 @@ public class MainActivity extends ReactActivity {
   public void onPause() {
     super.onStop();
     Context context = getApplicationContext();
-    context.startService(new Intent(context, ListenerService.class));
+    context.startService(new Intent(context, DataService.class));
     HeadlessJsTaskService.acquireWakeLockNow(context);
     Log.i(TAG, "Starting Listener...");
-
   }
 
 }
