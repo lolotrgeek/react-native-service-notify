@@ -17,6 +17,12 @@ import java.text.DecimalFormat;
 import org.liquidplayer.javascript.JSValue;
 import org.liquidplayer.javascript.JSContext;
 
+import java.lang.StringBuilder;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+
 public class DataService extends Service {
     private static final int SERVICE_NOTIFICATION_ID = 54321;
     private static final String CHANNEL_ID = "DATATASK";
@@ -31,7 +37,31 @@ public class DataService extends Service {
 
     Runnable conn = new Runnable() {
         public void run() {
-            context.evaluateScript("a = 10");
+            BufferedReader reader = null;
+            StringBuilder text = new StringBuilder();
+            try {
+                reader = new BufferedReader(new InputStreamReader(getAssets().open("test.js"), "UTF-8"));
+
+                // do reading, usually loop until end of file reading
+                String mLine;
+                while ((mLine = reader.readLine()) != null) {
+                    // process line
+                    text.append(mLine);
+                    text.append('\n');
+                    Log.i(TAG, mLine);
+                }
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
+            }
+            context.evaluateScript(text.toString());
             JSValue newAValue = context.property("a");
             DecimalFormat df = new DecimalFormat(".#");
             Log.i(TAG, df.format(newAValue.toNumber())); // 10.0
