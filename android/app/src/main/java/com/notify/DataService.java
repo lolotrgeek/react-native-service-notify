@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.Bundle;
+import android.os.Handler;
 import androidx.annotation.Nullable;
 import android.app.Notification;
 import androidx.core.app.NotificationCompat;
@@ -42,6 +43,7 @@ public class DataService extends Service {
     }
 
     Runnable conn = new Runnable() {
+        @Override
         public void run() {
             Context androidContext = getApplicationContext();
             try {
@@ -49,16 +51,22 @@ public class DataService extends Service {
                 final EventListener listener = new EventListener() {
                     @Override
                     public void onEvent(MicroService service, String event, JSONObject payload) {
-                        try {
-                            Log.i(TAG, "Event:" + event + " | Payload: " + payload.getString("foo"));
-                        } catch (JSONException e) {
-                            Log.e(TAG, e.getMessage());
-                        }
-                    };
+                        new Handler().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Log.i(TAG, "Event:" + event + " | Payload: " + payload.getString("foo"));
+                                } catch (JSONException e) {
+                                    Log.e(TAG, e.getMessage());
+                                }
+                            }
+                        });
+                    }
                 };
                 final ServiceStartListener startListener = new ServiceStartListener() {
                     @Override
                     public void onStart(MicroService service) {
+                        Log.i(TAG, "Node Ready");
                         service.addEventListener("my_event", listener);
                     }
                 };
