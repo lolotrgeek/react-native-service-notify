@@ -3,6 +3,7 @@ package com.notify;
 import android.app.Service;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.Context;
 import android.os.IBinder;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
@@ -13,23 +14,27 @@ import android.app.NotificationChannel;
 import android.os.Build;
 import android.util.Log;
 import java.text.DecimalFormat;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.net.URI;
 
 import org.liquidplayer.javascript.JSValue;
 import org.liquidplayer.javascript.JSContext;
 
 import java.lang.StringBuilder;
+import java.net.URI;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.liquidplayer.service.MicroService;
+import org.liquidplayer.service.MicroService.EventListener;
+import org.liquidplayer.service.MicroService.ServiceStartListener;
 
 public class DataService extends Service {
     private static final int SERVICE_NOTIFICATION_ID = 54321;
     private static final String CHANNEL_ID = "DATATASK";
     private static String TAG = "DataService";
-
-    JSContext context = new JSContext();
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -38,35 +43,31 @@ public class DataService extends Service {
 
     Runnable conn = new Runnable() {
         public void run() {
-            BufferedReader reader = null;
-            StringBuilder text = new StringBuilder();
+            Context androidContext = getApplicationContext();
             try {
-                reader = new BufferedReader(new InputStreamReader(getAssets().open("test.js"), "UTF-8"));
-
-                // do reading, usually loop until end of file reading
-                String mLine;
-                while ((mLine = reader.readLine()) != null) {
-                    // process line
-                    text.append(mLine);
-                    text.append('\n');
-                    Log.i(TAG, mLine);
-                }
-            } catch (IOException e) {
-                Log.e(TAG, e.getMessage());
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        Log.e(TAG, e.getMessage());
+                URI uri = MicroService.Bundle(androidContext, "example");
+                final EventListener listener = new EventListener() {
+                    @Override
+                    public void onEvent(MicroService service, String event, JSONObject payload) {
+                        try {
+                            Log.i(TAG, "Event:" + event + " | Payload: " + payload.getString("foo"));
+                        } catch (JSONException e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+                    };
+                };
+                final ServiceStartListener startListener = new ServiceStartListener() {
+                    @Override
+                    public void onStart(MicroService service) {
+                        service.addEventListener("my_event", listener);
                     }
-                }
+                };
+                final MicroService service = new MicroService(androidContext, uri, startListener);
+                service.start();
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
             }
-            context.evaluateScript(text.toString());
-            JSValue newAValue = context.property("a");
-            DecimalFormat df = new DecimalFormat(".#");
-            Log.i(TAG, df.format(newAValue.toNumber())); // 10.0
-        }
+        };
     };
 
     @Override

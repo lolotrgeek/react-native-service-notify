@@ -15,6 +15,8 @@ setInterval(()=>{}, 1000)
 
 console.log('Hello, World!')
 
+LiquidCore.emit('my_event', {foo: "hello, world", bar: 5, l337 : ['a', 'b'] })
+
 // Listen for a request from the host for the 'ping' event
 LiquidCore.on( 'ping', () => {
     // When we get the ping from the host, respond with "Hello, World!"
