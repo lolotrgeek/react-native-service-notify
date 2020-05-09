@@ -1,5 +1,11 @@
 {
   "scripts": {
+    "server": "liquidcore server",
+    "bundler": "liquidcore bundle",
+    "init": "liquidcore init",
+    "gradle-config": "liquidcore gradle",
+    "pod-config": "liquidcore pod",
+    "postinstall": "liquidcore postinstall",
     "start": "react-native start",
     "android": "react-native run-android",
     "ios": "react-native run-ios"
@@ -36,5 +42,10 @@
     "metro-react-native-babel-preset": "^0.56.0",
     "react-test-renderer": "16.9.0"
   },
-  "private": true
+  "private": true,
+  "liquidcore": {
+    "entry": [
+      "example.js"
+    ]
+  }
 }

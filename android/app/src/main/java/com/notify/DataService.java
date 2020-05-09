@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.liquidplayer.service.MicroService;
 
 public class DataService extends Service {
     private static final int SERVICE_NOTIFICATION_ID = 54321;
