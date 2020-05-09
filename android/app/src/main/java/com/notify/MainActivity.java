@@ -12,6 +12,9 @@ import android.os.Looper;
 import android.os.Bundle;
 import java.lang.Boolean;
 
+import org.liquidplayer.javascript.JSContext;
+
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.liquidplayer.service.MicroService;
@@ -24,6 +27,7 @@ import java.net.URI;
 public class MainActivity extends ReactActivity {
 
   private static String TAG = "NotifyMainActivity";
+  JSContext context = new JSContext();
 
   /**
    * Returns the name of the main component registered from JavaScript. This is
@@ -117,6 +121,7 @@ public class MainActivity extends ReactActivity {
         service.addEventListener("ready", readyListener);
         service.addEventListener("pong", pongListener);
       }
+      
     };
 
     // URI uri = MicroService.DevServer();
@@ -127,12 +132,17 @@ public class MainActivity extends ReactActivity {
       public void onProcessFailed(Process process, Exception e) {
         Log.e(TAG, e.getMessage());
       }
+      @Override
+      public void onProcessStart(Process process, JSContext context) {
+        boolean active = process.isActive();
+        Log.i(TAG, "Process Active: " + Boolean.toString(active));
+      }
     };
     service.start();
     Process process = service.getProcess(); 
     Log.i(TAG, "Process: " + process.toString());
     boolean active = process.isActive();
-    Log.i(TAG, "Process Active : " + Boolean.toString(active));
+    Log.i(TAG, "Process Active: " + Boolean.toString(active));
 
   }
 
