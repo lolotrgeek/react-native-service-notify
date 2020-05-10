@@ -150,7 +150,9 @@ public class MainActivity extends ReactActivity {
       }
       @Override
       public void onProcessExit(Process process, int code) {
+        boolean active = process.isActive();
         Log.i(TAG, "Process Exited: " + Integer.toString(code));
+        Log.i(TAG, "Process Active: " + Boolean.toString(active));
       }
     };
     service.start();
