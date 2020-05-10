@@ -46,6 +46,9 @@
   "liquidcore": {
     "entry": [
       "example.js"
-    ]
+    ],
+    "bundler_output": {
+      "android": ".liquidcore/android_bundle"
+    }
   }
 }

@@ -14,11 +14,11 @@ import java.lang.Boolean;
 
 import org.liquidplayer.javascript.JSContext;
 
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.liquidplayer.service.MicroService;
 import org.liquidplayer.service.MicroService.ServiceStartListener;
+import org.liquidplayer.service.MicroService.ServiceErrorListener;
 import org.liquidplayer.service.MicroService.EventListener;
 import org.liquidplayer.node.Process;
 
@@ -121,25 +121,40 @@ public class MainActivity extends ReactActivity {
         service.addEventListener("ready", readyListener);
         service.addEventListener("pong", pongListener);
       }
-      
+
+    };
+
+    final ServiceErrorListener errorListener = new ServiceErrorListener() {
+      @Override
+      public void onError(MicroService service, Exception e) {
+        Log.e(TAG, e.getMessage());
+
+      }
+
     };
 
     // URI uri = MicroService.DevServer();
-    URI uri = MicroService.Bundle(MainActivity.this);
+    // URI uri = MicroService.Bundle(MainActivity.this);
+    URI uri = MicroService.Bundle(MainActivity.this, "example.js");
     Log.i(TAG, "Bundle: " + uri.toString());
     MicroService service = new MicroService(MainActivity.this, uri, startListener) {
       @Override
       public void onProcessFailed(Process process, Exception e) {
         Log.e(TAG, e.getMessage());
       }
+
       @Override
       public void onProcessStart(Process process, JSContext context) {
         boolean active = process.isActive();
         Log.i(TAG, "Process Active: " + Boolean.toString(active));
       }
+      @Override
+      public void onProcessExit(Process process, int code) {
+        Log.i(TAG, "Process Exited: " + Integer.toString(code));
+      }
     };
     service.start();
-    Process process = service.getProcess(); 
+    Process process = service.getProcess();
     Log.i(TAG, "Process: " + process.toString());
     boolean active = process.isActive();
     Log.i(TAG, "Process Active: " + Boolean.toString(active));
