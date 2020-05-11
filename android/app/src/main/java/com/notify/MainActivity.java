@@ -63,19 +63,19 @@ public class MainActivity extends ReactActivity {
 
   // @Override
   // public void onResume() {
-  // Context context = getApplicationContext();
-  // context.startService(new Intent(context, DataService.class));
-  // super.onStart();
+  //   Context context = getApplicationContext();
+  //   context.startService(new Intent(context, ListenerService.class));
+  //   super.onStart();
 
   // }
 
   // @Override
   // public void onPause() {
-  // super.onStop();
-  // Context context = getApplicationContext();
-  // context.stopService(new Intent(context, DataService.class));
-  // HeadlessJsTaskService.acquireWakeLockNow(context);
+  //   super.onStop();
+  //   Context context = getApplicationContext();
+  //   context.stopService(new Intent(context, ListenerService.class));
   // }
+
   public URL buildUrl(String server) {
     URL url = null;
     try {

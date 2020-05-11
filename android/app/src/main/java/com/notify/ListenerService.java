@@ -31,7 +31,7 @@ public class ListenerService extends Service {
 
     private static final int SERVICE_NOTIFICATION_ID = 54321;
     private static final String CHANNEL_ID = "DATATASK";
-    private static String TAG = "ServerSocketTest";
+    private static String TAG = "Listener";
     public static String SERVER_IP = "192.168.1.109";
     public static final int SERVER_PORT = 8765;
 
@@ -45,7 +45,7 @@ public class ListenerService extends Service {
     Runnable conn = new Runnable() {
         public void run() {
             try {
-                URL url = new URL("http://192.168.1.109:8765/gun");
+                URL url = new URL("http://192.168.1.109:8082/index.js");
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 try {
                     Log.i(TAG, "Connected!");
