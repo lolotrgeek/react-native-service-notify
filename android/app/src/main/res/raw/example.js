@@ -9,9 +9,9 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
   global.__c = clear;
   global.__registerSegment = registerSegment;
   var modules = clear();
-  var EMPTY = {};
-  var _ref = {},
-      hasOwnProperty = _ref.hasOwnProperty;
+  const EMPTY = {};
+  const _ref = {},
+        hasOwnProperty = _ref.hasOwnProperty;
 
   function clear() {
     modules = Object.create(null);
@@ -23,9 +23,9 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
       return;
     }
 
-    var mod = {
-      dependencyMap: dependencyMap,
-      factory: factory,
+    const mod = {
+      dependencyMap,
+      factory,
       hasError: false,
       importedAll: EMPTY,
       importedDefault: EMPTY,
@@ -41,79 +41,53 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
   function proxyModuleExports(module) {
     module.exports = function () {};
 
-    var handler = {
-      get: function get(t, p, r) {
-        return Reflect.get(module.exports, p, r);
-      },
-      set: function set(t, p, v, r) {
-        return Reflect.set(module.exports, p, v, r);
-      },
-      setPrototypeOf: function setPrototypeOf(t, p) {
-        return Reflect.setPrototypeOf(module.exports, p);
-      },
-      getPrototypeOf: function getPrototypeOf(t) {
-        return Reflect.getPrototypeOf(module.exports);
-      },
-      getOwnPropertyDescriptor: function getOwnPropertyDescriptor(t, p) {
-        return Reflect.getOwnPropertyDescriptor(module.exports, p);
-      },
-      defineProperty: function defineProperty(t, p, d) {
-        return Reflect.defineProperty(module.exports, p, d);
-      },
-      has: function has(t, p) {
-        return Reflect.has(module.exports, p);
-      },
-      deleteProperty: function deleteProperty(t, p) {
-        return Reflect.deleteProperty(module.exports, p);
-      },
-      ownKeys: function ownKeys(t) {
-        return Reflect.ownKeys(module.exports);
-      },
-      apply: function apply(t, z, a) {
-        return Reflect.apply(module.exports, z, a);
-      },
-      construct: function construct(t, a, n) {
-        return Reflect.construct(module.exports, a, n);
-      },
-      preventExtensions: function preventExtensions(t) {
-        return Reflect.preventExtensions(module.exports);
-      },
-      isExtensible: function isExtensible(t) {
-        return Reflect.isExtensible(module.exports);
-      }
+    const handler = {
+      get: (t, p, r) => Reflect.get(module.exports, p, r),
+      set: (t, p, v, r) => Reflect.set(module.exports, p, v, r),
+      setPrototypeOf: (t, p) => Reflect.setPrototypeOf(module.exports, p),
+      getPrototypeOf: t => Reflect.getPrototypeOf(module.exports),
+      getOwnPropertyDescriptor: (t, p) => Reflect.getOwnPropertyDescriptor(module.exports, p),
+      defineProperty: (t, p, d) => Reflect.defineProperty(module.exports, p, d),
+      has: (t, p) => Reflect.has(module.exports, p),
+      deleteProperty: (t, p) => Reflect.deleteProperty(module.exports, p),
+      ownKeys: t => Reflect.ownKeys(module.exports),
+      apply: (t, z, a) => Reflect.apply(module.exports, z, a),
+      construct: (t, a, n) => Reflect.construct(module.exports, a, n),
+      preventExtensions: t => Reflect.preventExtensions(module.exports),
+      isExtensible: t => Reflect.isExtensible(module.exports)
     };
     return new Proxy(function () {}, handler);
   }
 
   function metroRequire(moduleId) {
-    var moduleIdReallyIsNumber = moduleId;
-    var module = modules[moduleIdReallyIsNumber];
+    const moduleIdReallyIsNumber = moduleId;
+    const module = modules[moduleIdReallyIsNumber];
     return module && module.isCyclic ? proxyModuleExports(module) : module && module.isInitialized ? module.publicModule.exports : guardedLoadModule(moduleIdReallyIsNumber, module);
   }
 
   function metroImportDefault(moduleId) {
-    var moduleIdReallyIsNumber = moduleId;
+    const moduleIdReallyIsNumber = moduleId;
 
     if (modules[moduleIdReallyIsNumber] && modules[moduleIdReallyIsNumber].importedDefault !== EMPTY) {
       return modules[moduleIdReallyIsNumber].importedDefault;
     }
 
-    var exports = metroRequire(moduleIdReallyIsNumber);
-    var importedDefault = exports && exports.__esModule ? exports.default : exports;
+    const exports = metroRequire(moduleIdReallyIsNumber);
+    const importedDefault = exports && exports.__esModule ? exports.default : exports;
     return modules[moduleIdReallyIsNumber].importedDefault = importedDefault;
   }
 
   metroRequire.importDefault = metroImportDefault;
 
   function metroImportAll(moduleId) {
-    var moduleIdReallyIsNumber = moduleId;
+    const moduleIdReallyIsNumber = moduleId;
 
     if (modules[moduleIdReallyIsNumber] && modules[moduleIdReallyIsNumber].importedAll !== EMPTY) {
       return modules[moduleIdReallyIsNumber].importedAll;
     }
 
-    var exports = metroRequire(moduleIdReallyIsNumber);
-    var importedAll;
+    const exports = metroRequire(moduleIdReallyIsNumber);
+    let importedAll;
 
     if (exports && exports.__esModule) {
       importedAll = exports;
@@ -121,7 +95,7 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
       importedAll = {};
 
       if (exports) {
-        for (var key in exports) {
+        for (const key in exports) {
           if (hasOwnProperty.call(exports, key)) {
             importedAll[key] = exports[key];
           }
@@ -135,12 +109,12 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
   }
 
   metroRequire.importAll = metroImportAll;
-  var inGuard = false;
+  let inGuard = false;
 
   function guardedLoadModule(moduleId, module) {
     if (!inGuard && global.ErrorUtils) {
       inGuard = true;
-      var returnValue;
+      let returnValue;
 
       try {
         returnValue = loadModuleImplementation(moduleId, module);
@@ -155,15 +129,15 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
     }
   }
 
-  var ID_MASK_SHIFT = 16;
-  var LOCAL_ID_MASK = 65535;
+  const ID_MASK_SHIFT = 16;
+  const LOCAL_ID_MASK = 65535;
 
   function unpackModuleId(moduleId) {
-    var segmentId = moduleId >>> ID_MASK_SHIFT;
-    var localId = moduleId & LOCAL_ID_MASK;
+    const segmentId = moduleId >>> ID_MASK_SHIFT;
+    const localId = moduleId & LOCAL_ID_MASK;
     return {
-      segmentId: segmentId,
-      localId: localId
+      segmentId,
+      localId
     };
   }
 
@@ -174,7 +148,7 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
   }
 
   metroRequire.packModuleId = packModuleId;
-  var moduleDefinersBySegmentID = [];
+  const moduleDefinersBySegmentID = [];
 
   function registerSegment(segmentID, moduleDefiner) {
     moduleDefinersBySegmentID[segmentID] = moduleDefiner;
@@ -182,11 +156,11 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
 
   function loadModuleImplementation(moduleId, module) {
     if (!module && moduleDefinersBySegmentID.length > 0) {
-      var _unpackModuleId = unpackModuleId(moduleId),
-          segmentId = _unpackModuleId.segmentId,
-          localId = _unpackModuleId.localId;
+      const _unpackModuleId = unpackModuleId(moduleId),
+            segmentId = _unpackModuleId.segmentId,
+            localId = _unpackModuleId.localId;
 
-      var definer = moduleDefinersBySegmentID[segmentId];
+      const definer = moduleDefinersBySegmentID[segmentId];
 
       if (definer != null) {
         definer(localId);
@@ -194,14 +168,14 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
       }
     }
 
-    var nativeRequire = global.nativeRequire;
+    const nativeRequire = global.nativeRequire;
 
     if (!module && nativeRequire) {
-      var _unpackModuleId2 = unpackModuleId(moduleId),
-          _segmentId = _unpackModuleId2.segmentId,
-          _localId = _unpackModuleId2.localId;
+      const _unpackModuleId2 = unpackModuleId(moduleId),
+            segmentId = _unpackModuleId2.segmentId,
+            localId = _unpackModuleId2.localId;
 
-      nativeRequire(_localId, _segmentId);
+      nativeRequire(localId, segmentId);
       module = modules[moduleId];
     }
 
@@ -215,12 +189,12 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
 
     module.isInitialized = true;
     module.isCyclic = true;
-    var _module = module,
-        factory = _module.factory,
-        dependencyMap = _module.dependencyMap;
+    const _module = module,
+          factory = _module.factory,
+          dependencyMap = _module.dependencyMap;
 
     try {
-      var moduleObject = module.publicModule;
+      const moduleObject = module.publicModule;
       moduleObject.id = moduleId;
       factory(global, metroRequire, metroImportDefault, metroImportAll, moduleObject, moduleObject.exports, dependencyMap);
       {
@@ -240,27 +214,30 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
   }
 
   function unknownModuleError(id) {
-    var message = 'Requiring unknown module "' + id + '".';
+    let message = 'Requiring unknown module "' + id + '".';
     return Error(message);
   }
 
   function moduleThrewError(id, error) {
-    var displayName = id;
+    const displayName = id;
     return Error('Requiring module "' + displayName + '", which threw an exception: ' + error);
   }
 })(typeof globalThis !== 'undefined' ? globalThis : typeof global !== 'undefined' ? global : typeof window !== 'undefined' ? window : this);
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  var _require = _$$_REQUIRE(_dependencyMap[0]),
-      LiquidCore = _require.LiquidCore;
+  "use strict";
 
-  setInterval(function () {}, 1000);
+  const {
+    LiquidCore
+  } = _$$_REQUIRE(_dependencyMap[0]);
+
+  setInterval(() => {}, 1000);
   console.log('Hello, World!');
   LiquidCore.emit('my_event', {
     foo: "hello, world",
     bar: 5,
     l337: ['a', 'b']
   });
-  LiquidCore.on('ping', function () {
+  LiquidCore.on('ping', () => {
     LiquidCore.emit('pong', {
       message: 'Hello, World from LiquidCore!'
     });
@@ -269,254 +246,8 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   LiquidCore.emit('ready');
 },0,[1]);
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  var _interopRequireDefault = _$$_REQUIRE(_dependencyMap[0]);
+  "use strict";
 
-  var _classCallCheck2 = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[1]));
-
-  var _possibleConstructorReturn2 = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[2]));
-
-  var _getPrototypeOf2 = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[3]));
-
-  var _inherits2 = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[4]));
-
-  function _createSuper(Derived) { return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (_isNativeReflectConstruct()) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
-
-  function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-  var events = _$$_REQUIRE(_dependencyMap[5]);
-
-  var fs = _$$_REQUIRE(_dependencyMap[6]);
-
-  var path = _$$_REQUIRE(_dependencyMap[7]);
-
-  var join = path.join;
-  var lc = global && global.LiquidCore;
-
-  if (!lc) {
-    var LiquidCore = function (_events) {
-      (0, _inherits2.default)(LiquidCore, _events);
-
-      var _super = _createSuper(LiquidCore);
-
-      function LiquidCore() {
-        (0, _classCallCheck2.default)(this, LiquidCore);
-        return _super.apply(this, arguments);
-      }
-
-      return LiquidCore;
-    }(events);
-
-    lc = new LiquidCore();
-    var native_require = global.require;
-    var defaults = {
-      arrow: process.env.NODE_BINDINGS_ARROW || ' → ',
-      compiled: process.env.NODE_BINDINGS_COMPILED_DIR || 'compiled',
-      platform: process.platform,
-      arch: process.arch,
-      version: process.versions.node,
-      bindings: 'bindings.node',
-      bindingsjs: 'bindings.node.js',
-      try: [['module_root', 'build', 'bindings'], ['module_root', 'build', 'Debug', 'bindings'], ['module_root', 'build', 'Release', 'bindings'], ['module_root', 'out', 'Debug', 'bindings'], ['module_root', 'Debug', 'bindings'], ['module_root', 'out', 'Release', 'bindings'], ['module_root', 'Release', 'bindings'], ['module_root', 'build', 'default', 'bindings'], ['module_root', 'compiled', 'version', 'platform', 'arch', 'bindings'], ['module_root', 'mocks', 'bindingsjs']]
-    };
-
-    function bindings(opts) {
-      if (typeof opts == 'string') {
-        opts = {
-          bindings: opts
-        };
-      } else if (!opts) {
-        opts = {};
-      }
-
-      Object.keys(defaults).map(function (i) {
-        if (!(i in opts)) opts[i] = defaults[i];
-      });
-
-      if (path.extname(opts.bindings) != '.node') {
-        opts.bindings += '.node';
-      }
-
-      opts.bindingsjs = opts.bindings + '.js';
-      var requireFunc = native_require;
-      var tries = [],
-          i = 0,
-          l = opts.try.length,
-          n,
-          b,
-          err;
-      var modules = [];
-      var mods = fs.readdirSync(path.resolve('.', 'node_modules'));
-      mods.forEach(function (m) {
-        return m.startsWith('@') ? modules = modules.concat(fs.readdirSync(path.resolve('.', 'node_modules', m)).map(function (f) {
-          return m + '/' + f;
-        })) : modules.push(m);
-      });
-
-      for (var j = 0; j < modules.length; j++) {
-        opts.module_root = modules[j];
-
-        for (i = 0; i < l; i++) {
-          n = join.apply(null, opts.try[i].map(function (p) {
-            return opts[p] || p;
-          }));
-          tries.push(n);
-
-          try {
-            b = opts.path ? requireFunc.resolve(n) : requireFunc(n);
-
-            if (!opts.path) {
-              b.path = n;
-            }
-
-            return b;
-          } catch (e) {
-            if (!/not find/i.test(e.message)) {
-              throw e;
-            }
-          }
-        }
-      }
-
-      err = new Error('Could not locate the bindings file. Tried:\n' + tries.map(function (a) {
-        return opts.arrow + a;
-      }).join('\n'));
-      err.tries = tries;
-      throw err;
-    }
-
-    lc.require = function (module) {
-      if (path.extname(module) == '.node') {
-        console.warn('WARN: Attempting to bind native module ' + path.basename(module));
-        console.warn('WARN: Consider using a browser implementation or make sure you have a LiquidCore addon.');
-        return bindings(path.basename(module));
-      }
-
-      return native_require(module);
-    };
-
-    lc.require.__proto__ = native_require.__proto__;
-
-    if (global) {
-      global.LiquidCore = lc;
-    }
-  }
-
-  module.exports = {
-    LiquidCore: lc
-  };
-},1,[2,3,4,7,8,10,11,12]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  function _interopRequireDefault(obj) {
-    return obj && obj.__esModule ? obj : {
-      "default": obj
-    };
-  }
-
-  module.exports = _interopRequireDefault;
-},2,[]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  module.exports = _classCallCheck;
-},3,[]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  var _typeof = _$$_REQUIRE(_dependencyMap[0]);
-
-  var assertThisInitialized = _$$_REQUIRE(_dependencyMap[1]);
-
-  function _possibleConstructorReturn(self, call) {
-    if (call && (_typeof(call) === "object" || typeof call === "function")) {
-      return call;
-    }
-
-    return assertThisInitialized(self);
-  }
-
-  module.exports = _possibleConstructorReturn;
-},4,[5,6]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  function _typeof(obj) {
-    "@babel/helpers - typeof";
-
-    if (typeof Symbol === "function" && typeof (typeof Symbol === "function" ? Symbol.iterator : "@@iterator") === "symbol") {
-      module.exports = _typeof = function _typeof(obj) {
-        return typeof obj;
-      };
-    } else {
-      module.exports = _typeof = function _typeof(obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== (typeof Symbol === "function" ? Symbol.prototype : "@@prototype") ? "symbol" : typeof obj;
-      };
-    }
-
-    return _typeof(obj);
-  }
-
-  module.exports = _typeof;
-},5,[]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  function _assertThisInitialized(self) {
-    if (self === undefined) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-
-    return self;
-  }
-
-  module.exports = _assertThisInitialized;
-},6,[]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  function _getPrototypeOf(o) {
-    module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-      return o.__proto__ || Object.getPrototypeOf(o);
-    };
-    return _getPrototypeOf(o);
-  }
-
-  module.exports = _getPrototypeOf;
-},7,[]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  var setPrototypeOf = _$$_REQUIRE(_dependencyMap[0]);
-
-  function _inherits(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-
-    subClass.prototype = Object.create(superClass && superClass.prototype, {
-      constructor: {
-        value: subClass,
-        writable: true,
-        configurable: true
-      }
-    });
-    if (superClass) setPrototypeOf(subClass, superClass);
-  }
-
-  module.exports = _inherits;
-},8,[9]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  function _setPrototypeOf(o, p) {
-    module.exports = _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
-      o.__proto__ = p;
-      return o;
-    };
-
-    return _setPrototypeOf(o, p);
-  }
-
-  module.exports = _setPrototypeOf;
-},9,[]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  module.exports = LiquidCore.require('events');
-},10,[]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  module.exports = LiquidCore.require('fs');
-},11,[]);
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  module.exports = LiquidCore.require('path');
-},12,[]);
+  throw new Error('Cannot resolve module');
+},1,[]);
 __r(0);

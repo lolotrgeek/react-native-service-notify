@@ -226,6 +226,10 @@ var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   "use strict";
 
+  const {
+    LiquidCore
+  } = _$$_REQUIRE(_dependencyMap[0]);
+
   setInterval(() => {}, 1000);
   console.log('Hello, World!');
   LiquidCore.emit('my_event', {
@@ -240,5 +244,10 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     process.exit(0);
   });
   LiquidCore.emit('ready');
-},0,[]);
+},0,[1]);
+__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
+  "use strict";
+
+  throw new Error('Cannot resolve module');
+},1,[]);
 __r(0);

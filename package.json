@@ -48,7 +48,7 @@
       "example.js"
     ],
     "bundler_output": {
-      "android": "android/app/src/main/res/raw"
+      "android": "app/src/main/res/raw"
     }
   }
 }

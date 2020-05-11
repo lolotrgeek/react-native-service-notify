@@ -17,12 +17,15 @@ import org.liquidplayer.javascript.JSContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.liquidplayer.service.MicroService;
+import org.liquidplayer.service.MicroService.BundleOptions;
 import org.liquidplayer.service.MicroService.ServiceStartListener;
 import org.liquidplayer.service.MicroService.ServiceErrorListener;
 import org.liquidplayer.service.MicroService.EventListener;
 import org.liquidplayer.node.Process;
 
 import java.net.URI;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 public class MainActivity extends ReactActivity {
 
@@ -73,6 +76,25 @@ public class MainActivity extends ReactActivity {
   // context.stopService(new Intent(context, DataService.class));
   // HeadlessJsTaskService.acquireWakeLockNow(context);
   // }
+  public URL buildUrl(String server) {
+    URL url = null;
+    try {
+      url = new URL(server);
+    } catch (MalformedURLException e) {
+      Log.e(TAG, e.getMessage());
+    }
+    return url;
+  };
+
+  public URI buildUri(String server) {
+    URI uri = null;
+    try {
+      uri = new URI(server);
+    } catch (Exception e) {
+      Log.e(TAG, e.getMessage());
+    }
+    return uri;
+  };
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -128,14 +150,16 @@ public class MainActivity extends ReactActivity {
       @Override
       public void onError(MicroService service, Exception e) {
         Log.e(TAG, e.getMessage());
-
       }
-
+    };
+    // URI uri = MicroService.Bundle(MainActivity.this);
+    BundleOptions options = new BundleOptions() {
+      Integer port = 8082;
+      URL server_url = buildUrl("http://localhost");
     };
 
-    // URI uri = MicroService.DevServer();
-    // URI uri = MicroService.Bundle(MainActivity.this);
-    URI uri = MicroService.Bundle(MainActivity.this, "example.js");
+    // URI uri = MicroService.Bundle(MainActivity.this, "index", options);
+    URI uri = buildUri("http://192.168.1.109:8082/index.js");
     Log.i(TAG, "Bundle: " + uri.toString());
     MicroService service = new MicroService(MainActivity.this, uri, startListener) {
       @Override
@@ -148,6 +172,7 @@ public class MainActivity extends ReactActivity {
         boolean active = process.isActive();
         Log.i(TAG, "Process Active: " + Boolean.toString(active));
       }
+
       @Override
       public void onProcessExit(Process process, int code) {
         boolean active = process.isActive();
