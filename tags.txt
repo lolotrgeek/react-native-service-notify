@@ -1,0 +1,1 @@
+adb logcat -s NotifyMainActivity:* nodejs:* MicrosService:*

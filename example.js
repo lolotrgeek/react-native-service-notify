@@ -8,7 +8,7 @@
  /* Hello, World! */
 
  // react doesn't want to resolve liquid core, have to uncomment following line on build
- const {LiquidCore} = require('liquidcore')
+//  const {LiquidCore} = require('liquidcore')
 
 // A micro service will exit when it has nothing left to do.  So to
 // avoid a premature exit, set an indefinite timer.  When we
