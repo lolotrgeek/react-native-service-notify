@@ -1,0 +1,46 @@
+
+{
+	"buildFiles" : [ "H:/notify-native/android/app/CMakeLists.txt" ],
+	"cleanCommands" : 
+	[
+		"C:\\Android\\Sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build H:\\notify-native\\android\\app\\.externalNativeBuild\\cmake\\debug\\arm64-v8a --target clean"
+	],
+	"cppFileExtensions" : [ "cpp" ],
+	"libraries" : 
+	{
+		"libnode-Debug-arm64-v8a" : 
+		{
+			"abi" : "arm64-v8a",
+			"artifactName" : "libnode",
+			"buildType" : "debug",
+			"output" : "H:/notify-native/android/app/libnode/bin/arm64-v8a/libnode.so",
+			"toolchain" : "1179442973"
+		},
+		"native-lib-Debug-arm64-v8a" : 
+		{
+			"abi" : "arm64-v8a",
+			"artifactName" : "native-lib",
+			"buildCommand" : "C:\\Android\\Sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build H:\\notify-native\\android\\app\\.externalNativeBuild\\cmake\\debug\\arm64-v8a --target native-lib",
+			"buildType" : "debug",
+			"files" : 
+			[
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=C:/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=C:/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot  -Dnative_lib_EXPORTS -I..\\..\\..\\..\\libnode\\include\\node  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "H:/notify-native/android/app/src/main/cpp/native-lib.cpp",
+					"workingDirectory" : "H:/notify-native/android/app/.externalNativeBuild/cmake/debug/arm64-v8a"
+				}
+			],
+			"output" : "H:/notify-native/android/app/build/intermediates/cmake/debug/obj/arm64-v8a/libnative-lib.so",
+			"toolchain" : "1179442973"
+		}
+	},
+	"toolchains" : 
+	{
+		"1179442973" : 
+		{
+			"cCompilerExecutable" : "C:/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe",
+			"cppCompilerExecutable" : "C:/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/bin/clang++.exe"
+		}
+	}
+}

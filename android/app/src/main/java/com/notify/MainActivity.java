@@ -27,9 +27,11 @@ import java.io.InputStreamReader;
 import android.content.res.AssetManager;
 
 public class MainActivity extends ReactActivity {
-
+  static {
+    System.loadLibrary("native-lib");
+    System.loadLibrary("node");
+  }
   private static String TAG = "NotifyMainActivity";
-  private AssetManager assetManager;
 
   /**
    * Returns the name of the main component registered from JavaScript. This is
@@ -40,6 +42,34 @@ public class MainActivity extends ReactActivity {
     return "Notify";
   }
 
+  // We just want one instance of node running in the background.
+  public static boolean _startedNodeAlready = false;
+
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    if (!_startedNodeAlready) {
+      _startedNodeAlready = true;
+      new Thread(new Runnable() {
+        @Override
+        public void run() {
+          startNodeWithArguments(new String[] { "node", "-e",
+              "var http = require('http'); " + "var versions_server = http.createServer( (request, response) => { "
+                  + "  response.end('Versions: ' + JSON.stringify(process.versions)); " + "}); "
+                  + "versions_server.listen(3000);" });
+        }
+      }).start();
+    }
+  }
+
+  /**
+   * A native method that is implemented by the 'native-lib' native library, which
+   * is packaged with this application.
+   */
+  public native Integer startNodeWithArguments(String[] arguments);
+
+  // SERVICE DEFINITIONS HERE
   // @Override
   // public void onResume() {
   // Context context = getApplicationContext();
@@ -75,5 +105,4 @@ public class MainActivity extends ReactActivity {
   // context.stopService(new Intent(context, ListenerService.class));
   // }
 
-  
 }
