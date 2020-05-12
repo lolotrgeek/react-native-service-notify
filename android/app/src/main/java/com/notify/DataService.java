@@ -19,19 +19,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.net.URI;
 
-import org.liquidplayer.javascript.JSValue;
-import org.liquidplayer.javascript.JSContext;
-
 import java.lang.StringBuilder;
 import java.net.URI;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.liquidplayer.service.MicroService;
-import org.liquidplayer.service.MicroService.EventListener;
-import org.liquidplayer.service.MicroService.ServiceStartListener;
-import org.liquidplayer.service.MicroService.ServiceErrorListener;
 
 public class DataService extends Service {
     private static final int SERVICE_NOTIFICATION_ID = 54321;
@@ -48,7 +41,7 @@ public class DataService extends Service {
         public void run() {
             Context androidContext = getApplicationContext();
 
-
+        }
     };
 
     @Override

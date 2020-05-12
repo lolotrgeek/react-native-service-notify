@@ -12,18 +12,6 @@ import android.os.Looper;
 import android.os.Bundle;
 import java.lang.Boolean;
 
-import org.liquidplayer.javascript.JSContext;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.liquidplayer.service.MicroService;
-import org.liquidplayer.service.MicroService.BundleOptions;
-import org.liquidplayer.service.MicroService.ServiceStartListener;
-import org.liquidplayer.service.MicroService.ServiceErrorListener;
-import org.liquidplayer.service.MicroService.EventListener;
-import org.liquidplayer.node.Process;
-import org.liquidplayer.javascript.JSContextGroup.LoopPreserver;
-
 import java.net.URI;
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -41,7 +29,6 @@ import android.content.res.AssetManager;
 public class MainActivity extends ReactActivity {
 
   private static String TAG = "NotifyMainActivity";
-  JSContext context = new JSContext();
   private AssetManager assetManager;
 
   /**
@@ -88,5 +75,5 @@ public class MainActivity extends ReactActivity {
   // context.stopService(new Intent(context, ListenerService.class));
   // }
 
-  }
+  
 }
