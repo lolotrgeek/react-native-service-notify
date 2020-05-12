@@ -19,9 +19,6 @@ buildscript {
         // in the individual module build.gradle files
     }
 }
-ext {
-    Download = de.undercouch.gradle.tasks.download.Download
-}
 allprojects {
     repositories {
         mavenLocal()

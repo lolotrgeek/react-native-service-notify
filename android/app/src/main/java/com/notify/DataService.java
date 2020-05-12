@@ -48,66 +48,7 @@ public class DataService extends Service {
         public void run() {
             Context androidContext = getApplicationContext();
 
-            Log.i(TAG, "Attempting Start...");
-            URI uri = MicroService.Bundle(androidContext, "example");
-            final EventListener listener = new EventListener() {
-                @Override
-                public void onEvent(MicroService service, String event, JSONObject payload) {
-                    new Handler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Log.i(TAG, "Event:" + event + " | Payload: " + payload.getString("foo"));
-                            } catch (JSONException e) {
-                                Log.e(TAG, e.getMessage());
-                            }
-                        }
-                    });
-                }
-            };
-            final EventListener readyListener = new EventListener() {
-                @Override
-                public void onEvent(MicroService service, String event, JSONObject payload) {
-                    service.emit("ping");
-                }
-            };
-            final EventListener pongListener = new EventListener() {
-                @Override
-                public void onEvent(MicroService service, String event, final JSONObject payload) {
-                    // NOTE: This event is typically called inside of the micro service's thread,
-                    // not
-                    // the main UI thread. To update the UI, run this on the main thread.
-                    new Handler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Log.i(TAG, payload.getString("message"));
-                            } catch (JSONException e) {
-                                Log.e(TAG, e.getMessage());
-                            }
-                        }
-                    });
-                }
-            };
-            final ServiceStartListener startListener = new ServiceStartListener() {
-                @Override
-                public void onStart(MicroService service) {
-                    Log.i(TAG, "Node Ready");
-                    service.addEventListener("my_event", listener);
-                    service.addEventListener("ready", readyListener);
-                    service.addEventListener("pong", pongListener);
-                }
-            };
 
-            final ServiceErrorListener errorListener = new ServiceErrorListener() {
-                @Override
-                public void onError(MicroService service, Exception e) {
-                    Log.i(TAG, e.getMessage());
-                }
-            };
-            final MicroService service = new MicroService(androidContext, uri, startListener);
-            service.start();
-        };
     };
 
     @Override
