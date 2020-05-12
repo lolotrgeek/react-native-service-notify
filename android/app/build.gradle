@@ -76,17 +76,9 @@ project.ext.react = [
     entryFile: "index.js",
     enableHermes: false,  // clean and rebuild if changing
 ]
-task bundleLiquidCoreCode(type: Exec) {
-  workingDir rootProject.projectDir
-  commandLine 'node', 'H:/notify-native/node_modules/liquidcore/lib/cli.js', 'bundle', '--platform=android'
-}
-project.afterEvaluate {
-    preBuild.dependsOn bundleLiquidCoreCode
-}
+
 apply from: "../../node_modules/react-native/react.gradle"
-apply from: "../../node_modules/liquidcore/include.V8.gradle"
-apply from: "../../node_modules/liquidcore/include.gradle"
-apply plugin: 'de.undercouch.download'
+
 /**
  * Set this to true to create two separate APKs instead of one:
  *   - An APK that only works on ARM devices
