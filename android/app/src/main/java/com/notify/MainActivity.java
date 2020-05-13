@@ -7,30 +7,8 @@ import com.facebook.react.ReactActivity;
 import com.facebook.react.HeadlessJsTaskService;
 import android.util.Log;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Bundle;
-import java.lang.Boolean;
-
-import java.net.URI;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.io.File;
-import android.net.Uri;
-
-import java.lang.StringBuilder;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import android.content.res.AssetManager;
-
 public class MainActivity extends ReactActivity {
-  static {
-    System.loadLibrary("native-lib");
-    System.loadLibrary("node");
-  }
+
   private static String TAG = "NotifyMainActivity";
 
   /**
@@ -42,32 +20,12 @@ public class MainActivity extends ReactActivity {
     return "Notify";
   }
 
-  // We just want one instance of node running in the background.
-  public static boolean _startedNodeAlready = false;
-
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    if (!_startedNodeAlready) {
-      _startedNodeAlready = true;
-      new Thread(new Runnable() {
-        @Override
-        public void run() {
-          startNodeWithArguments(new String[] { "node", "-e",
-              "var http = require('http'); " + "var versions_server = http.createServer( (request, response) => { "
-                  + "  response.end('Versions: ' + JSON.stringify(process.versions)); " + "}); "
-                  + "versions_server.listen(3000);" });
-        }
-      }).start();
-    }
+  public void onResume() {
+      super.onResume();
+      Context context = getApplicationContext();
+      context.startService(new Intent(context, DataService.class));
   }
-
-  /**
-   * A native method that is implemented by the 'native-lib' native library, which
-   * is packaged with this application.
-   */
-  public native Integer startNodeWithArguments(String[] arguments);
 
   // SERVICE DEFINITIONS HERE
   // @Override

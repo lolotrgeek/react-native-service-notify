@@ -40,12 +40,15 @@ DerivedData
 # Android/IntelliJ
 #
 build/
+android/app/.cxx
 .idea
 .gradle
 local.properties
 *.iml
 android/app/build
 android/.gradle
+android/app/.externalNativeBuild/**
+android/app/.externalNativeBuild
 
 # node.js
 #
@@ -79,3 +82,4 @@ buck-out/
 # History
 /.history
 cases.md
+

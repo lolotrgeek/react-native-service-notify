@@ -3,9 +3,18 @@
 #include <cstdlib>
 #include "node.h"
 
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_notify_DataService_stringFromJNI(
+        JNIEnv *env,
+        jobject /* this */) {
+    std::string hello = "Hello from C++";
+    return env->NewStringUTF(hello.c_str());
+}
+
 //node's libUV requires all arguments being on contiguous memory.
 extern "C" jint JNICALL
-Java_com_yourorg_sample_MainActivity_startNodeWithArguments(
+Java_com_notify_DataService_startNodeWithArguments(
         JNIEnv *env,
         jobject /* this */,
         jobjectArray arguments) {
@@ -21,13 +30,13 @@ Java_com_yourorg_sample_MainActivity_startNodeWithArguments(
     }
 
     //Stores arguments in contiguous memory.
-    char* args_buffer = (char*) calloc(c_arguments_size, sizeof(char));
+    char* args_buffer=(char*)calloc(c_arguments_size, sizeof(char));
 
     //argv to pass into node.
     char* argv[argument_count];
 
     //To iterate through the expected start position of each argument in args_buffer.
-    char* current_args_position = args_buffer;
+    char* current_args_position=args_buffer;
 
     //Populate the args_buffer and argv.
     for (int i = 0; i < argument_count ; i++)
@@ -41,13 +50,10 @@ Java_com_yourorg_sample_MainActivity_startNodeWithArguments(
         argv[i] = current_args_position;
 
         //Increment to the next argument's expected position.
-        current_args_position += strlen(current_args_position) + 1;
+        current_args_position += strlen(current_args_position)+1;
     }
 
     //Start node, with argc and argv.
-    int node_result = node::Start(argument_count, argv);
-    free(args_buffer);
-
-    return jint(node_result);
+    return jint(node::Start(argument_count,argv));
 
 }
