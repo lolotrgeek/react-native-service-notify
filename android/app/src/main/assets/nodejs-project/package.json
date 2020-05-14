@@ -6,6 +6,8 @@
   "author": "janeasystems",
   "license": "",
   "dependencies": {
+    "debug": "^4.1.1",
+    "gun": "^0.2020.430",
     "left-pad": "^1.3.0"
   }
 }
