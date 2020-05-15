@@ -6,7 +6,6 @@
 
 package com.notify;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
@@ -58,6 +57,7 @@ public class NodeJS extends Service {
 
     private static String LOGTAG = "NODEJS-BRIDGE";
     private static String SYSTEM_CHANNEL = "_SYSTEM_";
+    private static String EVENT_CHANNEL = "_EVENTS_";
 
     private static boolean engineAlreadyStarted = false;
 
@@ -146,18 +146,23 @@ public class NodeJS extends Service {
 //        }
     }
 
-//    @Override
-//    public void onStartCommand() {
-//        super.onStartCommand();
-//        Log.d(LOGTAG, "onResume");
-//        if (nodeIsReadyForAppEvents) {
-//            sendMessageToNodeChannel(SYSTEM_CHANNEL, "resume");
-//        }
-//    }
 
-    private boolean sendMessageToNode(String channelName, String msg) {
-        sendMessageToNodeChannel(channelName, msg);
-        return true;
+    public void sendMessageToNode(String event, String payload) {
+        waitForInit();
+        JSONObject message = new JSONObject();
+        try {
+            message.put("event", event);
+            message.put("payload", payload);
+        } catch (JSONException e) {
+            Log.e(LOGTAG, e.getMessage());
+        }
+        if(nodeIsReadyForAppEvents) {
+            Log.i(LOGTAG, "Sending - " + message.toString());
+            sendMessageToNodeChannel(EVENT_CHANNEL, message.toString());
+        } else {
+            Log.e(LOGTAG, "Unable to Send - " + message.toString());
+        }
+
     }
 
     public static void sendMessageToApplication(String channelName, String msg) {
@@ -165,11 +170,10 @@ public class NodeJS extends Service {
             // If it's a system channel call, handle it in the plugin native side.
             handleAppChannelMessage(msg);
         } else {
-            // Otherwise, send it to Cordova.
+            // Otherwise, send it.
             handleAppChannelMessage(msg);
         }
     }
-
 
     public static void handleAppChannelMessage(String msg) {
         Log.i(LOGTAG, msg);
@@ -223,9 +227,10 @@ public class NodeJS extends Service {
                         NodeJS.nodePath, true);
             }
         }).start();
+        nodeIsReadyForAppEvents=true;
     }
 
-    private void startEngineWithScript(final String scriptBody) {
+    public void startEngineWithScript(final String scriptBody) {
         Log.d(LOGTAG, "StartEngineWithScript: " + scriptBody);
 
         if (NodeJS.engineAlreadyStarted == true) {

@@ -4,7 +4,7 @@ const EventEmitter = require('events');
 const NativeBridge = process._linkedBinding('node_bridge');
 
 /**
- * Built-in events channel to exchange events between the Cordova app
+ * Built-in events channel to exchange events between the Native app
  * and the Node.js app. It allows to emit user defined event types with
  * optional arguments.
  */
@@ -12,7 +12,7 @@ const EVENT_CHANNEL = '_EVENTS_';
 
 /**
  * Built-in, one-way event channel reserved for sending events from
- * the Cordova plug-in native layer to the Node.js app.
+ * the native layer to the Node.js app.
  */
 const SYSTEM_CHANNEL = '_SYSTEM_';
 
@@ -56,7 +56,7 @@ class ChannelSuper extends EventEmitter {
     this.name = name;
     // Renaming the 'emit' method to 'emitLocal' is not strictly needed, but
     // it is useful to clarify that 'emitting' on this object has a local
-    // scope: it emits the event on the Cordova side only, it doesn't send
+    // scope: it emits the event on the Native side only, it doesn't send
     // the event to Node.
     this.emitLocal = this.emit;
     delete this.emit;
@@ -76,6 +76,7 @@ class ChannelSuper extends EventEmitter {
  * JavaScript object supported by 'JSON.stringify()'.
  * Sending functions is not currently supported.
  * Includes the previously available 'send' method for 'message' events.
+ *  a messages is sent as stringified JSON `{event: string, payload: string }`
  */
 class EventChannel extends ChannelSuper {
   post(event, ...msg) {
@@ -177,13 +178,13 @@ class SystemChannel extends ChannelSuper {
 
 /**
  * Manage the registered channels to emit events/messages received by the
- * Cordova app or by the Cordova plugin itself (i.e. the system channel).
+ * Native app or by the Native plugin itself (i.e. the system channel).
  */
 var channels = {};
 
 /*
  * This method is invoked by the native code when an event/message is received
- * from the Cordova app.
+ * from the Native app.
  */
 function bridgeListener(channelName, data) {
   if (channels.hasOwnProperty(channelName)) {

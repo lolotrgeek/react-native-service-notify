@@ -14,8 +14,6 @@ import android.os.Build;
 import android.util.Log;
 
 
-import org.json.JSONObject;
-
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -25,6 +23,7 @@ public class DataService extends NodeJS {
     private static final int SERVICE_NOTIFICATION_ID = 54321;
     private static final String CHANNEL_ID = "DATATASK";
     private static String TAG = "DataService";
+
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
@@ -97,7 +96,7 @@ public class DataService extends NodeJS {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Starting Listener...");
         super.startEngine("main.js");
-        super.sendMessageToNodeChannel("myevent", "Hello!");
+        super.sendMessageToNode("message", "Hello!");
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
