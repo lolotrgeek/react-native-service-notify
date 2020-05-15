@@ -46,6 +46,7 @@ local.properties
 *.iml
 android/app/build
 android/.gradle
+android/app/.cxx/
 
 # node.js
 #
@@ -79,3 +80,4 @@ buck-out/
 # History
 /.history
 cases.md
+

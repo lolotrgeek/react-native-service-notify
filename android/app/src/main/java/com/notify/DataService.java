@@ -1,37 +1,27 @@
 package com.notify;
 
-import android.app.Service;
-import android.app.PendingIntent;
-import android.content.Intent;
-import android.content.Context;
-import android.os.IBinder;
-import android.os.Bundle;
-import android.os.Handler;
-import androidx.annotation.Nullable;
 import android.app.Notification;
-import androidx.core.app.NotificationCompat;
-import android.app.NotificationManager;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
-import java.text.DecimalFormat;
+
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.net.URI;
-
-import org.liquidplayer.javascript.JSValue;
-import org.liquidplayer.javascript.JSContext;
-
-import java.lang.StringBuilder;
-import java.net.URI;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import org.liquidplayer.service.MicroService;
 import org.liquidplayer.service.MicroService.EventListener;
-import org.liquidplayer.service.MicroService.ServiceStartListener;
 import org.liquidplayer.service.MicroService.ServiceErrorListener;
+import org.liquidplayer.service.MicroService.ServiceStartListener;
+
+import java.net.URI;
+
+import androidx.core.app.NotificationCompat;
 
 public class DataService extends Service {
     private static final int SERVICE_NOTIFICATION_ID = 54321;

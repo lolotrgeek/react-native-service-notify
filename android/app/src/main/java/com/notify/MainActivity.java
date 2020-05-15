@@ -1,21 +1,16 @@
 package com.notify;
 
-import android.content.Context;
-import android.content.Intent;
-
-import com.facebook.react.ReactActivity;
-import com.facebook.react.HeadlessJsTaskService;
-import android.util.Log;
-
+import android.content.res.AssetManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Bundle;
-import java.lang.Boolean;
+import android.util.Log;
 
-import org.liquidplayer.javascript.JSContext;
+import com.facebook.react.ReactActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.liquidplayer.javascript.JSContext;
 import org.liquidplayer.service.MicroService;
 import org.liquidplayer.service.MicroService.BundleOptions;
 import org.liquidplayer.service.MicroService.ServiceStartListener;
@@ -24,19 +19,13 @@ import org.liquidplayer.service.MicroService.EventListener;
 import org.liquidplayer.node.Process;
 import org.liquidplayer.javascript.JSContextGroup.LoopPreserver;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.MalformedURLException;
-import java.io.File;
-import android.net.Uri;
-
-import java.lang.StringBuilder;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import android.content.res.AssetManager;
 
 public class MainActivity extends ReactActivity {
 
@@ -168,7 +157,7 @@ public class MainActivity extends ReactActivity {
       Integer port = 8082;
       URL server_url = buildUrl("http://localhost");
     };
-    URI uri = MicroService.Bundle(MainActivity.this, "liquid");
+    URI uri = MicroService.Bundle(MainActivity.this, "liquid", options);
     // URI uri = MicroService.Bundle(MainActivity.this, "index", options);
     // URI uri = buildUri("http://192.168.1.109:8082/index.js");
     // URI droiduri = Uri.parse("android.resource://com.notify/raw/liquid.bundle");
@@ -189,21 +178,28 @@ public class MainActivity extends ReactActivity {
         boolean active = process.isActive();
         Log.i(TAG, "Process Active: " + Boolean.toString(active));
         // process.keepAlive();
-        try {
-          InputStream bundled = assetManager.open("liquid.bundle");
-          BufferedReader r = new BufferedReader(new InputStreamReader(bundled));
-          StringBuilder total = new StringBuilder();
-          for (String line; (line = r.readLine()) != null;) {
-            total.append(line).append('\n');
-            Log.i(TAG, line);
+        int count = 0;
+        int maxTries = 10;
+        String nodeResponse = "";
+        while (true) {
+          try {
+            InputStream bundled = assetManager.open("liquid.bundle");
+            BufferedReader in = new BufferedReader(new InputStreamReader(bundled));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null)
+              nodeResponse = nodeResponse + inputLine;
+            in.close();
+            Log.i(TAG, nodeResponse);
+            break;
+          } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+          } catch (Exception e) {
+            if (++count == maxTries) {
+              Log.e(TAG, e.getMessage());
+            }
           }
-          r.close();
-        } catch (IOException e) {
-          Log.e(TAG, e.getMessage());
-        } catch (Exception e) {
-          Log.e(TAG, e.getMessage());
         }
-      }
+      };
 
       @Override
       public void onProcessExit(Process process, int code) {
@@ -211,7 +207,7 @@ public class MainActivity extends ReactActivity {
         Log.i(TAG, "Process Exited: " + Integer.toString(code));
         Log.i(TAG, "Process Active: " + Boolean.toString(active));
       }
-      
+
     };
     service.start();
     Process process = service.getProcess();
