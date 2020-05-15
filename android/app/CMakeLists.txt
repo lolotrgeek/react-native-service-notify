@@ -17,7 +17,9 @@ add_library( # Sets the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/cpp/native-lib.cpp )
+             src/main/cpp/native-lib.cpp 
+             src/main/cpp/node-bridge.cpp 
+             )
 
 #Includes node's header files.
 include_directories(libnode/include/node/)
