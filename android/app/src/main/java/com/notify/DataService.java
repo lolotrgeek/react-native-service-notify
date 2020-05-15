@@ -14,6 +14,8 @@ import android.os.Build;
 import android.util.Log;
 
 
+import org.json.JSONObject;
+
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -90,10 +92,12 @@ public class DataService extends NodeJS {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Starting Listener...");
-
+        super.startEngine("main.js");
+        super.sendMessageToNodeChannel("myevent", "Hello!");
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,

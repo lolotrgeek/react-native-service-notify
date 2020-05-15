@@ -9,7 +9,6 @@ package com.notify;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
-import org.pgsqlite.CallbackContext;
 
 import android.app.Service;
 import android.content.Intent;
@@ -62,8 +61,6 @@ public class NodeJS extends Service {
 
     private static boolean engineAlreadyStarted = false;
 
-    private static CallbackContext allChannelListenerContext = null;
-
     private static final Object onlyOneEngineStartingAtATimeLock = new Object();
 
     // Flag to indicate if node is ready to receive app events.
@@ -111,10 +108,6 @@ public class NodeJS extends Service {
         asyncInit();
     }
 
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
     private void asyncInit() {
         if (wasAPKUpdated()) {
             try {
@@ -144,41 +137,18 @@ public class NodeJS extends Service {
         }
     }
 
-    public boolean execute(String action, JSONArray data, CallbackContext callbackContext) throws JSONException {
-        if (action.equals("sendMessageToNode")) {
-            String channelName = data.getString(0);
-            String msg = data.getString(1);
-            this.sendMessageToNode(channelName, msg);
-        } else if (action.equals("setAllChannelsListener")) {
-            this.setAllChannelsListener(callbackContext);
-        } else if (action.equals("startEngine")) {
-            String target = data.getString(0);
-            JSONObject startOptions = data.getJSONObject(1);
-            this.startEngine(target, startOptions, callbackContext);
-        } else if (action.equals("startEngineWithScript")) {
-            String scriptBody = data.getString(0);
-            JSONObject startOptions = data.getJSONObject(1);
-            this.startEngineWithScript(scriptBody, startOptions, callbackContext);
-        } else {
-            Log.e(LOGTAG, "Invalid action: " + action);
-            return false;
-        }
-
-        return true;
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+//        Log.d(LOGTAG, "onDestroy");
+//        if (nodeIsReadyForAppEvents) {
+//            sendMessageToNodeChannel(SYSTEM_CHANNEL, "destroy");
+//        }
     }
 
 //    @Override
-//    public void onPause(boolean multitasking) {
-//        super.onPause(multitasking);
-//        Log.d(LOGTAG, "onPause");
-//        if (nodeIsReadyForAppEvents) {
-//            sendMessageToNodeChannel(SYSTEM_CHANNEL, "pause");
-//        }
-//    }
-//
-//    @Override
-//    public void onResume(boolean multitasking) {
-//        super.onResume(multitasking);
+//    public void onStartCommand() {
+//        super.onStartCommand();
 //        Log.d(LOGTAG, "onResume");
 //        if (nodeIsReadyForAppEvents) {
 //            sendMessageToNodeChannel(SYSTEM_CHANNEL, "resume");
@@ -200,52 +170,29 @@ public class NodeJS extends Service {
         }
     }
 
-//    public static void sendMessageToCordova(String channelName, String msg) {
-//        final String channel = new String(channelName);
-//        final String message = new String(msg);
-//        NodeJS.activity.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                JSONArray args = new JSONArray();
-//                args.put(channel);
-//                args.put(message);
-//                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, args);
-//                pluginResult.setKeepCallback(true);
-//                NodeJS.allChannelListenerContext.sendPluginResult(pluginResult);
-//            }
-//        });
-//    }
 
     public static void handleAppChannelMessage(String msg) {
+        Log.i(LOGTAG, msg);
         if (msg.equals("ready-for-app-events")) {
             nodeIsReadyForAppEvents=true;
         }
     }
 
-    private boolean setAllChannelsListener(final CallbackContext callbackContext) {
-        Log.v(LOGTAG, "setAllChannelsListener");
-        NodeJS.allChannelListenerContext = callbackContext;
-        return true;
-    }
-
-    private void startEngine(final String scriptFileName, final JSONObject startOptions,
-                             final CallbackContext callbackContext) {
+    public void startEngine(final String scriptFileName) {
         Log.d(LOGTAG, "StartEngine: " + scriptFileName);
 
         if (NodeJS.engineAlreadyStarted == true) {
-            sendResult(false, "Engine already started", callbackContext);
+            Log.i(LOGTAG, "Engine already started");
             return;
         }
 
         if (scriptFileName == null || scriptFileName.isEmpty()) {
-            sendResult(false, "Invalid filename", callbackContext);
+            Log.i(LOGTAG, "Invalid filename");
             return;
         }
 
         final String scriptFileAbsolutePath = new String(NodeJS.nodeAppRootAbsolutePath + "/" + scriptFileName);
         Log.d(LOGTAG, "Script absolute path: " + scriptFileAbsolutePath);
-
-        final boolean redirectOutputToLogcat = getOptionRedirectOutputToLogcat(startOptions);
 
         new Thread(new Runnable() {
             @Override
@@ -253,48 +200,45 @@ public class NodeJS extends Service {
                 waitForInit();
 
                 if (ioe != null) {
-                    sendResult(false, "Initialization failed: " + ioe.toString(), callbackContext);
+                    Log.i(LOGTAG, "Initialization failed: " + ioe.toString());
                     return;
                 }
 
                 synchronized(onlyOneEngineStartingAtATimeLock) {
                     if (NodeJS.engineAlreadyStarted == true) {
-                        sendResult(false, "Engine already started", callbackContext);
+                        Log.i(LOGTAG, "Engine already started");
                         return;
                     }
                     File fileObject = new File(scriptFileAbsolutePath);
                     if (!fileObject.exists()) {
-                        sendResult(false, "File not found", callbackContext);
+                        Log.i(LOGTAG, "File not found");
                         return;
                     }
                     NodeJS.engineAlreadyStarted = true;
                 }
 
-                sendResult(true, "", callbackContext);
+                Log.i(LOGTAG, "Engine Starting");
 
-                startNodeWithArguments(
-                        new String[]{"node", scriptFileAbsolutePath},
-                        NodeJS.nodePath,
-                        redirectOutputToLogcat);
+                startNodeWithArguments(new String[]{"node", scriptFileAbsolutePath},
+                        NodeJS.nodePath, true);
             }
         }).start();
     }
 
-    private void startEngineWithScript(final String scriptBody, final JSONObject startOptions,
-                                       final CallbackContext callbackContext) {
+    private void startEngineWithScript(final String scriptBody) {
         Log.d(LOGTAG, "StartEngineWithScript: " + scriptBody);
 
         if (NodeJS.engineAlreadyStarted == true) {
-            sendResult(false, "Engine already started", callbackContext);
+            Log.i(LOGTAG, "Engine already started");
             return;
         }
 
         if (scriptBody == null || scriptBody.isEmpty()) {
-            sendResult(false, "Script is empty", callbackContext);
+            Log.i(LOGTAG, "Script is empty");
             return;
         }
 
-        final boolean redirectOutputToLogcat = getOptionRedirectOutputToLogcat(startOptions);
+        final boolean redirectOutputToLogcat = true;
         final String scriptBodyToRun = new String(scriptBody);
 
         new Thread(new Runnable() {
@@ -303,53 +247,24 @@ public class NodeJS extends Service {
                 waitForInit();
 
                 if (ioe != null) {
-                    sendResult(false, "Initialization failed: " + ioe.toString(), callbackContext);
+                    Log.i(LOGTAG, "Initialization failed: " + ioe.toString());
                     return;
                 }
 
                 synchronized(onlyOneEngineStartingAtATimeLock) {
                     if (NodeJS.engineAlreadyStarted == true) {
-                        sendResult(false, "Engine already started", callbackContext);
+                        Log.i(LOGTAG, "Engine already started");
                         return;
                     }
                     NodeJS.engineAlreadyStarted = true;
                 }
 
-                sendResult(true, "", callbackContext);
+                Log.i(LOGTAG, "Engine Started");
 
                 startNodeWithArguments(
                         new String[]{"node", "-e", scriptBodyToRun},
                         NodeJS.nodePath,
                         redirectOutputToLogcat);
-            }
-        }).start();
-    }
-
-    /**
-     * Sends a callback result to Cordova
-     */
-    private void sendResult(boolean result, final String errorMsg, final CallbackContext callbackContext) {
-        if (result) {
-            sendSuccess(callbackContext);
-        } else {
-            sendFailure(errorMsg, callbackContext);
-        }
-    }
-
-    private void sendSuccess(final CallbackContext callbackContext) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                callbackContext.success();
-            }
-        }).start();
-    }
-
-    private void sendFailure(final String errorMsg, final CallbackContext callbackContext) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                callbackContext.error(errorMsg);
             }
         }).start();
     }
