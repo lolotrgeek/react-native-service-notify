@@ -55,6 +55,10 @@ native.app.on('resume', () => {
   native.channel.post('engine', 'resumed');
 });
 
+native.app.on('alive', () => {
+  console.log('[node] app alive.');
+});
+
 
 ; (function () {
   const config = { port: process.env.OPENSHIFT_NODEJS_PORT || process.env.VCAP_APP_PORT || process.env.PORT || process.argv[2] || 8765 };

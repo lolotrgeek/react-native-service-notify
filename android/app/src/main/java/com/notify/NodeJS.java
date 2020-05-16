@@ -6,6 +6,7 @@
 
 package com.notify;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
@@ -140,19 +141,23 @@ public class NodeJS extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        Log.d(LOGTAG, "onDestroy");
-//        if (nodeIsReadyForAppEvents) {
-//            sendMessageToNodeChannel(SYSTEM_CHANNEL, "destroy");
-//        }
     }
 
+    public void systemMessageToNode() {
+        if (nodeIsReadyForAppEvents) {
+            Log.d(LOGTAG, "System msg to Node");
+            sendMessageToNodeChannel(SYSTEM_CHANNEL, "alive");
+        }
+    }
 
-    public void sendMessageToNode(String event, String payload) {
+    public void sendMessageToNode(String event, String data) {
         waitForInit();
         JSONObject message = new JSONObject();
+        JSONArray payload = new JSONArray();
         try {
+            payload.put(data);
             message.put("event", event);
-            message.put("payload", payload);
+            message.put("payload", payload.toString());
         } catch (JSONException e) {
             Log.e(LOGTAG, e.getMessage());
         }

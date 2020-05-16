@@ -97,6 +97,7 @@ public class DataService extends NodeJS {
         Log.i(TAG, "Starting Listener...");
         super.startEngine("main.js");
         super.sendMessageToNode("message", "Hello!");
+        super.systemMessageToNode();
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
