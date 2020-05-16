@@ -76,7 +76,7 @@ class ChannelSuper extends EventEmitter {
  * JavaScript object supported by 'JSON.stringify()'.
  * Sending functions is not currently supported.
  * Includes the previously available 'send' method for 'message' events.
- *  a messages is sent as stringified JSON `{event: string, payload: string }`
+ * Messages sent as stringified JSON: `{event: '', payload: [] }`
  */
 class EventChannel extends ChannelSuper {
   post(event, ...msg) {

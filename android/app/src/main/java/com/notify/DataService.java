@@ -12,7 +12,7 @@ import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.os.Build;
 import android.util.Log;
-
+import android.database.sqlite.SQLiteDatabase;
 
 import java.net.URL;
 import java.io.BufferedReader;
