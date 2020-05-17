@@ -31,6 +31,7 @@ import static com.notify.node_sqlite3.SQLite3Shim.CODES.SQLITE_OK;
 public class SQLite3Shim {
 
     static class JNIReturnObject {
+
         JNIReturnObject(CODES code) {
             this.status = code.errno;
             this.reference = null;
