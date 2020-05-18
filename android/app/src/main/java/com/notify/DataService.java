@@ -2,6 +2,7 @@ package com.notify;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.IBinder;
 
 import android.app.Notification;
@@ -19,6 +20,8 @@ import org.json.JSONObject;
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+
+import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
 
 public class DataService extends NodeJS {
@@ -95,16 +98,20 @@ public class DataService extends NodeJS {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void handleIncomingMessages(String msg) {
+
         try {
             JSONObject obj = new JSONObject(msg);
             Log.d(TAG, obj.toString());
             Log.d(TAG, obj.get("event").toString());
-            
+
             JSONObject response = new JSONObject();
             response.put("err", null);
 
             if(obj.get("event").toString() == "sqliteDatabase") {
                 Log.i(TAG, "sending response" + response.toString());
+
+                SQLiteDatabase mydatabase = openOrCreateDatabase("testDB",MODE_PRIVATE,null);
+
                 super.sendMessageToNode("sqliteDatabase", response.toString());
             }
 
