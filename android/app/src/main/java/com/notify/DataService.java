@@ -13,6 +13,9 @@ import android.app.NotificationChannel;
 import android.os.Build;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -91,14 +94,39 @@ public class DataService extends NodeJS {
     }
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
-    public void handleIncomingMessage(String msg) {
-        Log.i(TAG, msg);
+    public void handleIncomingMessages(String msg) {
+        try {
+            JSONObject obj = new JSONObject(msg);
+            Log.d(TAG, obj.toString());
+            Log.d(TAG, obj.get("event").toString());
+            
+            JSONObject response = new JSONObject();
+            response.put("err", null);
+
+            if(obj.get("event").toString() == "sqliteDatabase") {
+                Log.i(TAG, "sending response" + response.toString());
+                super.sendMessageToNode("sqliteDatabase", response.toString());
+            }
+
+            if(obj.get("event").toString() == "sqliteRun") {
+                Log.i(TAG, "sending response" + response.toString());
+                super.sendMessageToNode("sqliteRun", response.toString());
+            }
+            if(obj.get("event").toString() == "sqliteAll") {
+                JSONArray rows = new JSONArray();
+                rows.put("fake row");
+                response.put("rows", rows);
+                Log.i(TAG, "sending response" + response.toString());
+                super.sendMessageToNode("sqliteAll", response.toString());
+            }
+        } catch (Throwable t) {
+            Log.e("My App", "Could not parse malformed JSON: \"" + msg + "\"");
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void init() {
-        super.startEngine("main.js");
-        super.sendMessageToNode("message", "Hello!");
+        super.startEngine("data.js");
         super.systemMessageToNode();
 
     }

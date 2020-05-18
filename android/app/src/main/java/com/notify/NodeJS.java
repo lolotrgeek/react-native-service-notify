@@ -186,13 +186,13 @@ public class NodeJS extends Service {
     }
 
     public static void handleAppChannelMessage(String msg) {
-        instance.handleIncomingMessage(msg);
+        instance.handleIncomingMessages(msg);
         if (msg.equals("ready-for-app-events")) {
             nodeIsReadyForAppEvents=true;
         }
     }
 
-    public void handleIncomingMessage( String msg) {}
+    public void handleIncomingMessages( String msg) {}
 
     public void startEngine(final String scriptFileName) {
         Log.d(LOGTAG, "StartEngine: " + scriptFileName);

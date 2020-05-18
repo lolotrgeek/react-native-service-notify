@@ -5,6 +5,12 @@ const native = require('./native-bridge');
 native.channel.post('started', 'sqlite3.js loaded')
 
 class Database {
+    /**
+     * 
+     * @param {string} filename 
+     * @param {string} mode (optional): One or more of `OPEN_READONLY`, `OPEN_READWRITE`and `OPEN_CREATE`. The default value is `OPEN_READWRITE | OPEN_CREATE`.
+     * @param {*} callback (Optional): called when the database was opened successfully or when an error occurred. 
+     */
     constructor(filename, mode, callback) {
         this.filename = filename
         this.mode = mode ? mode : ''
@@ -56,5 +62,6 @@ class Database {
     }
 }
 module.exports = {
-    Database: Database
+    Database: Database,
+    verbose: () => {}
 }
