@@ -35,6 +35,7 @@ public class NodeJS extends Service {
 
     private static Context context = null;
     private static AssetManager assetManager = null;
+    private static NodeJS instance;
 
     private static String filesDir;
     private static final String PROJECT_ROOT = "nodejs-project";
@@ -80,10 +81,14 @@ public class NodeJS extends Service {
     public native void sendMessageToNodeChannel(String channelName, String msg);
     public native void registerNodeDataDirPath(String dataDir);
     public native String getCurrentABIName();
+    public static NodeJS getInstance() {
+        return instance;
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onCreate() {
+        instance = this;
         super.onCreate();
         Log.d(LOGTAG, "Node Service Initialize");
 
@@ -181,11 +186,13 @@ public class NodeJS extends Service {
     }
 
     public static void handleAppChannelMessage(String msg) {
-        Log.i(LOGTAG, msg);
+        instance.handleIncomingMessage(msg);
         if (msg.equals("ready-for-app-events")) {
             nodeIsReadyForAppEvents=true;
         }
     }
+
+    public void handleIncomingMessage( String msg) {}
 
     public void startEngine(final String scriptFileName) {
         Log.d(LOGTAG, "StartEngine: " + scriptFileName);

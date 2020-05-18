@@ -12,7 +12,6 @@ import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.os.Build;
 import android.util.Log;
-import android.database.sqlite.SQLiteDatabase;
 
 import java.net.URL;
 import java.io.BufferedReader;
@@ -90,14 +89,25 @@ public class DataService extends NodeJS {
             notificationManager.createNotificationChannel(channel);
         }
     }
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void handleIncomingMessage(String msg) {
+        Log.i(TAG, msg);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void init() {
+        super.startEngine("main.js");
+        super.sendMessageToNode("message", "Hello!");
+        super.systemMessageToNode();
+
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Starting Listener...");
-        super.startEngine("main.js");
-        super.sendMessageToNode("message", "Hello!");
-        super.systemMessageToNode();
+        init();
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
