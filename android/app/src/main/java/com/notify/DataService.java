@@ -9,6 +9,7 @@ import android.app.Notification;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.os.Build;
@@ -19,22 +20,24 @@ import com.notify.node_sqlite3.SQLite3Bindings;
 import com.notify.node_sqlite3.SQLite3Helper;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.sql.Array;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
 
 public class DataService extends NodeJS {
     private static final int SERVICE_NOTIFICATION_ID = 54321;
     private static final String CHANNEL_ID = "DATATASK";
     private static String TAG = "DataService";
+
+    public SQLite3Bindings db;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -46,22 +49,23 @@ public class DataService extends NodeJS {
     public IBinder onBind(Intent intent) {
         return null;
     }
-    public boolean _startedNodeAlready=false;
+
+    public boolean _startedNodeAlready = false;
 
     public Runnable request = new Runnable() {
         @Override
         public void run() {
             int count = 0;
             int maxTries = 10;
-            String nodeResponse="";
-            while(true) {
+            String nodeResponse = "";
+            while (true) {
                 try {
                     URL localNodeServer = new URL("http://localhost:3000/");
                     BufferedReader in = new BufferedReader(
                             new InputStreamReader(localNodeServer.openStream()));
                     String inputLine;
                     while ((inputLine = in.readLine()) != null)
-                        nodeResponse=nodeResponse+inputLine;
+                        nodeResponse = nodeResponse + inputLine;
                     in.close();
                     Log.i(TAG, nodeResponse);
                     break;
@@ -102,71 +106,119 @@ public class DataService extends NodeJS {
             notificationManager.createNotificationChannel(channel);
         }
     }
+
+    public JSONObject msgParse(String msg) {
+        JSONObject obj = null;
+        try {
+            Log.d(TAG, "Parsing Msg...");
+            obj = new JSONObject(msg);
+            Log.d(TAG, obj.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        return obj;
+    }
+
+    public String eventParse(JSONObject obj) {
+        String event = null;
+        try {
+            Log.d(TAG, "Parsing Event...");
+            event = obj.get("event").toString();
+            Log.d(TAG, event);
+
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+        return event;
+    }
+
+    public JSONObject payloadParse(JSONObject obj) {
+        JSONObject request = null;
+        try {
+            Log.d(TAG, "Parsing Payload...");
+
+            JSONArray payload = new JSONArray(obj.get("payload").toString());
+            Log.d(TAG, payload.toString());
+            request = new JSONObject(payload.get(0).toString());
+            Log.d(TAG, request.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+
+        }
+        return request;
+    }
+
+    public String[] paramsParse (JSONObject request) {
+        String[]  params = null;
+        try {
+            JSONArray jsonparams = new JSONArray(request.get("params").toString());
+            // map JSONArray to list
+            List<String> list = new ArrayList<String>();
+            for (int i = 0; i < jsonparams.length(); i++) {
+                list.add(jsonparams.getString(i));
+            }
+            // convert list to String[]
+            params = list.toArray(new String[list.size()]);
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+
+        }
+        return params;
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void handleIncomingMessages(String msg) {
-
         try {
-            SQLite3Bindings bindings = new SQLite3Bindings();
-            JSONObject obj = new JSONObject(msg);
-            Log.d(TAG, obj.toString());
-            Log.d(TAG, obj.get("event").toString());
+            JSONObject obj = msgParse(msg);
+            String event = eventParse(obj);
+            JSONObject request = payloadParse(obj);
 
             JSONObject response = new JSONObject();
             response.put("err", null);
 
-            if(obj.get("event").toString() == "sqliteDatabase") {
-                JSONObject payload = obj.getJSONObject("payload");
-                String filename = payload.get("filename").toString();
-                String mode = payload.get("mode").toString();
-                String db = bindings.Database(filename);
-                if (db != "success") {
-                    response.put("err", db);
+            if (event.equals("sqliteDatabase")) {
+                Log.d(TAG, "Parsing Database request...");
+                String filename = request.get("filename").toString();
+                Log.d(TAG, filename);
+                String mode = request.get("mode").toString();
+                Log.d(TAG, mode);
+                try {
+                    db = new SQLite3Bindings(getApplicationContext(), filename, 1);
+                    Log.i(TAG, "sending response" + response.toString());
+                    super.sendMessageToNode("sqliteDatabase", response.toString());
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
                 }
-                Log.i(TAG, "sending response" + response.toString());
-                super.sendMessageToNode("sqliteDatabase", response.toString());
             }
 
-            if(obj.get("event").toString() == "sqliteRun") {
-                JSONObject payload = obj.getJSONObject("payload");
-                String query = payload.get("sql").toString();
-                JSONArray jsonparams = payload.getJSONArray("params");
-                // map JSONArray to list
-                List<String> list = new ArrayList<String>();
-                for(int i = 0; i < jsonparams.length(); i++){
-                    list.add(jsonparams.getString(i));
-                }
-                // convert list to String[]
-                String[] params = list.toArray(new String[list.size()]);
-                String transaction = bindings.run(query, params);
-                if (transaction != "success") {
+            else if (event.equals("sqliteRun")) {
+                String query = request.get("sql").toString();
+                String[] params = paramsParse(request);
+                String transaction = db.run(query, params);
+                if (!transaction.equals("success")) {
                     response.put("err", transaction);
                 }
                 Log.i(TAG, "sending response" + response.toString());
                 super.sendMessageToNode("sqliteRun", response.toString());
             }
-            if(obj.get("event").toString() == "sqliteAll") {
-                JSONObject payload = obj.getJSONObject("payload");
-                String query = payload.get("sql").toString();
-                JSONArray jsonparams = payload.getJSONArray("params");
-                // map JSONArray to list
-                List<String> list = new ArrayList<String>();
-                for(int i = 0; i < jsonparams.length(); i++){
-                    list.add(jsonparams.getString(i));
-                }
-                // convert list to String[]
-                String[] params = list.toArray(new String[list.size()]);
-                String transaction = bindings.all(query, params);
+            else if (event.equals("sqliteAll")) {
+                String query = request.get("sql").toString();
+                String[] params = paramsParse(request);
+                String transaction = db.all(query, params);
                 String errCheck = transaction.substring(0, 3);
-                if (errCheck == "err") {
+                if (errCheck.equals("err")) {
                     response.put("err", transaction);
                 }
                 response.put("rows", transaction);
                 Log.i(TAG, "sending response" + response.toString());
                 super.sendMessageToNode("sqliteAll", response.toString());
             }
-        } catch (Throwable t) {
-            Log.e("My App", "Could not parse malformed JSON: \"" + msg + "\"");
+            else {
+                Log.d(TAG, "Invalid Msg");
+            }
+        }catch (Throwable t) {
+            Log.e(TAG, "Could not parse malformed JSON: \"" + msg + "\"");
         }
     }
 

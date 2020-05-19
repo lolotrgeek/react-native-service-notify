@@ -23,7 +23,6 @@ class Database {
         native.channel.on('sqliteDatabase', msg => {
             let response = JSON.parse(msg)
             callback(response.err) // if null, was success
-
         })
     }
 
