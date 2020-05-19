@@ -1,12 +1,15 @@
 package com.notify.node_sqlite3;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 import android.util.Log;
+
+import org.json.JSONArray;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,49 +19,50 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class SQLite3Helper extends SQLiteOpenHelper {
-    public static final String TAG = "SQLite3Helper";
-
-    public static String TABLE_NAME = "";
-    public static int DATABASE_VERSION = 1;
-    public static String DATABASE_NAME = "";
-
-
-    public SQLite3Helper(Context context, String filename, String tablename, int version) {
-        super(context, filename, null, version);
-        DATABASE_NAME = filename;
-        DATABASE_VERSION = version;
-        TABLE_NAME = tablename;
-    }
-
-    public void onCreate(SQLiteDatabase db) {
-    }
-
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-    }
-    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        onUpgrade(db, oldVersion, newVersion);
-    }
-}
-
 public class SQLite3Bindings {
     public static final String TAG = "SQLite3Bindings";
     public SQLiteDatabase db = null;
     public SQLite3Helper dbHelper = null;
     public Context context = null;
 
-
-    public void Database(String filename, String tablename) {
-        dbHelper = new SQLite3Helper(context.getApplicationContext(), filename, tablename, 1);
-        db = dbHelper.getWritableDatabase();
+    public String Database(String filename) {
+        try {
+            dbHelper = new SQLite3Helper(context.getApplicationContext(), filename, 1);
+            db = dbHelper.getWritableDatabase();
+            return "success";
+        } catch(Exception e) {
+            Log.e(TAG, e.getMessage());
+            return e.getMessage();
+        }
     }
 
-    public void run(String query, String[] params) {
-        db.rawQuery(query, params);
+    public String run(String query, String[] params) {
+        try {
+            db.rawQuery(query, params);
+            return "success";
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+            return e.getMessage();
+        }
     }
 
-    public void all(String query, String[] params) {
-        db.rawQuery(query, params);
+    public String all(String query, String[] params) {
+        try {
+            JSONArray rows = new JSONArray();
+            Cursor cursor = db.rawQuery(query, params);
+            cursor.moveToFirst();
+            String[] columns = cursor.getColumnNames();
+            for (String column : columns) {
+                String result = cursor.getString(cursor.getColumnIndex(column));
+                rows.put(result);
+                cursor.moveToLast();
+            }
+            cursor.close();
+            return rows.toString();
+        } catch (Exception e) {
+            String err = "err " + e.getMessage();
+            Log.e(TAG, e.getMessage());
+            return e.getMessage();
+        }
     }
 }

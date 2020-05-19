@@ -14,12 +14,19 @@ import android.app.NotificationChannel;
 import android.os.Build;
 import android.util.Log;
 
+import com.notify.node_sqlite3.SQLite3Bindings;
+import com.notify.node_sqlite3.SQLite3Bindings;
+import com.notify.node_sqlite3.SQLite3Helper;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.database.sqlite.SQLiteDatabase.openDatabase;
 
@@ -100,6 +107,7 @@ public class DataService extends NodeJS {
     public void handleIncomingMessages(String msg) {
 
         try {
+            SQLite3Bindings bindings = new SQLite3Bindings();
             JSONObject obj = new JSONObject(msg);
             Log.d(TAG, obj.toString());
             Log.d(TAG, obj.get("event").toString());
@@ -108,21 +116,52 @@ public class DataService extends NodeJS {
             response.put("err", null);
 
             if(obj.get("event").toString() == "sqliteDatabase") {
+                JSONObject payload = obj.getJSONObject("payload");
+                String filename = payload.get("filename").toString();
+                String mode = payload.get("mode").toString();
+                String db = bindings.Database(filename);
+                if (db != "success") {
+                    response.put("err", db);
+                }
                 Log.i(TAG, "sending response" + response.toString());
-
-                SQLiteDatabase mydatabase = openOrCreateDatabase("testDB",MODE_PRIVATE,null);
-
                 super.sendMessageToNode("sqliteDatabase", response.toString());
             }
 
             if(obj.get("event").toString() == "sqliteRun") {
+                JSONObject payload = obj.getJSONObject("payload");
+                String query = payload.get("sql").toString();
+                JSONArray jsonparams = payload.getJSONArray("params");
+                // map JSONArray to list
+                List<String> list = new ArrayList<String>();
+                for(int i = 0; i < jsonparams.length(); i++){
+                    list.add(jsonparams.getString(i));
+                }
+                // convert list to String[]
+                String[] params = list.toArray(new String[list.size()]);
+                String transaction = bindings.run(query, params);
+                if (transaction != "success") {
+                    response.put("err", transaction);
+                }
                 Log.i(TAG, "sending response" + response.toString());
                 super.sendMessageToNode("sqliteRun", response.toString());
             }
             if(obj.get("event").toString() == "sqliteAll") {
-                JSONArray rows = new JSONArray();
-                rows.put("fake row");
-                response.put("rows", rows);
+                JSONObject payload = obj.getJSONObject("payload");
+                String query = payload.get("sql").toString();
+                JSONArray jsonparams = payload.getJSONArray("params");
+                // map JSONArray to list
+                List<String> list = new ArrayList<String>();
+                for(int i = 0; i < jsonparams.length(); i++){
+                    list.add(jsonparams.getString(i));
+                }
+                // convert list to String[]
+                String[] params = list.toArray(new String[list.size()]);
+                String transaction = bindings.all(query, params);
+                String errCheck = transaction.substring(0, 3);
+                if (errCheck == "err") {
+                    response.put("err", transaction);
+                }
+                response.put("rows", transaction);
                 Log.i(TAG, "sending response" + response.toString());
                 super.sendMessageToNode("sqliteAll", response.toString());
             }

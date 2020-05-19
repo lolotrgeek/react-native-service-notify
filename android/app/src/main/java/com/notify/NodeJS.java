@@ -78,9 +78,13 @@ public class NodeJS extends Service {
     }
 
     public native Integer startNodeWithArguments(String[] arguments, String nodePath, boolean redirectOutputToLogcat);
+
     public native void sendMessageToNodeChannel(String channelName, String msg);
+
     public native void registerNodeDataDirPath(String dataDir);
+
     public native String getCurrentABIName();
+
     public static NodeJS getInstance() {
         return instance;
     }
@@ -97,7 +101,7 @@ public class NodeJS extends Service {
 
         // Sets the TMPDIR environment to the cacheDir, to be used in Node as os.tmpdir
         try {
-            Os.setenv("TMPDIR", context.getCacheDir().getAbsolutePath(),true);
+            Os.setenv("TMPDIR", context.getCacheDir().getAbsolutePath(), true);
         } catch (ErrnoException e) {
             e.printStackTrace();
         }
@@ -166,7 +170,7 @@ public class NodeJS extends Service {
         } catch (JSONException e) {
             Log.e(LOGTAG, e.getMessage());
         }
-        if(nodeIsReadyForAppEvents) {
+        if (nodeIsReadyForAppEvents) {
             Log.i(LOGTAG, "Sending - " + message.toString());
             sendMessageToNodeChannel(EVENT_CHANNEL, message.toString());
         } else {
@@ -188,11 +192,12 @@ public class NodeJS extends Service {
     public static void handleAppChannelMessage(String msg) {
         instance.handleIncomingMessages(msg);
         if (msg.equals("ready-for-app-events")) {
-            nodeIsReadyForAppEvents=true;
+            nodeIsReadyForAppEvents = true;
         }
     }
 
-    public void handleIncomingMessages( String msg) {}
+    public void handleIncomingMessages(String msg) {
+    }
 
     public void startEngine(final String scriptFileName) {
         Log.d(LOGTAG, "StartEngine: " + scriptFileName);
@@ -220,7 +225,7 @@ public class NodeJS extends Service {
                     return;
                 }
 
-                synchronized(onlyOneEngineStartingAtATimeLock) {
+                synchronized (onlyOneEngineStartingAtATimeLock) {
                     if (NodeJS.engineAlreadyStarted == true) {
                         Log.i(LOGTAG, "Engine already started");
                         return;
@@ -239,7 +244,7 @@ public class NodeJS extends Service {
                         NodeJS.nodePath, true);
             }
         }).start();
-        nodeIsReadyForAppEvents=true;
+        nodeIsReadyForAppEvents = true;
     }
 
     public void startEngineWithScript(final String scriptBody) {
@@ -268,7 +273,7 @@ public class NodeJS extends Service {
                     return;
                 }
 
-                synchronized(onlyOneEngineStartingAtATimeLock) {
+                synchronized (onlyOneEngineStartingAtATimeLock) {
                     if (NodeJS.engineAlreadyStarted == true) {
                         Log.i(LOGTAG, "Engine already started");
                         return;
@@ -398,7 +403,7 @@ public class NodeJS extends Service {
         saveLastUpdateTime();
     }
 
-    private ArrayList<String> readFileFromAssets(String filename){
+    private ArrayList<String> readFileFromAssets(String filename) {
         ArrayList lines = new ArrayList();
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(context.getAssets().open(filename)));
@@ -488,7 +493,7 @@ public class NodeJS extends Service {
         if (startOptions.has(OPTION_NAME) == true) {
             try {
                 result = startOptions.getBoolean(OPTION_NAME);
-            } catch(JSONException e) {
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
