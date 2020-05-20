@@ -36,7 +36,7 @@ public class SQLite3Bindings extends SQLite3Helper {
      * NOTE: no public static accessor to db (runner) map since it would not work with db threading.
      * FUTURE put DBRunner into a public class that can provide external accessor.
      */
-    static ConcurrentHashMap<String, DBRunner> dbrmap = new ConcurrentHashMap<String, DBRunner>();
+//    static ConcurrentHashMap<String, DBRunner> dbrmap = new ConcurrentHashMap<String, DBRunner>();
 
         public SQLite3Bindings(Context context, String filename, int version) {
             super(context, filename, version);
@@ -89,26 +89,26 @@ public class SQLite3Bindings extends SQLite3Helper {
             return result;
         }
 
-    class DBRunner implements Runnable {
-        final String filename;
-        final int openFlags;
-        private String assetFilename;
-
-        public DBRunner(String filename)
-
-                throws Exception {
-
-        }
-
-        public void run() { // run the service
-            try {
-                for (;;) {
-
-                }
-            } catch (Exception ex) {
-                db.close();
-                threadPool.shutdown();
-            }
-        }
-    }
+//    class DBRunner implements Runnable {
+//        final String filename;
+//        final int openFlags;
+//        private String assetFilename;
+//
+//        public DBRunner(String filename)
+//
+//                throws Exception {
+//
+//        }
+//
+//        public void run() { // run the service
+//            try {
+//                for (;;) {
+//
+//                }
+//            } catch (Exception ex) {
+//                db.close();
+//                threadPool.shutdown();
+//            }
+//        }
+//    }
     }

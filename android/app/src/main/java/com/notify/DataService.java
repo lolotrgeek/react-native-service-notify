@@ -16,8 +16,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.notify.node_sqlite3.SQLite3Bindings;
-import com.notify.node_sqlite3.SQLite3Bindings;
-import com.notify.node_sqlite3.SQLite3Helper;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
