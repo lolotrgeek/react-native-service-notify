@@ -30,6 +30,9 @@ import java.sql.Array;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class DataService extends NodeJS {
@@ -37,6 +40,10 @@ public class DataService extends NodeJS {
     private static final String CHANNEL_ID = "DATATASK";
     private static String TAG = "DataService";
 
+
+    /**
+     * Bound Database Object
+     */
     public SQLite3Bindings db;
 
     // Used to load the 'native-lib' library on application startup.
@@ -90,6 +97,7 @@ public class DataService extends NodeJS {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        db.close();
         Log.i(TAG, "Killing Listener...");
     }
 
@@ -169,6 +177,7 @@ public class DataService extends NodeJS {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void handleIncomingMessages(String msg) {
+
         try {
             JSONObject obj = msgParse(msg);
             String event = eventParse(obj);
@@ -205,19 +214,15 @@ public class DataService extends NodeJS {
             else if (event.equals("sqliteAll")) {
                 String query = request.get("sql").toString();
                 String[] params = paramsParse(request);
-                String transaction = db.all(query, params);
-                String errCheck = transaction.substring(0, 3);
-                if (errCheck.equals("err")) {
-                    response.put("err", transaction);
-                }
-                response.put("rows", transaction);
+                JSONObject transaction = db.all(query, params);
+                response = transaction;
                 Log.i(TAG, "sending response" + response.toString());
                 super.sendMessageToNode("sqliteAll", response.toString());
             }
             else {
                 Log.d(TAG, "Invalid Msg");
             }
-        }catch (Throwable t) {
+        } catch (Throwable t) {
             Log.e(TAG, "Could not parse malformed JSON: \"" + msg + "\"");
         }
     }
