@@ -55,38 +55,40 @@ public class DataService extends NodeJS {
 
     public boolean _startedNodeAlready = false;
 
-    public Runnable request = new Runnable() {
-        @Override
-        public void run() {
-            int count = 0;
-            int maxTries = 10;
-            String nodeResponse = "";
-            while (true) {
-                try {
-                    URL localNodeServer = new URL("http://localhost:3000/");
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(localNodeServer.openStream()));
-                    String inputLine;
-                    while ((inputLine = in.readLine()) != null)
-                        nodeResponse = nodeResponse + inputLine;
-                    in.close();
-                    Log.i(TAG, nodeResponse);
-                    break;
-                } catch (Exception e) {
-                    if (++count == maxTries) {
-                        Log.e(TAG, e.getMessage());
-                    }
-                }
-            }
-        }
-    };
+//    public Runnable request = new Runnable() {
+//        @Override
+//        public void run() {
+//            int count = 0;
+//            int maxTries = 10;
+//            String nodeResponse = "";
+//            while (true) {
+//                try {
+//                    URL localNodeServer = new URL("http://localhost:3000/");
+//                    BufferedReader in = new BufferedReader(
+//                            new InputStreamReader(localNodeServer.openStream()));
+//                    String inputLine;
+//                    while ((inputLine = in.readLine()) != null)
+//                        nodeResponse = nodeResponse + inputLine;
+//                    in.close();
+//                    Log.i(TAG, nodeResponse);
+//                    break;
+//                } catch (Exception e) {
+//                    if (++count == maxTries) {
+//                        Log.e(TAG, e.getMessage());
+//                    }
+//                }
+//            }
+//        }
+//    };
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onCreate() {
         super.onCreate();
-        new Thread(request).start();
+//        Thread dataThread = new Thread(request);
+//        dataThread.setName("dataThread");
+//        dataThread.start();
     }
 
 //    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -294,7 +296,7 @@ public class DataService extends NodeJS {
             action = DataService.Action.valueOf(actionAsString);
         } catch (IllegalArgumentException e) {
             // shouldn't ever happen
-            Log.e(TAG +"_execute", e.getMessage());
+            Log.e(TAG + "_execute", e.getMessage());
             return false;
         }
 
@@ -302,7 +304,7 @@ public class DataService extends NodeJS {
             return executeAndPossiblyThrow(action, args, event);
         } catch (JSONException e) {
             // TODO: signal JSON problem to JS
-            Log.e(TAG +"_execute_JSON", e.getMessage());
+            Log.e(TAG + "_execute_JSON", e.getMessage());
             return false;
         }
     }
