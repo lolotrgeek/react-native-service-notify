@@ -33,7 +33,7 @@ import org.json.JSONObject;
 /**
  * Android Database helper class
  */
-class SQLiteAndroidDatabase {
+public class SQLiteAndroidDatabase {
     public static final String TAG = "SQLiteAndroidDatabase";
     private static final Pattern FIRST_WORD = Pattern.compile("^[\\s;]*([^\\s;]+)",
             Pattern.CASE_INSENSITIVE);
@@ -88,7 +88,7 @@ class SQLiteAndroidDatabase {
      *
      * @param dbfile The database File specification
      */
-    void open(File dbfile) throws Exception {
+    public void open(File dbfile) throws Exception {
         if (!isPostHoneycomb) {
             Log.v("SQLiteAndroidDatabase",
                     "INTERNAL PLUGIN ERROR: deprecated android.os.Build.VERSION not supported: " +
@@ -104,7 +104,7 @@ class SQLiteAndroidDatabase {
     /**
      * Close a database (in the current thread).
      */
-    void closeDatabaseNow() {
+    public void closeDatabaseNow() {
         if (mydb != null) {
             if (isTransactionActive) {
                 try {
@@ -120,7 +120,7 @@ class SQLiteAndroidDatabase {
         }
     }
 
-    void bugWorkaround() throws Exception {
+    public void bugWorkaround() throws Exception {
         this.closeDatabaseNow();
         this.open(dbFile);
     }
@@ -131,7 +131,7 @@ class SQLiteAndroidDatabase {
      * @param queryarr      Array of query strings
      * @param jsonparamsArr Array of JSON query parameters
      */
-    void executeSqlBatch(String[] queryarr, JSONArray[] jsonparamsArr) {
+    public void executeSqlBatch(String[] queryarr, JSONArray[] jsonparamsArr) {
 
         if (mydb == null) {
             // not allowed - can only happen if someone has closed (and possibly deleted) a database and then re-used the database
