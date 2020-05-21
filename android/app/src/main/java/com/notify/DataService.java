@@ -114,9 +114,8 @@ public class DataService extends NodeJS {
     public JSONObject msgParse(String msg) {
         JSONObject obj = null;
         try {
-            Log.d(TAG, "Parsing Msg...");
             obj = new JSONObject(msg);
-            Log.d(TAG, obj.toString());
+            Log.d(TAG, "Parsing Msg :" + obj.toString());
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -126,9 +125,8 @@ public class DataService extends NodeJS {
     public String eventParse(JSONObject obj) {
         String event = null;
         try {
-            Log.d(TAG, "Parsing Event...");
             event = obj.get("event").toString();
-            Log.d(TAG, event);
+            Log.d(TAG, "Parsing Event: " + event);
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -140,11 +138,8 @@ public class DataService extends NodeJS {
         JSONObject request = null;
         try {
             Log.d(TAG, "Parsing Payload...");
-
             JSONArray payload = new JSONArray(obj.get("payload").toString());
-            Log.d(TAG, payload.toString());
             request = new JSONObject(payload.get(0).toString());
-            Log.d(TAG, request.toString());
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
 
@@ -152,8 +147,34 @@ public class DataService extends NodeJS {
         return request;
     }
 
-    public String[] paramsParse (JSONObject request) {
-        String[]  params = null;
+    public JSONArray argsBuilder(JSONObject request) {
+        JSONArray args = new JSONArray();
+        JSONObject allargs = new JSONObject();
+        JSONObject dbargs = new JSONObject();
+        JSONObject txargs = new JSONObject();
+        JSONArray executes = new JSONArray();
+        try {
+            String dbname = request.get("dbname").toString();
+            JSONObject query = new JSONObject(request.get("query").toString());
+            JSONArray params = new JSONArray(query.get("params").toString());
+            String sql = query.get("sql").toString();
+            txargs.put("sql", sql);
+            txargs.put("params", params);
+            executes.put(txargs);
+            dbargs.put("dbname", dbname);
+            allargs.put("dbargs", dbargs);
+            allargs.put("executes", executes);
+            args.put(allargs);
+            Log.d(TAG, "Building args: " + args.toString());
+            return args;
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+            return null;
+        }
+    }
+
+    public String[] paramsParse(JSONObject request) {
+        String[] params = null;
         try {
             JSONArray jsonparams = new JSONArray(request.get("params").toString());
             // map JSONArray to list
@@ -171,6 +192,17 @@ public class DataService extends NodeJS {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void handleOutgoingMessages(JSONObject response, String event, String err) {
+        try {
+            response.put("err", err);
+            Log.i(TAG, event + "response :" + response.toString());
+            super.sendMessageToNode(event, response.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void handleIncomingMessages(String msg) {
 
@@ -179,47 +211,21 @@ public class DataService extends NodeJS {
             String event = eventParse(obj);
             JSONObject request = payloadParse(obj);
 
-            JSONObject response = new JSONObject();
-            response.put("err", null);
+            JSONArray args = new JSONArray();
 
-            if (event.equals("sqliteDatabase")) {
-                Log.d(TAG, "Parsing Database request...");
-                String filename = request.get("filename").toString();
-                Log.d(TAG, filename);
-                String mode = request.get("mode").toString();
-                Log.d(TAG, mode);
-                JSONArray args = new JSONArray();
-                args.put(request);
-                try {
-                    this.execute("open", args);
-                    Log.i(TAG, "sending response" + response.toString());
-                    super.sendMessageToNode("sqliteDatabase", response.toString());
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            }
-
-            else if (event.equals("sqliteRun")) {
-                String query = request.get("sql").toString();
-//                String[] params = paramsParse(request);
-                JSONArray params = new JSONArray();
-                JSONArray args = new JSONArray();
-                args.put(request);
-                boolean transaction = this.execute("backgroundExecuteSqlBatch", params);
-                    response.put("err", transaction);
-                Log.i(TAG, "sending response" + response.toString());
-                super.sendMessageToNode("sqliteRun", response.toString());
-            }
-            else if (event.equals("sqliteAll")) {
-                String query = request.get("sql").toString();
-                String[] params = paramsParse(request);
-                boolean transaction = this.execute(query, params);
-                response.put("err", transaction);
-                Log.i(TAG, "sending response" + response.toString());
-                super.sendMessageToNode("sqliteAll", response.toString());
-            }
-            else {
-                Log.d(TAG, "Invalid Msg");
+            switch (event) {
+                case "sqliteDatabase":
+                    Log.d(TAG, "Parsing Database request...");
+                    args = args.put(request);
+                    this.execute("open", args, event);
+                    break;
+                case "sqliteRun":
+                case "sqliteAll":
+                    args = argsBuilder(request);
+                    this.execute("backgroundExecuteSqlBatch", args, event);
+                    break;
+                default:
+                    Log.e(TAG, "Invalid Event");
             }
         } catch (Throwable t) {
             Log.e(TAG, "Could not parse malformed JSON: \"" + msg + "\"");
@@ -281,27 +287,28 @@ public class DataService extends NodeJS {
      * @param args           JSONArray of arguments for the plugin.
      * @return Whether the action was valid.
      */
-    public boolean execute(String actionAsString, JSONArray args) {
-
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public boolean execute(String actionAsString, JSONArray args, String event) {
         DataService.Action action;
         try {
             action = DataService.Action.valueOf(actionAsString);
         } catch (IllegalArgumentException e) {
             // shouldn't ever happen
-            Log.e(DataService.class.getSimpleName(), "unexpected error", e);
+            Log.e(TAG +"_execute", e.getMessage());
             return false;
         }
 
         try {
-            return executeAndPossiblyThrow(action, args);
+            return executeAndPossiblyThrow(action, args, event);
         } catch (JSONException e) {
             // TODO: signal JSON problem to JS
-            Log.e(DataService.class.getSimpleName(), "unexpected error", e);
+            Log.e(TAG +"_execute_JSON", e.getMessage());
             return false;
         }
     }
 
-    private boolean executeAndPossiblyThrow(DataService.Action action, JSONArray args)
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private boolean executeAndPossiblyThrow(DataService.Action action, JSONArray args, String event)
             throws JSONException {
 
         boolean status = true;
@@ -318,7 +325,7 @@ public class DataService extends NodeJS {
 
             case open:
                 o = args.getJSONObject(0);
-                dbname = o.getString("filename");
+                dbname = o.getString("dbname");
                 // open database and start reading its queue
                 this.startDatabase(dbname, o);
                 break;
@@ -366,15 +373,15 @@ public class DataService extends NodeJS {
                             r.q.put(q);
                         } catch (Exception e) {
                             Log.e(DataService.class.getSimpleName(), "couldn't add to queue", e);
-                            Log.e(TAG, "INTERNAL PLUGIN ERROR: couldn't add to queue");
+                            handleOutgoingMessages(new JSONObject(), event, e.getMessage());
                         }
                     } else {
                         Log.e(TAG, "INTERNAL PLUGIN ERROR: database not open");
+                        handleOutgoingMessages(new JSONObject(), event, "INTERNAL PLUGIN ERROR: database not open");
                     }
                 }
                 break;
         }
-
         return status;
     }
 
@@ -423,6 +430,7 @@ public class DataService extends NodeJS {
      *
      * @param dbname The name of the database file
      */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private SQLiteAndroidDatabase openDatabase(String dbname, boolean old_impl) throws Exception {
         try {
             // ASSUMPTION: no db (connection/handle) is already stored in the map
@@ -444,11 +452,12 @@ public class DataService extends NodeJS {
 
 //            if (cbc != null) // XXX Android locking/closing BUG workaround
 //                Log.d(TAG,);
-
+            handleOutgoingMessages(new JSONObject(), "sqliteDatabase", null);
             return mydb;
         } catch (Exception e) {
 //            if (cbc != null) // XXX Android locking/closing BUG workaround
             Log.e(TAG, "can't open database " + e);
+            handleOutgoingMessages(new JSONObject(), "sqliteDatabase", e.getMessage());
             throw e;
         }
     }
@@ -458,6 +467,7 @@ public class DataService extends NodeJS {
      *
      * @param dbname The name of the database file
      */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void closeDatabase(String dbname) {
         DataService.DBRunner r = dbrmap.get(dbname);
         if (r != null) {
@@ -466,11 +476,10 @@ public class DataService extends NodeJS {
             } catch (Exception e) {
 
                 Log.e(TAG, "couldn't close database" + e);
-
-                Log.e(DataService.class.getSimpleName(), "couldn't close database", e);
+                handleOutgoingMessages(new JSONObject(), "sqliteDatabase", e.getMessage());
             }
         } else {
-
+            handleOutgoingMessages(new JSONObject(), "sqliteDatabase", null);
             Log.d(TAG, "database closed.");
         }
     }
@@ -552,6 +561,7 @@ public class DataService extends NodeJS {
             this.q = new LinkedBlockingQueue<DataService.DBQuery>();
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         public void run() {
             try {
                 this.mydb = openDatabase(dbname, this.oldImpl);
@@ -567,7 +577,7 @@ public class DataService extends NodeJS {
                 dbq = q.take();
 
                 while (!dbq.stop) {
-                    mydb.executeSqlBatch(dbq.queries, dbq.jsonparams );
+                    mydb.executeSqlBatch(dbq.queries, dbq.jsonparams);
 
                     if (this.bugWorkaround && dbq.queries.length == 1 && dbq.queries[0] == "COMMIT")
                         mydb.bugWorkaround();
