@@ -23,6 +23,7 @@ import java.lang.Number;
 
 import java.util.Locale;
 
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -131,13 +132,13 @@ public class SQLiteAndroidDatabase {
      * @param queryarr      Array of query strings
      * @param jsonparamsArr Array of JSON query parameters
      */
-    public void executeSqlBatch(String[] queryarr, JSONArray[] jsonparamsArr) {
+    public JSONArray executeSqlBatch(String[] queryarr, JSONArray[] jsonparamsArr) {
 
         if (mydb == null) {
             // not allowed - can only happen if someone has closed (and possibly deleted) a database and then re-used the database
             // (internal plugin error)
             Log.e(TAG, "INTERNAL PLUGIN ERROR: database not open");
-            return;
+            return null;
         }
 
         int len = queryarr.length;
@@ -148,6 +149,7 @@ public class SQLiteAndroidDatabase {
         }
 
         Log.d(TAG, batchResults.toString());
+        return batchResults;
     }
 
     private void executeSqlBatchStatement(String query, JSONArray json_params, JSONArray batchResults) {

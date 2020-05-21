@@ -21,6 +21,7 @@ class Database {
         }
         native.channel.post('sqliteDatabase', JSON.stringify(payload))
         native.channel.on('sqliteDatabase', msg => {
+            console.log('[node] MESSAGE received: "%s"', msg);
             let response = JSON.parse(msg)
             callback(response.err) // if null, was success
         })

@@ -9,18 +9,11 @@ package com.notify.node_sqlite3;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
-import java.io.File;
-
-import java.lang.IllegalArgumentException;
 import java.lang.Number;
 
 import java.sql.SQLException;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,17 +42,17 @@ class SQLiteConnectorDatabase extends SQLiteAndroidDatabase {
 
     /**
      * Executes a batch request and sends the results via cbc.
-     *
-     * @param queryarr   Array of query strings
+     *  @param queryarr   Array of query strings
      * @param jsonparams Array of JSON query parameters
+     * @return
      */
     @Override
-    public void executeSqlBatch(String[] queryarr, JSONArray[] jsonparams) {
+    public JSONArray executeSqlBatch(String[] queryarr, JSONArray[] jsonparams) {
 
         if (mydb == null) {
             // not allowed - can only happen if someone has closed (and possibly deleted) a database and then re-used the database
             Log.e(TAG, "database has been closed");
-            return;
+            return null;
         }
 
         int len = queryarr.length;
@@ -135,6 +128,7 @@ class SQLiteConnectorDatabase extends SQLiteAndroidDatabase {
         }
 
         Log.d( TAG, batchResults.toString());
+        return batchResults;
     }
 
     /**

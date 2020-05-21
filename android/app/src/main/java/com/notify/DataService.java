@@ -205,6 +205,23 @@ public class DataService extends NodeJS {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void handleExecuteResponse(String event, String err, JSONArray batchResults) {
+        JSONObject response = new JSONObject();
+        try {
+            JSONObject results = new JSONObject(batchResults.get(0).toString());
+            JSONObject result = new JSONObject(results.get("result").toString());
+            JSONArray rows = new JSONArray();
+            rows.put(result);
+            response.put("rows", rows);
+            response.put("err", err);
+            Log.i(TAG, event + "response :" + response.toString());
+            super.sendMessageToNode(event, response.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void handleIncomingMessages(String msg) {
 
@@ -329,7 +346,7 @@ public class DataService extends NodeJS {
                 o = args.getJSONObject(0);
                 dbname = o.getString("dbname");
                 // open database and start reading its queue
-                this.startDatabase(dbname, o);
+                this.startDatabase(dbname, o, event);
                 break;
 
             case close:
@@ -368,7 +385,7 @@ public class DataService extends NodeJS {
                     }
 
                     // put db query in the queue to be executed in the db thread:
-                    DataService.DBQuery q = new DataService.DBQuery(queries, jsonparams);
+                    DataService.DBQuery q = new DataService.DBQuery(queries, jsonparams, event);
                     DataService.DBRunner r = dbrmap.get(dbname);
                     if (r != null) {
                         try {
@@ -414,14 +431,14 @@ public class DataService extends NodeJS {
     // LOCAL METHODS
     // --------------------------------------------------------------------------
 
-    private void startDatabase(String dbname, JSONObject options) {
+    private void startDatabase(String dbname, JSONObject options, String event) {
         DataService.DBRunner r = dbrmap.get(dbname);
 
         if (r != null) {
             // NO LONGER EXPECTED due to BUG 666 workaround solution:
             Log.e(TAG, "INTERNAL ERROR: database already open for db name: " + dbname);
         } else {
-            r = new DataService.DBRunner(dbname, options);
+            r = new DataService.DBRunner(dbname, options, event);
             dbrmap.put(dbname, r);
             this.threadPool.execute(r);
         }
@@ -545,6 +562,8 @@ public class DataService extends NodeJS {
 
     private class DBRunner implements Runnable {
         final String dbname;
+        final String event;
+        final String err;
         private boolean oldImpl;
         private boolean bugWorkaround;
 
@@ -552,8 +571,10 @@ public class DataService extends NodeJS {
 
         SQLiteAndroidDatabase mydb;
 
-        DBRunner(final String dbname, JSONObject options) {
+        DBRunner(final String dbname, JSONObject options, String event) {
             this.dbname = dbname;
+            this.event = event;
+            this.err = null;
             this.oldImpl = options.has("androidOldDatabaseImplementation");
             Log.v(DataService.class.getSimpleName(), "Android db implementation: built-in android.database.sqlite package");
             this.bugWorkaround = this.oldImpl && options.has("androidBugWorkaround");
@@ -579,12 +600,13 @@ public class DataService extends NodeJS {
                 dbq = q.take();
 
                 while (!dbq.stop) {
-                    mydb.executeSqlBatch(dbq.queries, dbq.jsonparams);
-
+                    JSONArray batchResults = mydb.executeSqlBatch(dbq.queries, dbq.jsonparams);
+                    handleExecuteResponse(event, err, batchResults);
                     if (this.bugWorkaround && dbq.queries.length == 1 && dbq.queries[0] == "COMMIT")
                         mydb.bugWorkaround();
 
                     dbq = q.take();
+
                 }
             } catch (Exception e) {
                 Log.e(DataService.class.getSimpleName(), "unexpected error", e);
@@ -628,13 +650,16 @@ public class DataService extends NodeJS {
         final boolean delete;
         final String[] queries;
         final JSONArray[] jsonparams;
+        final String event;
 
-        DBQuery(String[] myqueries, JSONArray[] params) {
+
+        DBQuery(String[] myqueries, JSONArray[] params, String event) {
             this.stop = false;
             this.close = false;
             this.delete = false;
             this.queries = myqueries;
             this.jsonparams = params;
+            this.event = event;
         }
 
         DBQuery(boolean delete) {
@@ -643,6 +668,7 @@ public class DataService extends NodeJS {
             this.delete = delete;
             this.queries = null;
             this.jsonparams = null;
+            this.event = null;
         }
 
         // signal the DBRunner thread to stop:
@@ -652,6 +678,7 @@ public class DataService extends NodeJS {
             this.delete = false;
             this.queries = null;
             this.jsonparams = null;
+            this.event = null;
         }
     }
 
