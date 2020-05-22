@@ -209,15 +209,21 @@ public class DataService extends NodeJS {
         JSONObject response = new JSONObject();
         try {
             JSONObject results = new JSONObject(batchResults.get(0).toString());
+            Log.d(TAG + "_handleExecuteResponse", event + "results :" + results.toString());
             JSONObject result = new JSONObject(results.get("result").toString());
-            JSONArray rows = new JSONArray();
-            rows.put(result);
-            response.put("rows", rows);
+            Log.d(TAG + "_handleExecuteResponse", event + "result :" + result.toString());
+            if(result.has("rows") ) {
+                JSONArray rows = new JSONArray();
+                rows.put(result.get("rows").toString());
+                response.put("rows", rows);
+            } else {
+                response.put("result", result);
+            }
             response.put("err", err);
-            Log.i(TAG, event + "response :" + response.toString());
+            Log.i(TAG + "_handleExecuteResponse", event + "response :" + response.toString());
             super.sendMessageToNode(event, response.toString());
         } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG+ "_handleExecuteResponse", e.getMessage());
         }
     }
 
