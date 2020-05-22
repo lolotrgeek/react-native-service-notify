@@ -1,6 +1,6 @@
 // Require the 'native-bridge' to enable communications between the
 // Node.js app and the Native app.
-const native = require('./native-bridge');
+const native = require('../native-bridge');
 
 native.channel.post('started', 'sqlite3.js loaded')
 

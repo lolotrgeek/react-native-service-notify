@@ -209,9 +209,7 @@ public class DataService extends NodeJS {
         JSONObject response = new JSONObject();
         try {
             JSONObject results = new JSONObject(batchResults.get(0).toString());
-            Log.d(TAG + "_handleExecuteResponse", event + "results :" + results.toString());
             JSONObject result = new JSONObject(results.get("result").toString());
-            Log.d(TAG + "_handleExecuteResponse", event + "result :" + result.toString());
             if(result.has("rows") ) {
                 JSONArray rows = new JSONArray();
                 rows.put(result.get("rows").toString());
@@ -259,7 +257,7 @@ public class DataService extends NodeJS {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void init() {
-        super.startEngine("data.js");
+        super.startEngine("main.js");
         super.systemMessageToNode();
 
     }
