@@ -1,14 +1,21 @@
+const { hostname } = require('os');
+
 ; (function () {
-  const config = { port: process.env.OPENSHIFT_NODEJS_PORT || process.env.VCAP_APP_PORT || process.env.PORT || process.argv[2] || 8765 };
+  const config = { 
+    port: process.env.OPENSHIFT_NODEJS_PORT || process.env.VCAP_APP_PORT || process.env.PORT || process.argv[2] || 8765 ,
+    host: '127.0.0.1'
+  };
   const Gun = require('gun')
   const GunSQLite = require('./gun-sqlite');
   const adapter = GunSQLite.bootstrap(Gun);
 
   config.server = require('http').createServer(Gun.serve(__dirname));
 
+  console.log('GUN config ', config)
+
   const gun = new Gun({
     // Defaults
-    web: config.server.listen(config.port),
+    web: config.server.listen(config.port, config.host),
     file: false,
     radisk: false,
     localStorage: false,
@@ -22,6 +29,10 @@
   })
   console.log('Relay peer started on port ' + config.port + ' with /gun');
 
+  gun.get('hello').put({value: 'world'}, ack => console.log('ACK: ' , ack))
+  gun.get('hello').on((data, key) => {
+    console.log('Data Found!' + data)
+  })
   module.exports = gun;
 }());
 

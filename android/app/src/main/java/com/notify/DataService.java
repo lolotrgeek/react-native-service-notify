@@ -37,10 +37,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
+
+
 public class DataService extends NodeJS {
     private static final int SERVICE_NOTIFICATION_ID = 54321;
     private static final String CHANNEL_ID = "DATATASK";
-    private static String TAG = "DataService";
+    private static String TAG = "DATA-SERVICE";
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -238,12 +240,13 @@ public class DataService extends NodeJS {
 
             switch (event) {
                 case "sqliteDatabase":
-                    Log.d(TAG, "Parsing Database request...");
+                    Log.d(TAG, "Opening Database.");
                     args = args.put(request);
                     this.execute("open", args, event);
                     break;
                 case "sqliteRun":
                 case "sqliteAll":
+                    Log.d(TAG, "Running Query.");
                     args = argsBuilder(request);
                     this.execute("backgroundExecuteSqlBatch", args, event);
                     break;

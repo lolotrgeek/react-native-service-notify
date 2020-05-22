@@ -62,7 +62,6 @@ const adapter = new KeyValAdapter({
      * @param {function}      done     Called after write is complete
      */
     put: function (batch, done) {
-
         // Produce an array of upsert queries
         const inserts = batch.map(node => {
             const keyField = `${node.key}_${node.field}`;

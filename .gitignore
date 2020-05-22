@@ -49,6 +49,7 @@ android/app/build
 android/.gradle
 android/app/.externalNativeBuild/**
 android/app/.externalNativeBuild
+android/app/.settings/
 android/.settings/
 
 # node.js
