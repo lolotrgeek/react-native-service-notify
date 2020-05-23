@@ -24,7 +24,7 @@ public class MainActivity extends ReactActivity {
   public void onResume() {
       super.onResume();
       Context context = getApplicationContext();
-      context.startService(new Intent(context, DataService.class));
+      context.startService(new Intent(context, HeartbeatService.class));
   }
 
   // SERVICE DEFINITIONS HERE

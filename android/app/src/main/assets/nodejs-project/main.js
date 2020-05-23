@@ -3,7 +3,7 @@ const { hostname } = require('os');
 ; (function () {
   const config = { 
     port: process.env.OPENSHIFT_NODEJS_PORT || process.env.VCAP_APP_PORT || process.env.PORT || process.argv[2] || 8765 ,
-    host: '127.0.0.1'
+    host: 'localhost'
   };
   const Gun = require('gun')
   const GunSQLite = require('./gun-sqlite');

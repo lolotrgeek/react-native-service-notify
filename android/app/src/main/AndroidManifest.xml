@@ -15,12 +15,16 @@
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
-    <service android:name="com.notify.HeartbeatService" android:enabled="true" android:exported="false"></service>
-    <service android:name="com.notify.ListenerService" android:enabled="true" android:exported="false"></service>
-    <service android:name="com.notify.DataService" android:enabled="true" android:exported="false"></service>
-    <service android:name="com.notify.HeartbeatEventService"></service>
-    <service android:name="com.notify.DataEventService"></service>
-    <service android:name="com.notify.ActionEventService"></service>
+
+    <service
+        android:name="com.notify.HeartbeatService"
+        android:enabled="true"
+        android:exported="false" />
+    <service
+        android:name="com.notify.DataService"
+        android:enabled="true"
+        android:exported="false" />
+
     <receiver android:name="com.notify.BootUpReceiver" android:enabled="true" android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />

@@ -2,7 +2,7 @@ package com.notify;
 
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
+
 import android.os.IBinder;
 
 import android.app.Notification;
@@ -22,11 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.net.URL;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.sql.Array;
-import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-
-
-
 public class DataService extends NodeJS {
-    private static final int SERVICE_NOTIFICATION_ID = 54321;
-    private static final String CHANNEL_ID = "DATATASK";
     private static String TAG = "DATA-SERVICE";
 
     // Used to load the 'native-lib' library on application startup.
@@ -100,20 +91,6 @@ public class DataService extends NodeJS {
 //        db.close();
 //        Log.i(TAG, "Killing Listener...");
 //    }
-
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_LOW;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "DATATASK", importance);
-            channel.setDescription("CHANEL DESCRIPTION");
-            channel.setSound(null, null);
-            channel.setShowBadge(false);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
 
     public JSONObject msgParse(String msg) {
         JSONObject obj = null;
@@ -259,26 +236,10 @@ public class DataService extends NodeJS {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void init() {
+    public void init() {
         super.startEngine("main.js");
         super.systemMessageToNode();
 
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "Starting Listener...");
-        init();
-        createNotificationChannel();
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID).setContentTitle("Listener Task")
-                .setContentText("Ready...").setSmallIcon(R.mipmap.ic_launcher).setContentIntent(contentIntent)
-                .setOnlyAlertOnce(true).setPriority(NotificationCompat.PRIORITY_HIGH).setOngoing(true).build();
-        startForeground(SERVICE_NOTIFICATION_ID, notification);
-        return START_STICKY;
     }
 
     /**

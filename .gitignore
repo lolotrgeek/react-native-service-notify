@@ -49,8 +49,10 @@ android/app/build
 android/.gradle
 android/app/.externalNativeBuild/**
 android/app/.externalNativeBuild
-android/app/.settings/
-android/.settings/
+android/app/.settings
+android/app/.settings/**
+android/.settings
+android/.settings/**
 
 # node.js
 #
@@ -84,5 +86,3 @@ buck-out/
 # History
 /.history
 cases.md
-
-

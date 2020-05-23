@@ -7,15 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
+
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.os.Build;
-import android.os.Message;
 
-import com.facebook.react.HeadlessJsTaskService;
 
-public class HeartbeatService extends Service {
+public class HeartbeatService extends DataService {
 
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
@@ -23,37 +23,17 @@ public class HeartbeatService extends Service {
     private static HeartbeatService instance;
     // private int CURRENT_TICK = 0;
 
-
-
     private Handler countHandler = new Handler();
-    private Handler msgHandler = new Handler();
-    private Handler actionHandler = new Handler();
-
     private Runnable runnableCode = new Runnable() {
         @Override
         public void run() {
-            Context context = getApplicationContext();
-            Intent myIntent = new Intent(context, HeartbeatEventService.class);
-            context.startService(myIntent);
-            HeadlessJsTaskService.acquireWakeLockNow(context);
             countHandler.postDelayed(this, INTERVAL);
-        }
-    };
-
-    private Runnable runnableActionCode = new Runnable() {
-        @Override
-        public void run() {
-            Context context = getApplicationContext();
-            Intent myIntent = new Intent(context, ActionEventService.class);
-            context.startService(myIntent);
-            HeadlessJsTaskService.acquireWakeLockNow(context);
         }
     };
 
     public static HeartbeatService getInstance() {
         return instance;
     }
-
     public void setRunnableInterval(int ms) {
         INTERVAL = ms;
     }
@@ -70,13 +50,6 @@ public class HeartbeatService extends Service {
         this.countHandler.removeCallbacks(this.runnableCode);
     }
 
-
-    public void postInt(int num) {
-        Message message = new Message();
-        message.what = SERVICE_NOTIFICATION_ID;
-        message.arg1 = num;
-        this.msgHandler.sendMessage(message);
-    }
 
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
@@ -97,24 +70,25 @@ public class HeartbeatService extends Service {
         return null;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onCreate() {
         instance = this;
         super.onCreate();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onDestroy() {
         super.onDestroy();
         this.countHandler.removeCallbacks(this.runnableCode);
-        this.actionHandler.removeCallbacks(this.runnableActionCode);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        this.actionHandler.post(this.runnableActionCode);
         createNotificationChannel();
+        super.init();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
