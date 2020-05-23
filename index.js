@@ -1,14 +1,9 @@
 import React from 'react';
 import { AppRegistry, Platform } from 'react-native';
 import App from './src/App';
-import CountTask from './src/service/CountTask'
-import DataTask from './src/service/DataTask'
-import ActionTask from './src/service/ActionTask'
+
 import { name as appName } from './src/app.json';
 
-AppRegistry.registerHeadlessTask('Heartbeat', () => CountTask);
-AppRegistry.registerHeadlessTask('Data', () => DataTask);
-AppRegistry.registerHeadlessTask('Action', () => ActionTask);
 AppRegistry.registerComponent('Notify', () => App);
 
 if (Platform.OS === 'web') {

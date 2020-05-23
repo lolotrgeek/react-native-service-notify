@@ -31,22 +31,21 @@
 
   native.channel.on('get', msg => {
     let response = JSON.parse(msg)
-    if (response.action === 'get') {
-      gun.get(response.key).on((data, key) => {
-        console.log('Data Found!' + data)
-        native.channel.post('get', data)
-      })
-    }
+
+    gun.get(response).on((data, key) => {
+      console.log('Data Found!' + data)
+      native.channel.post('get', data)
+    })
+
   })
 
   native.channel.on('put', msg => {
     let response = JSON.parse(msg)
-    if (response.action === 'get') {
-      gun.put(response.value , ack => {
-        console.log('ACK: ', ack)
-        native.channel.post('put', ack)
-      })
-    }
+    gun.put(response, ack => {
+      console.log('ACK: ', ack)
+      native.channel.post('put', ack)
+    })
+
   })
 
   module.exports = gun;
