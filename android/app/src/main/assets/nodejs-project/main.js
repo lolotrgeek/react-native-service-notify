@@ -1,8 +1,6 @@
-const { hostname } = require('os');
-
 ; (function () {
-  const config = { 
-    port: process.env.OPENSHIFT_NODEJS_PORT || process.env.VCAP_APP_PORT || process.env.PORT || process.argv[2] || 8765 ,
+  const config = {
+    port: process.env.OPENSHIFT_NODEJS_PORT || process.env.VCAP_APP_PORT || process.env.PORT || process.argv[2] || 8765,
     host: 'localhost'
   };
   const Gun = require('gun')
@@ -29,10 +27,28 @@ const { hostname } = require('os');
   })
   console.log('Relay peer started on port ' + config.port + ' with /gun');
 
-  gun.get('hello').put({value: 'world'}, ack => console.log('ACK: ' , ack))
-  gun.get('hello').on((data, key) => {
-    console.log('Data Found!' + data)
+  const native = require('./native-bridge')
+
+  native.channel.on('get', msg => {
+    let response = JSON.parse(msg)
+    if (response.action === 'get') {
+      gun.get(response.key).on((data, key) => {
+        console.log('Data Found!' + data)
+        native.channel.post('get', data)
+      })
+    }
   })
+
+  native.channel.on('put', msg => {
+    let response = JSON.parse(msg)
+    if (response.action === 'get') {
+      gun.put(response.value , ack => {
+        console.log('ACK: ', ack)
+        native.channel.post('put', ack)
+      })
+    }
+  })
+
   module.exports = gun;
 }());
 

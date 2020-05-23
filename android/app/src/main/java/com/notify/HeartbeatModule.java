@@ -10,10 +10,13 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import android.app.PendingIntent;
 import android.app.NotificationManager;
+
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import android.R.mipmap;
 
+import android.os.Build;
 import android.widget.Toast;
 
 import javax.annotation.Nonnull;
@@ -21,7 +24,7 @@ import javax.annotation.Nonnull;
 public class HeartbeatModule extends ReactContextBaseJavaModule {
 
     public static final String REACT_CLASS = "Heartbeat";
-    private static ReactApplicationContext reactContext;
+    public static ReactApplicationContext reactContext;
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
     private static String TITLE = "Title";
@@ -79,6 +82,24 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         TITLE = title;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @ReactMethod
+    public void sendToNode(String msg) {
+        HeartbeatService.getInstance().sendMessageToNode("React", msg);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @ReactMethod
+    public void get(String msg) {
+        HeartbeatService.getInstance().sendMessageToNode("get", msg);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @ReactMethod
+    public void put(String msg) {
+        HeartbeatService.getInstance().sendMessageToNode("put", msg);
+    }
+
     @ReactMethod
     public void getStatus(Callback successCallback) {
         try {
@@ -103,6 +124,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
     public void startService() {
         instance = this;
@@ -132,6 +154,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
     public void startAction() {
         if (STATUS == "STOPPED") {
@@ -144,6 +167,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
     public void stopAction() {
         if (STATUS == "STOPPED") {
@@ -157,6 +181,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         }
     }
     
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
     public void resumeCounting() {
         if (STATUS == "STOPPED") {
@@ -172,6 +197,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
     public void pauseCounting() {
         if (STATUS == "STOPPED") {

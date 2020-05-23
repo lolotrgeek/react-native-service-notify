@@ -10,9 +10,16 @@ import android.os.IBinder;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.os.Build;
+import android.util.Log;
+
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 public class HeartbeatService extends DataService {
@@ -21,7 +28,12 @@ public class HeartbeatService extends DataService {
     private static final String CHANNEL_ID = "HEARTBEAT";
     private static int INTERVAL = 1000;
     private static HeartbeatService instance;
-    // private int CURRENT_TICK = 0;
+
+    @Override
+    public Context getApplicationContext() {
+        return super.getApplicationContext();
+    }
+// private int CURRENT_TICK = 0;
 
     private Handler countHandler = new Handler();
     private Runnable runnableCode = new Runnable() {
@@ -34,6 +46,7 @@ public class HeartbeatService extends DataService {
     public static HeartbeatService getInstance() {
         return instance;
     }
+
     public void setRunnableInterval(int ms) {
         INTERVAL = ms;
     }
@@ -50,6 +63,24 @@ public class HeartbeatService extends DataService {
         this.countHandler.removeCallbacks(this.runnableCode);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void handleIncomingMessages(String msg) {
+        super.handleIncomingMessages(msg);
+        try {
+            JSONObject obj = super.msgParse(msg);
+            String event = super.eventParse(obj);
+            JSONObject request = super.payloadParse(obj);
+            switch (event) {
+                case "get":
+                    HeartbeatModule.getInstance().reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("get", request);
+                case "put":
+                    HeartbeatModule.getInstance().reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("put", request);
+            }
+        } catch (Throwable t) {
+            Log.e("HEARTBEAT-SERVICE", "Could not parse malformed JSON: \"" + msg + "\"");
+        }
+    }
 
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because

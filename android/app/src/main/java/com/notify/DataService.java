@@ -172,6 +172,12 @@ public class DataService extends NodeJS {
         return params;
     }
 
+    /**
+     * Outgoing Messages from Android to Node
+     * @param response
+     * @param event
+     * @param err
+     */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void handleOutgoingMessages(JSONObject response, String event, String err) {
         try {
@@ -183,6 +189,12 @@ public class DataService extends NodeJS {
         }
     }
 
+    /**
+     * Outgoing messages from SqLite to Node
+     * @param event
+     * @param err
+     * @param batchResults
+     */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void handleExecuteResponse(String event, String err, JSONArray batchResults) {
         JSONObject response = new JSONObject();
@@ -204,10 +216,13 @@ public class DataService extends NodeJS {
         }
     }
 
+    /**
+     * Incoming Messages from Node to Android
+     * @param msg
+     */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void handleIncomingMessages(String msg) {
-
         try {
             JSONObject obj = msgParse(msg);
             String event = eventParse(obj);
