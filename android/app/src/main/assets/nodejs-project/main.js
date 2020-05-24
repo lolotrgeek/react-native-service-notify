@@ -30,8 +30,14 @@
   const native = require('./native-bridge')
 
   native.channel.on('get', msg => {
-    let response = JSON.parse(msg)
-
+    console.log('[node] incoming get: ' + typeof msg + msg)
+    let response
+    try {
+      response = JSON.parse(msg)
+    } catch (error) {
+      response = msg
+    }
+    
     gun.get(response).on((data, key) => {
       console.log('Data Found!' + data)
       native.channel.post('get', data)
@@ -40,6 +46,7 @@
   })
 
   native.channel.on('put', msg => {
+    console.log('[node] incoming put: ' + typeof msg + msg)
     let response = JSON.parse(msg)
     gun.put(response, ack => {
       console.log('ACK: ', ack)

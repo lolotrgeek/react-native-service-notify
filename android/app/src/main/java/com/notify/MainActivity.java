@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.facebook.react.ReactActivity;
-import com.facebook.react.HeadlessJsTaskService;
 import android.util.Log;
 
 public class MainActivity extends ReactActivity {
@@ -21,10 +20,10 @@ public class MainActivity extends ReactActivity {
   }
 
   @Override
-  public void onResume() {
-      super.onResume();
+  public void onStart() {
+      super.onStart();
       Context context = getApplicationContext();
-      context.startService(new Intent(context, HeartbeatService.class));
+      context.startService(new Intent(context, HeartbeatService.class).putExtra("TITLE", "Node React Test"));
   }
 
   // SERVICE DEFINITIONS HERE

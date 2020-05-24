@@ -92,13 +92,30 @@ public class DataService extends NodeJS {
 //        Log.i(TAG, "Killing Listener...");
 //    }
 
+    public boolean isJSONValid(String test) {
+        try {
+            new JSONObject(test);
+        } catch (JSONException ex) {
+            // edited, to include @Arthur's comment
+            // e.g. in case JSONArray is valid as well...
+            try {
+                new JSONArray(test);
+            } catch (JSONException ex1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public JSONObject msgParse(String msg) {
         JSONObject obj = null;
-        try {
-            obj = new JSONObject(msg);
-            Log.d(TAG, "Parsing Msg :" + obj.toString());
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
+        if (isJSONValid(msg)) {
+            try {
+                obj = new JSONObject(msg);
+                Log.d(TAG, "Parsing Msg :" + obj.toString());
+            } catch (JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
         return obj;
     }
@@ -123,7 +140,6 @@ public class DataService extends NodeJS {
             request = new JSONObject(payload.get(0).toString());
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
-
         }
         return request;
     }
@@ -154,26 +170,10 @@ public class DataService extends NodeJS {
         }
     }
 
-    public String[] paramsParse(JSONObject request) {
-        String[] params = null;
-        try {
-            JSONArray jsonparams = new JSONArray(request.get("params").toString());
-            // map JSONArray to list
-            List<String> list = new ArrayList<String>();
-            for (int i = 0; i < jsonparams.length(); i++) {
-                list.add(jsonparams.getString(i));
-            }
-            // convert list to String[]
-            params = list.toArray(new String[list.size()]);
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-
-        }
-        return params;
-    }
 
     /**
      * Outgoing Messages from Android to Node
+     *
      * @param response
      * @param event
      * @param err
@@ -191,6 +191,7 @@ public class DataService extends NodeJS {
 
     /**
      * Outgoing messages from SqLite to Node
+     *
      * @param event
      * @param err
      * @param batchResults
@@ -201,7 +202,7 @@ public class DataService extends NodeJS {
         try {
             JSONObject results = new JSONObject(batchResults.get(0).toString());
             JSONObject result = new JSONObject(results.get("result").toString());
-            if(result.has("rows") ) {
+            if (result.has("rows")) {
                 JSONArray rows = new JSONArray();
                 rows.put(result.get("rows").toString());
                 response.put("rows", rows);
@@ -212,12 +213,13 @@ public class DataService extends NodeJS {
             Log.i(TAG + "_handleExecuteResponse", event + "response :" + response.toString());
             super.sendMessageToNode(event, response.toString());
         } catch (JSONException e) {
-            Log.e(TAG+ "_handleExecuteResponse", e.getMessage());
+            Log.e(TAG + "_handleExecuteResponse", e.getMessage());
         }
     }
 
     /**
      * Incoming Messages from Node to Android
+     *
      * @param msg
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -226,24 +228,33 @@ public class DataService extends NodeJS {
         try {
             JSONObject obj = msgParse(msg);
             String event = eventParse(obj);
-            JSONObject request = payloadParse(obj);
-
-            JSONArray args = new JSONArray();
-
             switch (event) {
                 case "sqliteDatabase":
-                    Log.d(TAG, "Opening Database.");
-                    args = args.put(request);
-                    this.execute("open", args, event);
+                    try {
+                        JSONObject request = payloadParse(obj);
+                        JSONArray args = new JSONArray();
+                        Log.d(TAG, "Opening Database.");
+                        args = args.put(request);
+                        this.execute("open", args, event);
+                    } catch (Exception e) {
+                        Log.d(TAG, e.getMessage());
+                    }
                     break;
                 case "sqliteRun":
                 case "sqliteAll":
-                    Log.d(TAG, "Running Query.");
-                    args = argsBuilder(request);
-                    this.execute("backgroundExecuteSqlBatch", args, event);
+                    try {
+                        JSONObject request = payloadParse(obj);
+                        JSONArray args = new JSONArray();
+                        Log.d(TAG, "Running Query.");
+                        args = argsBuilder(request);
+                        this.execute("backgroundExecuteSqlBatch", args, event);
+
+                    } catch (Exception e) {
+                        Log.d(TAG, e.getMessage());
+                    }
                     break;
                 default:
-                    Log.e(TAG, "Invalid Event");
+                    Log.d(TAG, "NonSQL Event:" + event);
             }
         } catch (Throwable t) {
             Log.e(TAG, "Could not parse malformed JSON: \"" + msg + "\"");

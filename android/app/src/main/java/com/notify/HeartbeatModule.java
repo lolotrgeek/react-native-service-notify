@@ -14,9 +14,11 @@ import android.app.NotificationManager;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+
 import android.R.mipmap;
 
 import android.os.Build;
+import android.util.Log;
 import android.widget.Toast;
 
 import javax.annotation.Nonnull;
@@ -90,14 +92,23 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @ReactMethod
-    public void get(String msg) {
-        HeartbeatService.getInstance().sendMessageToNode("get", msg);
+    private void get(String msg) {
+        try {
+            HeartbeatService.getInstance().sendMessageToNode("get", msg);
+        } catch (Exception e) {
+            Log.e("HEARTBEAT-MODULE", "get - " + e.getMessage());
+        }
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @ReactMethod
-    public void put(String msg) {
-        HeartbeatService.getInstance().sendMessageToNode("put", msg);
+    private void put(String msg) {
+        try {
+            HeartbeatService.getInstance().sendMessageToNode("put", msg);
+        } catch (Exception e) {
+            Log.e("HEARTBEAT-MODULE", "put - " + e.getMessage());
+        }
     }
 
     @ReactMethod
@@ -112,7 +123,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setCountStatus(String status) {
         COUNT = status;
-        Toast.makeText(this.reactContext,COUNT,Toast.LENGTH_SHORT).show();
+        Toast.makeText(this.reactContext, COUNT, Toast.LENGTH_SHORT).show();
     }
 
     @ReactMethod
@@ -130,7 +141,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         instance = this;
         if (STATUS == "STOPPED") {
             try {
-                this.reactContext.startForegroundService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE)); 
+                this.reactContext.startForegroundService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
                 // this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE)); 
                 STATUS = "STARTED";
                 this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS", STATUS);
@@ -180,7 +191,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             // TODO: handle exception
         }
     }
-    
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
     public void resumeCounting() {

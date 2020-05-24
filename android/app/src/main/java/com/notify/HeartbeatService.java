@@ -19,6 +19,7 @@ import android.util.Log;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -28,6 +29,7 @@ public class HeartbeatService extends DataService {
     private static final String CHANNEL_ID = "HEARTBEAT";
     private static int INTERVAL = 1000;
     private static HeartbeatService instance;
+    private static String TAG = "HEARTBEAT-SERVICE";
 
     @Override
     public Context getApplicationContext() {
@@ -63,6 +65,18 @@ public class HeartbeatService extends DataService {
         this.countHandler.removeCallbacks(this.runnableCode);
     }
 
+    public JSONObject heartbeatPayloadParse(JSONObject obj) {
+        JSONObject request = null;
+        try {
+            Log.d(TAG, "Parsing Payload...");
+            JSONArray payload = new JSONArray(obj.get("payload").toString());
+            request = new JSONObject(payload.get(0).toString());
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        return request;
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void handleIncomingMessages(String msg) {
@@ -70,15 +84,24 @@ public class HeartbeatService extends DataService {
         try {
             JSONObject obj = super.msgParse(msg);
             String event = super.eventParse(obj);
-            JSONObject request = super.payloadParse(obj);
             switch (event) {
                 case "get":
-                    HeartbeatModule.getInstance().reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("get", request);
+                    try {
+                        JSONObject request = heartbeatPayloadParse(obj);
+                        HeartbeatModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("get", request);
+                    } catch (Exception e) {
+                        Log.d(TAG, e.getMessage());
+                    }
                 case "put":
-                    HeartbeatModule.getInstance().reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("put", request);
+                    try {
+                        JSONObject request = heartbeatPayloadParse(obj);
+                        HeartbeatModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("put", request);
+                    } catch (Exception e) {
+                        Log.d(TAG, e.getMessage());
+                    }
             }
         } catch (Throwable t) {
-            Log.e("HEARTBEAT-SERVICE", "Could not parse malformed JSON: \"" + msg + "\"");
+            Log.e(TAG, "Could not parse malformed JSON: \"" + msg + "\"");
         }
     }
 
@@ -92,6 +115,7 @@ public class HeartbeatService extends DataService {
             channel.setSound(null, null);
             channel.setShowBadge(false);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            assert notificationManager != null;
             notificationManager.createNotificationChannel(channel);
         }
     }
@@ -124,8 +148,7 @@ public class HeartbeatService extends DataService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
-        String title = intent.getStringExtra("Timer");
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID).setContentTitle(title)
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID).setContentTitle("Title")
                 .setContentText("Ready...").setSmallIcon(R.mipmap.ic_launcher).setContentIntent(contentIntent)
                 .setOnlyAlertOnce(true).setPriority(NotificationCompat.PRIORITY_HIGH).setOngoing(true).build();
         startForeground(SERVICE_NOTIFICATION_ID, notification);
