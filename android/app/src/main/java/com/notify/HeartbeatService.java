@@ -16,6 +16,8 @@ import android.app.NotificationChannel;
 import android.os.Build;
 import android.util.Log;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import org.json.JSONArray;
@@ -77,6 +79,14 @@ public class HeartbeatService extends DataService {
         return request;
     }
 
+    public void sendMessageToReact(String event, String msg) {
+        HeartbeatModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(event, msg);
+    }
+
+    /**
+     * Incoming Messages from Node to Android, adds data React cases
+     * @param msg
+     */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void handleIncomingMessages(String msg) {
@@ -88,16 +98,19 @@ public class HeartbeatService extends DataService {
                 case "get":
                     try {
                         JSONObject request = heartbeatPayloadParse(obj);
-                        HeartbeatModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("get", request);
+                        Log.d(TAG, "get response - " + request);
+                        sendMessageToReact("get", request.toString());
                     } catch (Exception e) {
-                        Log.d(TAG, e.getMessage());
+                        Log.e(TAG, e.getMessage());
                     }
                 case "put":
                     try {
                         JSONObject request = heartbeatPayloadParse(obj);
-                        HeartbeatModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("put", request);
+                        WritableMap params = Arguments.createMap();
+                        Log.d(TAG, "put response - " + request);
+                        sendMessageToReact("put", request.toString());
                     } catch (Exception e) {
-                        Log.d(TAG, e.getMessage());
+                        Log.e(TAG, e.getMessage());
                     }
             }
         } catch (Throwable t) {

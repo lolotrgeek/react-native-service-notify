@@ -30,29 +30,44 @@
   const native = require('./native-bridge')
 
   native.channel.on('get', msg => {
-    console.log('[node] incoming get: ' + typeof msg + msg)
+    console.log('[React node] incoming get: ' + typeof msg + msg)
     let response
     try {
       response = JSON.parse(msg)
     } catch (error) {
       response = msg
     }
-    
-    gun.get(response).on((data, key) => {
-      console.log('Data Found!' + data)
+
+    gun.get('app').get(response).on((data, key) => {
+      console.log('[GUN node] Data Found: ' + data)
       native.channel.post('get', data)
     })
 
   })
 
   native.channel.on('put', msg => {
-    console.log('[node] incoming put: ' + typeof msg + msg)
-    let response = JSON.parse(msg)
-    gun.put(response, ack => {
-      console.log('ACK: ', ack)
-      native.channel.post('put', ack)
-    })
+    console.log('[React node] incoming put: ' + typeof msg + msg)
+    let input
+    try {
+      input = JSON.parse(msg)
+    } catch (error) {
+      response = msg
+    }
 
+    if (typeof input.key === 'string') {
+      console.log('[React node] storing ' + input.key + input.value)
+      const key = input.key
+      gun.get('app').get(key).put(input, ack => {
+        console.log('[GUN node] ACK: ', ack)
+        native.channel.post('put', ack)
+      })
+    }
+
+  })
+
+  gun.get('app').get('hello').put({value: 'world'}, ack => console.log('ACK: ' , ack))
+  gun.get('app').get('hello').on((data, key) => {
+    console.log('Data Found!' + data)
   })
 
   module.exports = gun;

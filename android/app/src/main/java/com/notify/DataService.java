@@ -245,8 +245,8 @@ public class DataService extends NodeJS {
                     try {
                         JSONObject request = payloadParse(obj);
                         JSONArray args = new JSONArray();
-                        Log.d(TAG, "Running Query.");
                         args = argsBuilder(request);
+                        Log.d(TAG, "Running " + event + " Query - " + args.toString());
                         this.execute("backgroundExecuteSqlBatch", args, event);
 
                     } catch (Exception e) {

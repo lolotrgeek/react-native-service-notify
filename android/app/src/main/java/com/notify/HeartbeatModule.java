@@ -98,7 +98,6 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             Log.e("HEARTBEAT-MODULE", "get - " + e.getMessage());
         }
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
