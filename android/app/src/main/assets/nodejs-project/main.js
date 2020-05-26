@@ -4,26 +4,19 @@
     host: 'localhost'
   };
   const Gun = require('gun')
-  const GunSQLite = require('./gun-sqlite');
-  const adapter = GunSQLite.bootstrap(Gun);
+  // const GunSQLite = require('./gun-sqlite');
+  // const adapter = GunSQLite.bootstrap(Gun);
+  const path = require('path')
 
   config.server = require('http').createServer(Gun.serve(__dirname));
 
-  console.log('GUN config ', config)
+  // console.log('GUN config ', config)
 
   const gun = new Gun({
     // Defaults
     web: config.server.listen(config.port, config.host),
-    file: false,
-    radisk: false,
-    localStorage: false,
-    sqlite: {
-      database_name: "GunDB.db",
-      // database_location: "default", // for concerns about location on iOS, see [here](https://github.com/andpor/react-native-sqlite-storage#opening-a-database)
-      onOpen: () => { },
-      onErr: err => { },
-      onReady: err => debug && console.log('Ready') // don't attempt to read/write from Gun until this has been called unless you like to live dangerously
-    }
+    file: path.join(__dirname, 'radata'),
+
   })
   console.log('Relay peer started on port ' + config.port + ' with /gun');
 
@@ -38,7 +31,7 @@
       response = msg
     }
 
-    gun.get('app').get(response).on((data, key) => {
+    gun.get(response).on((data, key) => {
       console.log('[GUN node] Data Found: ' + data)
       native.channel.post('get', data)
     })
@@ -57,7 +50,7 @@
     if (typeof input.key === 'string') {
       console.log('[React node] storing ' + input.key + input.value)
       const key = input.key
-      gun.get('app').get(key).put(input, ack => {
+      gun.get(key).put({value: input.value}, ack => {
         console.log('[GUN node] ACK: ', ack)
         native.channel.post('put', ack)
       })
@@ -65,10 +58,10 @@
 
   })
 
-  gun.get('app').get('hello').put({value: 'world'}, ack => console.log('ACK: ' , ack))
-  gun.get('app').get('hello').on((data, key) => {
-    console.log('Data Found!' + data)
-  })
+  // gun.get('app').get('hello').put({value: 'world'}, ack => console.log('ACK: ' , ack))
+  // gun.get('app').get('hello').on((data, key) => {
+  //   console.log('Data Found!' + data)
+  // })
 
   module.exports = gun;
 }());
