@@ -9,22 +9,21 @@ export default function App() {
   const [status, setStatus] = useState('status')
 
   useEffect(() => {
-    deviceEmitter.addListener("get", event => {
+    deviceEmitter.addListener("done", event => {
       console.log('[react] ', event)
       setStatus(event)
     })
 
-    deviceEmitter.addListener("put", event => {
-      console.log('[react] ', event)
-      setStatus(event)
-    })
+    return () => {
+      deviceEmitter.removeAllListeners("done")
+    }
   },[])
 
   return (
     <View style={styles.container}>
       <Text styles={styles.status}>{status}</Text>
       <Button title='Get' onPress={()=> Heartbeat.get('hello')} />
-      <Button title='Put' onPress={()=> Heartbeat.put(JSON.stringify({key: 'hello,', value: 'react'}))} />
+      <Button title='Put' onPress={()=> Heartbeat.put(JSON.stringify({key: 'hello,', value: 'newest'}))} />
     </View>
   );
 }

@@ -2,7 +2,6 @@ package com.notify;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -23,7 +22,6 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 
 public class HeartbeatService extends NodeJS {
 
@@ -162,20 +160,12 @@ public class HeartbeatService extends NodeJS {
             JSONObject obj = msgParse(msg);
             String event = eventParse(obj);
             switch (event) {
-                case "get":
+                case "done":
+                    Log.d(TAG, msg);
                     try {
                         JSONObject request = heartbeatPayloadParse(obj);
-                        Log.d(TAG, "get response - " + request);
-                        sendMessageToReact("get", request.toString());
-                    } catch (Exception e) {
-                        Log.e(TAG, e.getMessage());
-                    }
-                case "put":
-                    try {
-                        JSONObject request = heartbeatPayloadParse(obj);
-                        WritableMap params = Arguments.createMap();
-                        Log.d(TAG, "put response - " + request);
-                        sendMessageToReact("put", request.toString());
+                        Log.d(TAG, "done - " + request);
+                        sendMessageToReact("done", request.toString());
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage());
                     }
