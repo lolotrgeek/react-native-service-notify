@@ -4,8 +4,6 @@
     host: 'localhost'
   };
   const Gun = require('gun')
-  // const GunSQLite = require('./gun-sqlite');
-  // const adapter = GunSQLite.bootstrap(Gun);
   const path = require('path')
 
   config.server = require('http').createServer(Gun.serve(__dirname));
@@ -31,7 +29,7 @@
       response = msg
     }
 
-    gun.get(response).on((data, key) => {
+    gun.get('app').on((data, key) => {
       console.log('[GUN node] Data Found: ' + data)
       native.channel.post('get', data)
     })
@@ -50,7 +48,7 @@
     if (typeof input.key === 'string') {
       console.log('[React node] storing ' + input.key + input.value)
       const key = input.key
-      gun.get(key).put({value: input.value}, ack => {
+      gun.get('app').put({value: input.value}, ack => {
         console.log('[GUN node] ACK: ', ack)
         native.channel.post('put', ack)
       })

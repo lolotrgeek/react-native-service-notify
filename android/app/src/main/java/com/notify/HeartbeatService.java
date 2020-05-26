@@ -25,7 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class HeartbeatService extends DataService {
+public class HeartbeatService extends NodeJS {
 
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
@@ -82,7 +82,43 @@ public class HeartbeatService extends DataService {
     public void sendMessageToReact(String event, String msg) {
         HeartbeatModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(event, msg);
     }
+    public JSONObject msgParse(String msg) {
+        JSONObject obj = null;
+        if (isJSONValid(msg)) {
+            try {
+                obj = new JSONObject(msg);
+                Log.d(TAG, "Parsing Msg :" + obj.toString());
+            } catch (JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+        return obj;
+    }
+    public boolean isJSONValid(String test) {
+        try {
+            new JSONObject(test);
+        } catch (JSONException ex) {
+            // edited, to include @Arthur's comment
+            // e.g. in case JSONArray is valid as well...
+            try {
+                new JSONArray(test);
+            } catch (JSONException ex1) {
+                return false;
+            }
+        }
+        return true;
+    }
+    public String eventParse(JSONObject obj) {
+        String event = null;
+        try {
+            event = obj.get("event").toString();
+            Log.d(TAG, "Parsing Event: " + event);
 
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+        return event;
+    }
     /**
      * Incoming Messages from Node to Android, adds data React cases
      * @param msg
@@ -92,8 +128,8 @@ public class HeartbeatService extends DataService {
     public void handleIncomingMessages(String msg) {
         super.handleIncomingMessages(msg);
         try {
-            JSONObject obj = super.msgParse(msg);
-            String event = super.eventParse(obj);
+            JSONObject obj = msgParse(msg);
+            String event = eventParse(obj);
             switch (event) {
                 case "get":
                     try {
@@ -153,10 +189,16 @@ public class HeartbeatService extends DataService {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void init() {
+        super.startEngine("main.js");
+        super.systemMessageToNode();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         createNotificationChannel();
-        super.init();
+        init();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
