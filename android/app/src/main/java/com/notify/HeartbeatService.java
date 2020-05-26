@@ -33,6 +33,14 @@ public class HeartbeatService extends NodeJS {
     private static HeartbeatService instance;
     private static String TAG = "HEARTBEAT-SERVICE";
 
+    // Used to load the 'native-lib' library on application startup.
+    static {
+        System.loadLibrary("native-lib");
+        System.loadLibrary("node");
+    }
+
+    public boolean _startedNodeAlready = false;
+
     @Override
     public Context getApplicationContext() {
         return super.getApplicationContext();
@@ -82,6 +90,7 @@ public class HeartbeatService extends NodeJS {
     public void sendMessageToReact(String event, String msg) {
         HeartbeatModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(event, msg);
     }
+
     public JSONObject msgParse(String msg) {
         JSONObject obj = null;
         if (isJSONValid(msg)) {
@@ -94,6 +103,7 @@ public class HeartbeatService extends NodeJS {
         }
         return obj;
     }
+
     public boolean isJSONValid(String test) {
         try {
             new JSONObject(test);
@@ -108,6 +118,7 @@ public class HeartbeatService extends NodeJS {
         }
         return true;
     }
+
     public String eventParse(JSONObject obj) {
         String event = null;
         try {
@@ -119,8 +130,28 @@ public class HeartbeatService extends NodeJS {
         }
         return event;
     }
+
+    /**
+     * Outgoing Messages from Android to Node
+     *
+     * @param response
+     * @param event
+     * @param err
+     */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void handleOutgoingMessages(JSONObject response, String event, String err) {
+        try {
+            response.put("err", err);
+            Log.i(TAG, event + "response :" + response.toString());
+            super.sendMessageToNode(event, response.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
     /**
      * Incoming Messages from Node to Android, adds data React cases
+     *
      * @param msg
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
