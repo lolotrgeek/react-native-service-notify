@@ -23,7 +23,7 @@ export default function App() {
     <View style={styles.container}>
       <Text styles={styles.status}>{status}</Text>
       <Button title='Get' onPress={()=> Heartbeat.get('hello')} />
-      <Button title='Put' onPress={()=> Heartbeat.put(JSON.stringify({key: 'hello,', value: 'newest'}))} />
+      <Button title='Put' onPress={()=> Heartbeat.put(JSON.stringify({ hello: {node: 'new'}}))} />
     </View>
   );
 }
