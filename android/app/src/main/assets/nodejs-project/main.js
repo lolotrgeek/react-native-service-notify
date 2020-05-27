@@ -36,12 +36,12 @@
   }
 
   /**
-   * Create a chain by recursing through nested objects, adding each key to the chain
-   * until we hit a string value
+   * Create a chain by recursing nested objects, adding each key to the chain until hitting a string value
+   * 
    * @param {*} input `{key1: {key2: ''}}`
    * @param {*} chain 
    */
-  const chainerObj = (input, chain) => {
+  const chainerCompat = (input, chain) => {
     if (!input || !chain) {
       console.log('[Chain node] no input or chain')
       return false
@@ -60,7 +60,7 @@
           console.log('[Chain node] Extending chain: ', value)
           chain = chain.get(key)
         }
-        chainerObj(value, chain)
+        chainerCompat(value, chain)
       }
     }
     console.log('[Chain node] done.')
@@ -68,8 +68,8 @@
   }
 
   /**
- * Create a chain by splitting a key string, adding each key to the chain
- * until we hit a string value
+ * Create a chain by splitting a key string, adding each split to the chain
+ * 
  * @param {*} input `key1\key2\...`
  * @param {*} chain 
  */
