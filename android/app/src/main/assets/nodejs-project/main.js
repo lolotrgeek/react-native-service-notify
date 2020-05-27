@@ -38,10 +38,10 @@
   /**
    * Create a chain by recursing through nested objects, adding each key to the chain
    * until we hit a string value
-   * @param {*} input 
+   * @param {*} input `{key1: {key2: ''}}`
    * @param {*} chain 
    */
-  const chainer = (input, chain) => {
+  const chainerObj = (input, chain) => {
     if (!input || !chain) {
       console.log('[Chain node] no input or chain')
       return false
@@ -60,12 +60,38 @@
           console.log('[Chain node] Extending chain: ', value)
           chain = chain.get(key)
         }
-        chainer(value, chain)
+        chainerObj(value, chain)
       }
     }
     console.log('[Chain node] done.')
     return chain
+  }
 
+  /**
+ * Create a chain by splitting a key string, adding each key to the chain
+ * until we hit a string value
+ * @param {*} input `key1\key2\...`
+ * @param {*} chain 
+ */
+  const chainer = (input, chain) => {
+    if (!input || !chain) {
+      console.log('[Chain node] no input or chain')
+      return false
+    }
+    
+    if (typeof input === 'string') {
+      if (input.length === 0) return chain
+      input = input.split('/')
+      // chainer(input, chain)
+      // if (input.length === 0) return chain
+      while (input.length > 0) {
+        console.log('[Chain node] Chaining key:', input[0])
+        chain = chain.get(input[0])
+        input = input.slice(1)
+      }
+    }
+    console.log('[Chain node] done.')
+    return chain
   }
 
   const getOne = (msg) => {
@@ -82,16 +108,33 @@
     const chain = chainer(msg, app)
     console.log('[React node] Chain :', chain)
     chain.map().on((data, key) => {
-      console.log('[GUN node] Data Found: ' , data)
+      console.log('[GUN node] Data Found: ', data)
       // if doesn't send each, might want to put in an array...
       native.channel.post('done', { got: data })
     })
   }
 
+  /**
+   * Assign a value to keys, needs to parse JSON msg first
+   * @param {*} msg JSON `{key: 'key' || 'key1/key2/...', value: any}`
+   */
   const putAll = (msg) => {
     const input = JSON.parse(msg)
-    const chain = chainer(input, app)
+    const chain = chainer(input.key, app) 
     console.log('[React node] Chain :', chain)
+    chain.put(input.value, ack => {
+      console.log('[GUN node] ACK: ', ack)
+      native.channel.post('done', { put: ack })
+    })
+  }
+
+  /**
+   * Assign msg, will automatically chain a nested object
+   * deprecated: gets messy since it allows for deep unstructured chains
+   * @param {*} msg JSON { key1: {key2: any}, ...}
+   */
+  const putAllCompat = (msg) => {
+    const input = JSON.parse(msg)
     app.put(input, ack => {
       console.log('[GUN node] ACK: ', ack)
       native.channel.post('done', { put: ack })

@@ -21,6 +21,9 @@ import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import javax.annotation.Nonnull;
 
 public class HeartbeatModule extends ReactContextBaseJavaModule {
@@ -92,9 +95,9 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @ReactMethod
-    private void get(String msg) {
+    private void get(String key) {
         try {
-            HeartbeatService.getInstance().sendMessageToNode("get", msg);
+            HeartbeatService.getInstance().sendMessageToNode("get", key);
         } catch (Exception e) {
             Log.e("HEARTBEAT-MODULE", "get - " + e.getMessage());
         }
@@ -102,9 +105,12 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @ReactMethod
-    private void put(String msg) {
+    private void put(String key, String value) {
         try {
-            HeartbeatService.getInstance().sendMessageToNode("put", msg);
+            JSONObject msg = new JSONObject();
+            msg.put("key", key);
+            msg.put("value", value);
+            HeartbeatService.getInstance().sendMessageToNode("put", msg.toString());
         } catch (Exception e) {
             Log.e("HEARTBEAT-MODULE", "put - " + e.getMessage());
         }
