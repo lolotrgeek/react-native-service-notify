@@ -68,6 +68,16 @@
   }
 
   /**
+   * removes soul from given data
+   * @param {*} data 
+   */
+  const trimSoul = data => {
+    if (!data || !data['_'] || typeof data['_'] !== 'object') return data
+    delete data['_']
+    return data
+  }
+
+  /**
  * Create a chain by splitting a key string, adding each split to the chain
  * 
  * @param {*} input `key1\key2\...`
@@ -78,7 +88,7 @@
       console.log('[Chain node] no input or chain')
       return false
     }
-    
+
     if (typeof input === 'string') {
       if (input.length === 0) return chain
       input = input.split('/')
@@ -110,7 +120,7 @@
     chain.map().on((data, key) => {
       console.log('[GUN node] Data Found: ', data)
       // if doesn't send each, might want to put in an array...
-      native.channel.post('done', { got: data })
+      native.channel.post('done', { gotAll: data })
     })
   }
 
@@ -120,11 +130,25 @@
    */
   const putAll = (msg) => {
     const input = JSON.parse(msg)
-    const chain = chainer(input.key, app) 
+    const chain = chainer(input.key, app)
     console.log('[React node] Chain :', chain)
     chain.put(input.value, ack => {
       console.log('[GUN node] ACK: ', ack)
       native.channel.post('done', { put: ack })
+    })
+  }
+
+  /**
+   * Assign a value to a set, needs to parse JSON msg first
+   * @param {*} msg JSON `{key: 'key' || 'key1/key2/...', value: any}`
+   */
+  const setAll = (msg) => {
+    const input = JSON.parse(msg)
+    const chain = chainer(input.key, app)
+    console.log('[React node] Chain :', chain)
+    chain.set(input.value, ack => {
+      console.log('[GUN node] ACK: ', ack)
+      native.channel.post('done', { set: ack })
     })
   }
 
@@ -151,6 +175,16 @@
     }
   })
 
+  native.channel.on('getAll', msg => {
+    console.log('[React node] incoming getAll: ' + typeof msg + msg)
+    try {
+      console.log('[GUN node] Getting All: ' + msg)
+      getAll(msg)
+    } catch (error) {
+      console.log('[GUN node] : Getting All failed' + error)
+    }
+  })
+
   native.channel.on('put', msg => {
     console.log('[React node] incoming put: ' + typeof msg + msg)
     try {
@@ -161,6 +195,15 @@
     }
   })
 
+  native.channel.on('set', msg => {
+    console.log('[React node] incoming set: ' + typeof msg + msg)
+    try {
+      console.log('[React node] storing - ' + msg)
+      setAll(msg)
+    } catch (error) {
+      console.log('[GUN node] : Setting failed' + error)
+    }
+  })
   // gun.get('app').get('hello').put({value: 'world'}, ack => console.log('ACK: ' , ack))
   // gun.get('app').get('hello').on((data, key) => {
   //   console.log('Data Found!' + data)

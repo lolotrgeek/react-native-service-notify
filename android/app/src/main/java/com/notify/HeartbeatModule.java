@@ -105,6 +105,16 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @ReactMethod
+    private void getAll(String key) {
+        try {
+            HeartbeatService.getInstance().sendMessageToNode("getAll", key);
+        } catch (Exception e) {
+            Log.e("HEARTBEAT-MODULE", "getAll - " + e.getMessage());
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @ReactMethod
     private void put(String key, String value) {
         try {
             JSONObject msg = new JSONObject();
@@ -113,6 +123,19 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             HeartbeatService.getInstance().sendMessageToNode("put", msg.toString());
         } catch (Exception e) {
             Log.e("HEARTBEAT-MODULE", "put - " + e.getMessage());
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @ReactMethod
+    private void set(String key, String value) {
+        try {
+            JSONObject msg = new JSONObject();
+            msg.put("key", key);
+            msg.put("value", value);
+            HeartbeatService.getInstance().sendMessageToNode("set", msg.toString());
+        } catch (Exception e) {
+            Log.e("HEARTBEAT-MODULE", "set - " + e.getMessage());
         }
     }
 

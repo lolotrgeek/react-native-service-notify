@@ -1,3 +1,0 @@
-H:/notify-native/android/app/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/native-lib.dir
-H:/notify-native/android/app/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/edit_cache.dir
-H:/notify-native/android/app/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/rebuild_cache.dir
