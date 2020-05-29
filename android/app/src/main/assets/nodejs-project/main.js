@@ -229,7 +229,7 @@
     }
   })
 
-  // TIMER - add to separate file for concision \\
+  // TIMER - add to separate file for concision \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   let timer
   let runningTimer
 

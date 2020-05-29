@@ -28,6 +28,7 @@ public class HeartbeatService extends NodeJS {
 
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
+    private static String TITLE;
     private static String SUBTITLE;
     private static int INTERVAL = 1000;
     private static HeartbeatService instance;
@@ -174,14 +175,14 @@ public class HeartbeatService extends NodeJS {
                     try {
                         JSONObject update = heartbeatPayloadParse(obj);
                         Log.i(TAG, "msg from node : notify");
-                        Log.d(TAG,update.toString());
+                        Log.d(TAG, update.toString());
                         sendMessageToReact("notify", update.toString());
                         try {
-                            String title = update.get("title").toString();
-                            String subtitle = update.get("subtitle").toString();
-                            Log.i(TAG,"updating notification");
-                            Log.d(TAG, title + " " + subtitle);
-                            notificationUpdate(title, subtitle);
+                            TITLE = update.get("title").toString();
+                            SUBTITLE = update.get("subtitle").toString();
+                            Log.i(TAG, "updating notification");
+                            Log.d(TAG, TITLE + " " + SUBTITLE);
+                            notificationUpdate(TITLE, SUBTITLE);
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage());
                         }
@@ -236,6 +237,7 @@ public class HeartbeatService extends NodeJS {
     }
 
     public void notificationUpdate(String title, String subtitle) {
+        TITLE = title;
         SUBTITLE = subtitle;
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
@@ -264,7 +266,8 @@ public class HeartbeatService extends NodeJS {
 
     }
 
-    public void notificationPaused(String title) {
+    public void notificationPaused() {
+        Log.i(TAG,"pausing notification");
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
@@ -280,7 +283,7 @@ public class HeartbeatService extends NodeJS {
 
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(title).setContentText(SUBTITLE)
+                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(TITLE).setContentText(SUBTITLE)
                 .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_HIGH).setOnlyAlertOnce(true)
                 .setOngoing(false).addAction(buttonAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);

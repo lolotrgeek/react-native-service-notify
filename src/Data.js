@@ -42,7 +42,7 @@ export const deleteProject = (project) => {
 }
 /**
  * Generates a new timer using the standard timer model
- * TODO: consider doing a pre-create sync to eliminate unsynced deleted projects
+ * TODO: consider doing a pre-create sync to eliminate unsynced running timers/deleted projects
  * @param {*} projectId 
  */
 export const createTimer = (projectId) => {
