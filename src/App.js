@@ -11,6 +11,7 @@ export default function App() {
   const [status, setStatus] = useState([])
   const [projects, setProjects] = useState([])
   const [timers, setTimers] = useState([])
+  const [running, setRunning] = useState([])
 
   useEffect(() => Data.getProjects(), [])
   useEffect(() => {
@@ -20,7 +21,12 @@ export default function App() {
         let item = JSON.parse(parsed.gotAll)
         console.log('[react] ', item)
         if( item.type === 'project') setProjects(project => [...projects, item])
-        if(item.type === 'timer') setTimers(timer => [...timers, item])
+        if(item.type === 'timer') {
+          if (item.status === 'running') {
+            setRunning(item)
+          }
+          setTimers(timer => [...timers, item])
+        }
         
       }
     })
@@ -37,7 +43,7 @@ export default function App() {
       <Button title='create' onPress={() => Data.createProject('test2', '#000')}></Button>
       <Text>Events:</Text>
       <FlatList
-        data={events}
+        data={projects}
         renderItem={item => <Text >{item.name}</Text>}
         keyExtractor={item => item.id}
       />
