@@ -122,6 +122,7 @@
       // if doesn't send each, might want to put in an array...
       native.channel.post('done', { gotAll: data })
     })
+    chain.off()
   }
 
   /**
@@ -165,6 +166,12 @@
     })
   }
 
+  const offAll = msg => {
+    const input = JSON.parse(msg)
+    const chain = chainer(input.key)
+    chain.off()
+  }
+
   native.channel.on('get', msg => {
     console.log('[React node] incoming get: ' + typeof msg + msg)
     try {
@@ -204,10 +211,16 @@
       console.log('[GUN node] : Setting failed' + error)
     }
   })
-  // gun.get('app').get('hello').put({value: 'world'}, ack => console.log('ACK: ' , ack))
-  // gun.get('app').get('hello').on((data, key) => {
-  //   console.log('Data Found!' + data)
-  // })
+
+  native.channel.on('off', msg => {
+    console.log('[React node] incoming off: ' + typeof msg + msg)
+    try {
+      console.log('[React node] Off - ' + msg)
+      offAll(msg)
+    } catch (error) {
+      console.log('[GUN node] : Off failed' + error)
+    }
+  })
 
   module.exports = gun;
 }());

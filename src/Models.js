@@ -41,6 +41,7 @@ export const newProject = (name, color) => {
     const hashids = new Hashids()
     const key = hashids.encode(Date.now().toString())
     const value = {
+        id: key,
         created: new Date().toString(),
         type: 'project',
         status: 'active',

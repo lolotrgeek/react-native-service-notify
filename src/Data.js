@@ -143,4 +143,5 @@ export const finishTimer = (timer) => {
 
 export const getProjects = () => {
     store.getAll('projects')
+    // return store.off('projects')
 }
