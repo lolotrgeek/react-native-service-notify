@@ -3,9 +3,13 @@ package com.notify;
 import android.content.Intent;
 import android.content.Context;
 import android.content.BroadcastReceiver;
+import android.os.Build;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+
 public class HeartbeatActionReceiver extends BroadcastReceiver {
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getStringExtra("ACTION");
@@ -22,14 +26,16 @@ public class HeartbeatActionReceiver extends BroadcastReceiver {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void stop() {
         // HeartbeatModule.getInstance().stopService();
-        HeartbeatModule.getInstance().stopAction();
+        HeartbeatService.getInstance().sendMessageToNode("stop", "");
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void start() {
         // HeartbeatModule.getInstance().startService();
-        HeartbeatModule.getInstance().startAction();
+        HeartbeatService.getInstance().sendMessageToNode("start", "");
     }
 
 }

@@ -1,6 +1,6 @@
 import { cloneTimer, newProject, doneTimer, newTimer } from './Models'
 import { isRunning, multiDay, newEntryPerDay } from './Functions'
-import store from './Store'
+import * as store from './Store'
 
 const debug = true
 
@@ -8,8 +8,8 @@ export const createProject = (name, color) => {
     const project = newProject(name, color)
     if (!project) return false
     debug && console.log('Creating Project', project)
-    store.set(`history/projects${project.id}`, JSON.stringify(project))
-    store.put(`projects/${project.id}`, JSON.stringify(project))
+    store.set(`history/projects/${project.id}`, project)
+    store.put(`projects/${project.id}`, project)
 }
 
 export const updateProject = (project, updates) => {

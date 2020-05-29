@@ -8,26 +8,26 @@ const deviceEmitter = new NativeEventEmitter(Heartbeat)
 
 export default function App() {
 
+  const [online, setOnline] = useState([])
   const [status, setStatus] = useState([])
   const [projects, setProjects] = useState([])
   const [timers, setTimers] = useState([])
-  const [running, setRunning] = useState([])
+  const [running, setRunning] = useState({ id: 'none' })
 
-  useEffect(() => Data.getProjects(), [])
   useEffect(() => {
     deviceEmitter.addListener("done", event => {
       let parsed = JSON.parse(event)
       if (parsed.gotAll) {
         let item = JSON.parse(parsed.gotAll)
         console.log('[react] ', item)
-        if( item.type === 'project') setProjects(project => [...projects, item])
-        if(item.type === 'timer') {
+        if (item.type === 'project') setProjects(projects => [...projects, item])
+        if (item.type === 'timer') {
           if (item.status === 'running') {
             setRunning(item)
           }
           setTimers(timer => [...timers, item])
         }
-        
+
       }
     })
 
@@ -36,18 +36,20 @@ export default function App() {
     }
   }, [])
 
+  useEffect(() => Data.getProjects(), [])
 
   return (
     <View style={styles.container}>
       <Text styles={styles.status}>{status}</Text>
+      <Text>Running: {running.id}</Text>
+      <Text>Projects:</Text>
       <Button title='create' onPress={() => Data.createProject('test2', '#000')}></Button>
-      <Text>Events:</Text>
       <FlatList
         data={projects}
         renderItem={item => <Text >{item.name}</Text>}
         keyExtractor={item => item.id}
       />
-      <Button title='start' onPress={() => { Data.createTimer()}} />
+      <Button title='start' onPress={() => { Data.createTimer(projects[0].id) }} />
     </View>
   );
 }

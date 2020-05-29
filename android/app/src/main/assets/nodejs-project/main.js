@@ -10,6 +10,7 @@
 
   // console.log('GUN config ', config)
 
+
   const gun = new Gun({
     // Defaults
     web: config.server.listen(config.port, config.host),
@@ -33,6 +34,11 @@
     } finally {
       return input
     }
+  }
+
+  const inputParser = msg => {
+      if(typeof msg === 'string') return parser(msg)
+      else if(typeof msg === 'object') return msg
   }
 
   /**
@@ -106,7 +112,7 @@
 
   const getOne = (msg) => {
     const chain = chainer(msg, app)
-    console.log('[React node] Chain :', chain)
+    // console.log('[React node] Chain :', chain)
     chain.on((data, key) => {
       console.log('[GUN node] Data Found: ' + data)
       // if doesn't send each, might want to put in an array...
@@ -116,7 +122,7 @@
 
   const getAll = (msg) => {
     const chain = chainer(msg, app)
-    console.log('[React node] Chain :', chain)
+    // console.log('[React node] Chain :', chain)
     chain.map().on((data, key) => {
       console.log('[GUN node] Data Found: ', data)
       // if doesn't send each, might want to put in an array...
@@ -127,14 +133,14 @@
 
   /**
    * Assign a value to keys, needs to parse JSON msg first
-   * @param {*} msg JSON `{key: 'key' || 'key1/key2/...', value: any}`
+   * @param {*} msg `{key: 'key' || 'key1/key2/...', value: any}`
    */
   const putAll = (msg) => {
-    const input = JSON.parse(msg)
+    const input = inputParser(msg)
     const chain = chainer(input.key, app)
-    console.log('[React node] Chain :', chain)
+    // console.log('[React node] Chain :', chain)
     chain.put(input.value, ack => {
-      console.log('[GUN node] ACK: ', ack)
+      // console.log('[GUN node] ACK: ', ack)
       native.channel.post('done', { put: ack })
     })
   }
@@ -144,11 +150,11 @@
    * @param {*} msg JSON `{key: 'key' || 'key1/key2/...', value: any}`
    */
   const setAll = (msg) => {
-    const input = JSON.parse(msg)
+    const input = inputParser(msg)
     const chain = chainer(input.key, app)
-    console.log('[React node] Chain :', chain)
+    // console.log('[React node] Chain :', chain)
     chain.set(input.value, ack => {
-      console.log('[GUN node] ACK: ', ack)
+      // console.log('[GUN node] ACK: ', ack)
       native.channel.post('done', { set: ack })
     })
   }
@@ -159,15 +165,15 @@
    * @param {*} msg JSON { key1: {key2: any}, ...}
    */
   const putAllCompat = (msg) => {
-    const input = JSON.parse(msg)
+    const input = inputParser(msg)
     app.put(input, ack => {
-      console.log('[GUN node] ACK: ', ack)
+      // console.log('[GUN node] ACK: ', ack)
       native.channel.post('done', { put: ack })
     })
   }
 
   const offAll = msg => {
-    const input = JSON.parse(msg)
+    const input = inputParser(msg)
     const chain = chainer(input.key)
     chain.off()
   }
@@ -222,6 +228,15 @@
     }
   })
 
-  module.exports = gun;
+  module.exports = {
+    native: native,
+    chainer: chainer,
+    app: app,
+    get: getOne,
+    getAll: getAll,
+    put: putAll,
+    set: setAll,
+    off: offAll
+  };
 }());
 

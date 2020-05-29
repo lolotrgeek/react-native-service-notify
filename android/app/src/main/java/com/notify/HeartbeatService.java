@@ -9,6 +9,7 @@ import android.os.IBinder;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
@@ -27,9 +28,11 @@ public class HeartbeatService extends NodeJS {
 
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
+    private static String SUBTITLE;
     private static int INTERVAL = 1000;
     private static HeartbeatService instance;
     private static String TAG = "HEARTBEAT-SERVICE";
+
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -55,10 +58,6 @@ public class HeartbeatService extends NodeJS {
 
     public static HeartbeatService getInstance() {
         return instance;
-    }
-
-    public void setRunnableInterval(int ms) {
-        INTERVAL = ms;
     }
 
     // resumes the countHandler, use carefully, can cause service to step on itself
@@ -169,6 +168,24 @@ public class HeartbeatService extends NodeJS {
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage());
                     }
+                    break;
+                case "notify":
+                    Log.d(TAG, msg);
+                    try {
+                        JSONObject update = heartbeatPayloadParse(obj);
+                        Log.d(TAG, "notify - " + update);
+                        sendMessageToReact("notify", update.toString());
+                        try {
+                            String title = update.getString("title");
+                            String subtitle = update.getString("subtitle");
+                            notificationUpdate(title, subtitle);
+                        } catch (Exception e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                    break;
             }
         } catch (Throwable t) {
             Log.e(TAG, "Could not parse malformed JSON: \"" + msg + "\"");
@@ -213,6 +230,62 @@ public class HeartbeatService extends NodeJS {
     public void init() {
         super.startEngine("main.js");
         super.systemMessageToNode();
+    }
+
+    public void notificationUpdate(String title, String subtitle) {
+        SUBTITLE = subtitle;
+        // set Intent for what happens when tapping notification
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        // Intend and Build Action Buttons
+        Intent actionIntent = new Intent(this, HeartbeatActionReceiver.class);
+        actionIntent.putExtra("ACTION", "stop");
+        PendingIntent actionPendingIntent = PendingIntent.getBroadcast(this, 1, actionIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Action buttonAction = new NotificationCompat.Action.Builder(R.mipmap.ic_launcher, "Stop",
+                actionPendingIntent).build();
+
+        // Build the notification
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(title).setContentText(SUBTITLE)
+                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_HIGH).setOnlyAlertOnce(true)
+                .setOngoing(true).addAction(buttonAction);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        // send notification
+        // SERVICE_NOTIFICATION_ID is a unique int for each notification that you must
+        // define
+        notificationManager.notify(SERVICE_NOTIFICATION_ID, builder.build());
+
+    }
+
+    public void notificationPaused(String title) {
+        // set Intent for what happens when tapping notification
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        // Intend and Build Action Buttons
+        Intent startIntent = new Intent(this, HeartbeatActionReceiver.class);
+        startIntent.putExtra("ACTION", "start");
+        PendingIntent startPendingIntent = PendingIntent.getBroadcast(this, 1, startIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Action buttonAction = new NotificationCompat.Action.Builder(R.mipmap.ic_launcher, "Start",
+                startPendingIntent).build();
+
+        // Build the notification
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(title).setContentText(SUBTITLE)
+                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_HIGH).setOnlyAlertOnce(true)
+                .setOngoing(false).addAction(buttonAction);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        // send notification
+        // SERVICE_NOTIFICATION_ID is a unique int for each notification that you must
+        // define
+        notificationManager.notify(SERVICE_NOTIFICATION_ID, builder.build());
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

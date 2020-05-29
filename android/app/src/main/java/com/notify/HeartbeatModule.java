@@ -266,8 +266,6 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void notificationUpdate(int tick, String title) {
         TICK = Integer.toString(tick);
-        // send tick event
-        this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("Heartbeat", tick);
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this.reactContext, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent,
