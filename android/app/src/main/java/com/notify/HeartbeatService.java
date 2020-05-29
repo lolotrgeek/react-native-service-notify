@@ -75,7 +75,7 @@ public class HeartbeatService extends NodeJS {
     public JSONObject heartbeatPayloadParse(JSONObject obj) {
         JSONObject request = null;
         try {
-            Log.d(TAG, "Parsing Payload...");
+            Log.i(TAG, "Parsing Payload...");
             JSONArray payload = new JSONArray(obj.get("payload").toString());
             request = new JSONObject(payload.get(0).toString());
         } catch (JSONException e) {
@@ -93,7 +93,8 @@ public class HeartbeatService extends NodeJS {
         if (isJSONValid(msg)) {
             try {
                 obj = new JSONObject(msg);
-                Log.d(TAG, "Parsing Msg :" + obj.toString());
+                Log.i(TAG, "Parsing Msg...");
+                Log.d(TAG, obj.toString());
             } catch (JSONException e) {
                 Log.e(TAG, e.getMessage());
             }
@@ -105,8 +106,6 @@ public class HeartbeatService extends NodeJS {
         try {
             new JSONObject(test);
         } catch (JSONException ex) {
-            // edited, to include @Arthur's comment
-            // e.g. in case JSONArray is valid as well...
             try {
                 new JSONArray(test);
             } catch (JSONException ex1) {
@@ -120,8 +119,8 @@ public class HeartbeatService extends NodeJS {
         String event = null;
         try {
             event = obj.get("event").toString();
-            Log.d(TAG, "Parsing Event: " + event);
-
+            Log.i(TAG, "Parsing Event");
+            Log.d(TAG, event);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -139,7 +138,7 @@ public class HeartbeatService extends NodeJS {
     public void handleOutgoingMessages(JSONObject response, String event, String err) {
         try {
             response.put("err", err);
-            Log.i(TAG, event + "response :" + response.toString());
+            Log.d(TAG, event + "response :" + response.toString());
             super.sendMessageToNode(event, response.toString());
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
@@ -163,7 +162,8 @@ public class HeartbeatService extends NodeJS {
                     Log.d(TAG, msg);
                     try {
                         JSONObject request = heartbeatPayloadParse(obj);
-                        Log.d(TAG, "done - " + request);
+                        Log.i(TAG, "msg from node : done");
+                        Log.d("NODE_DEBUG_PUT", "done: " + request.toString());
                         sendMessageToReact("done", request.toString());
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage());
@@ -173,11 +173,14 @@ public class HeartbeatService extends NodeJS {
                     Log.d(TAG, msg);
                     try {
                         JSONObject update = heartbeatPayloadParse(obj);
-                        Log.d(TAG, "notify - " + update);
+                        Log.i(TAG, "msg from node : notify");
+                        Log.d(TAG,update.toString());
                         sendMessageToReact("notify", update.toString());
                         try {
-                            String title = update.getString("title");
-                            String subtitle = update.getString("subtitle");
+                            String title = update.get("title").toString();
+                            String subtitle = update.get("subtitle").toString();
+                            Log.i(TAG,"updating notification");
+                            Log.d(TAG, title + " " + subtitle);
                             notificationUpdate(title, subtitle);
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage());

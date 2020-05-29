@@ -120,6 +120,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             JSONObject msg = new JSONObject();
             msg.put("key", key);
             msg.put("value", value);
+            Log.d("NODE_DEBUG_PUT", msg.toString());
             HeartbeatService.getInstance().sendMessageToNode("put", msg.toString());
         } catch (Exception e) {
             Log.e("HEARTBEAT-MODULE", "put - " + e.getMessage());

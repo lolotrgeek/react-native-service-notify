@@ -37,8 +37,8 @@
   }
 
   const inputParser = msg => {
-    if (typeof msg === 'string') return parser(msg)
-    else if (typeof msg === 'object') return msg
+      if(typeof msg === 'string') return parser(msg)
+      else if(typeof msg === 'object') return msg
   }
 
   /**
@@ -86,7 +86,7 @@
   /**
  * Create a chain by splitting a key string, adding each split to the chain
  * 
- * @param {string} input `key` || `key1/key2/...`
+ * @param {*} input `key1\key2\...`
  * @param {*} chain 
  */
   const chainer = (input, chain) => {
@@ -116,7 +116,7 @@
     chain.on((data, key) => {
       console.log('[GUN node] Data Found: ' + data)
       // if doesn't send each, might want to put in an array...
-      native.channel.post('done', data)
+      native.channel.post('done', { got: data })
     })
   }
 
@@ -126,7 +126,7 @@
     chain.map().on((data, key) => {
       console.log('[GUN node] Data Found: ', data)
       // if doesn't send each, might want to put in an array...
-      native.channel.post('done', data )
+      native.channel.post('done', { gotAll: data })
     })
     chain.off()
   }
@@ -137,12 +137,11 @@
    */
   const putAll = (msg) => {
     const input = inputParser(msg)
-    console.log('[NODE_DEBUG_PUT] : ' , input)
     const chain = chainer(input.key, app)
     // console.log('[React node] Chain :', chain)
     chain.put(input.value, ack => {
-      console.log('[NODE_DEBUG_PUT] ERR? ', ack.err)
-      native.channel.post('done', ack.err ? ack : input.value)
+      // console.log('[GUN node] ACK: ', ack)
+      native.channel.post('done', { put: ack })
     })
   }
 
@@ -156,7 +155,7 @@
     // console.log('[React node] Chain :', chain)
     chain.set(input.value, ack => {
       // console.log('[GUN node] ACK: ', ack)
-      native.channel.post('done', ack.err ? ack : input.value)
+      native.channel.post('done', { set: ack })
     })
   }
 
@@ -169,7 +168,7 @@
     const input = inputParser(msg)
     app.put(input, ack => {
       // console.log('[GUN node] ACK: ', ack)
-      native.channel.post('done', ack.err ? ack : input.value)
+      native.channel.post('done', { put: ack })
     })
   }
 
@@ -180,7 +179,7 @@
   }
 
   native.channel.on('get', msg => {
-    console.log('[React node] incoming get: ' + typeof msg , msg)
+    console.log('[React node] incoming get: ' + typeof msg + msg)
     try {
       console.log('[GUN node] Getting : ' + msg)
       getOne(msg)
@@ -190,7 +189,7 @@
   })
 
   native.channel.on('getAll', msg => {
-    console.log('[React node] incoming getAll: ' + typeof msg , msg)
+    console.log('[React node] incoming getAll: ' + typeof msg + msg)
     try {
       console.log('[GUN node] Getting All: ' + msg)
       getAll(msg)
@@ -200,7 +199,7 @@
   })
 
   native.channel.on('put', msg => {
-    console.log('[React node] incoming put: ' + typeof msg , msg)
+    console.log('[React node] incoming put: ' + typeof msg + msg)
     try {
       console.log('[React node] storing - ' + msg)
       putAll(msg)
@@ -210,7 +209,7 @@
   })
 
   native.channel.on('set', msg => {
-    console.log('[React node] incoming set: ' + typeof msg , msg)
+    console.log('[React node] incoming set: ' + typeof msg + msg)
     try {
       console.log('[React node] storing - ' + msg)
       setAll(msg)
@@ -220,65 +219,12 @@
   })
 
   native.channel.on('off', msg => {
-    console.log('[React node] incoming off: ' + typeof msg , msg)
+    console.log('[React node] incoming off: ' + typeof msg + msg)
     try {
       console.log('[React node] Off - ' + msg)
       offAll(msg)
     } catch (error) {
       console.log('[GUN node] : Off failed' + error)
-    }
-  })
-
-  // TIMER - add to separate file for concision \\
-  let timer
-  let runningTimer
-
-  const runTimer = input => {
-    console.log('[Timer node] Start - ' + input)
-    let i = 0
-    timer = setInterval(() => {
-      native.channel.post('notify', { title: input.id, subtitle: i.toString() })
-      i++
-    }, 1000)
-  }
-
-  const stopTimer = () => {
-    console.log('[Timer node] Stop ' + timer)
-    clearInterval(timer)
-    runningTimer = {}
-    put({ key: 'running', value: { id: 'none' } })
-    native.channel.post('notify', {})
-  }
-
-  chainer('running', app).on((data, key) => {
-    data = JSON.parse(data)
-    if (data.type === 'timer') {
-      if (data.status === 'running') {
-        runningTimer = data
-        console.log('[NODE_DEBUG_PUT] : Running Timer ' , runningTimer)
-        runTimer(data)
-      }
-      if (data.status !== 'running' && data.id === runningTimer.id) {
-        stopTimer()
-      }
-    }
-  })
-
-  native.channel.on('stop', msg => {
-    console.log('[React node] incoming Stop: ' + typeof msg , msg)
-    try {
-      stopTimer()
-    } catch (error) {
-      console.log('[GUN node] : Stop failed' + error)
-    }
-  })
-
-  native.channel.on('start', msg => {
-    console.log('[React node] incoming Start: ' + typeof msg , msg)
-    try {
-      runTimer(runningTimer)
-    } catch (error) {
-      console.log('[GUN node] : Start failed' + error)
     }
   })
 

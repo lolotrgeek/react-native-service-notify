@@ -171,7 +171,8 @@ public class NodeJS extends Service {
             Log.e(LOGTAG, e.getMessage());
         }
         if (nodeIsReadyForAppEvents) {
-            Log.i(LOGTAG, "Sending - " + message.toString());
+            Log.i(LOGTAG, "Sending msg from Android to Node.");
+            Log.d(LOGTAG, message.toString());
             sendMessageToNodeChannel(EVENT_CHANNEL, message.toString());
         } else {
             Log.e(LOGTAG, "Unable to Send - " + message.toString());
