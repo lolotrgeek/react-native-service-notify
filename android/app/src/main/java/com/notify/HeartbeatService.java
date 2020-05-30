@@ -28,8 +28,8 @@ public class HeartbeatService extends NodeJS {
 
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
-    private static String TITLE;
-    private static String SUBTITLE;
+    private static String TITLE = "Title";
+    private static String SUBTITLE = "Subtitle";
     private static int INTERVAL = 1000;
     private static HeartbeatService instance;
     private static String TAG = "HEARTBEAT-SERVICE";
@@ -178,12 +178,20 @@ public class HeartbeatService extends NodeJS {
                         Log.d(TAG, update.toString());
                         sendMessageToReact("notify", update.toString());
                         try {
-                            TITLE = update.get("title").toString();
-                            SUBTITLE = update.get("subtitle").toString();
-                            Log.i(TAG, "updating notification");
-                            Log.d(TAG, TITLE + " " + SUBTITLE);
-                            notificationUpdate(TITLE, SUBTITLE);
+                            String state = update.get("state").toString();
+                            if (state == "stop") {
+                                notificationPaused();
+                            } else {
+                                String title = update.get("title").toString();
+                                TITLE = title;
+                                String subtitle = update.get("subtitle").toString();
+                                SUBTITLE = subtitle;
+
+                                Log.d(TAG, TITLE + " " + SUBTITLE);
+                                notificationUpdate(TITLE, SUBTITLE);
+                            }
                         } catch (Exception e) {
+
                             Log.e(TAG, e.getMessage());
                         }
                     } catch (Exception e) {
@@ -237,6 +245,7 @@ public class HeartbeatService extends NodeJS {
     }
 
     public void notificationUpdate(String title, String subtitle) {
+        Log.i(TAG, "updating notification");
         TITLE = title;
         SUBTITLE = subtitle;
         // set Intent for what happens when tapping notification
@@ -267,7 +276,7 @@ public class HeartbeatService extends NodeJS {
     }
 
     public void notificationPaused() {
-        Log.i(TAG,"pausing notification");
+        Log.i(TAG, "pausing notification");
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
