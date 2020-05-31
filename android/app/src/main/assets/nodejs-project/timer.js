@@ -8,8 +8,12 @@ let timer
 let runningTimer
 
 // Core Functions
+/**
+ * 
+ * @param {object} input 
+ */
 const runTimer = input => {
-    console.log('[Timer node] Start - ' + input)
+    console.log('[Timer node] Start')
     let i = 0
     timer = setInterval(() => {
         native.channel.post('notify', { title: input.id, subtitle: i.toString(), state: "start" })
@@ -22,6 +26,22 @@ const stopTimer = () => {
     // runningTimer = { id: 'none' }
     native.channel.post('notify', { state: "stop" })
 }
+
+// Helper Functions 
+const parser = input => {
+    try {
+      input = JSON.parse(input)
+    } catch (error) {
+      console.log('[Parse node] not a JSON object')
+    } finally {
+      return input
+    }
+  }
+  
+  const inputParser = msg => {
+    if (typeof msg === 'string') return parser(msg)
+    else if (typeof msg === 'object') return msg
+  }
 
 // Remote Commands Handler, listens to finishTimer or createTimer
 store.chainer('running', store.app).on((data, key) => {
@@ -60,7 +80,7 @@ native.channel.on('stop', msg => {
 native.channel.on('start', msg => {
     console.log('[React node] incoming Start: ' + typeof msg, msg)
     try {
-        createTimer(runningTimer.id)
+        createTimer(runningTimer.project)
         // runTimer(runningTimer)
     } catch (error) {
         console.log('[Timer node] : Start failed' + error)

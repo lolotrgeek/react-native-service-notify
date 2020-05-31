@@ -5,7 +5,7 @@ const { Heartbeat } = NativeModules;
 export const store = Heartbeat
 
 /**
- * 
+ * HeartbeatModule.java does the Object mapping for this function for node Store.putAll(msg)
  * @param {string} key 
  * @param {*} value 
  */
@@ -15,7 +15,7 @@ export function put(key, value) {
 }
 
 /**
- * 
+ * HeartbeatModule.java does the Object mapping for this function for node Store.putAll(msg)
  * @param {string} key 
  * @param {*} value 
  */
