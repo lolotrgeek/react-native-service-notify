@@ -7,7 +7,7 @@ const debug = true
 export const createProject = (name, color) => {
     const project = newProject(name, color)
     if (!project) return false
-    debug && console.log('Creating Project', project)
+    debug && console.log('[react Data] Creating Project', project)
     store.set(`history/projects/${project.id}`, project)
     store.put(`projects/${project.id}`, project)
 }
@@ -17,7 +17,7 @@ export const updateProject = (project, updates) => {
     Object.assign(projectEdit, updates)
     if (projectEdit.deleted) { projectEdit.deleted = null }
     projectEdit.edited = new Date().toString()
-    debug && console.log('Updating Project', projectEdit)
+    debug && console.log('[react Data] Updating Project', projectEdit)
     store.set(`history/projects/${project.id}`, projectEdit)
     store.put(`projects/${projectEdit.id}`, projectEdit)
 }
@@ -27,13 +27,13 @@ export const restoreProject = (project) => {
     if (restoredProject.status === 'deleted') {
         restoredProject.status = 'active'
     }
-    debug && console.log('Restoring Project', restoredProject)
+    debug && console.log('[react Data] Restoring Project', restoredProject)
     store.put(`projects/${restoreProject.id}`, restoreProject)
 }
 
 
 export const deleteProject = (project) => {
-    debug && console.log('Deleting Project', project)
+    debug && console.log('[react Data] Deleting Project', project)
     let projectDelete = project
     projectDelete.deleted = new Date().toString()
     store.set(`history/projects/${projectDelete.id}`, projectDelete)
@@ -47,9 +47,9 @@ export const deleteProject = (project) => {
  */
 export const createTimer = (projectId) => {
     if (!projectId || typeof projectId !== 'string' || projectId.length < 9) return false
-    debug && console.log('Creating Timer', projectId)
+    debug && console.log('[react Data] Creating Timer', projectId)
     const timer = newTimer(projectId)
-    debug && console.log('Created Timer', timer)
+    debug && console.log('[react Data] Created Timer', timer)
     store.put('running', timer)
     store.set(`history/timers/${projectId}/${timer.id}`, timer)
     return true
@@ -63,7 +63,7 @@ export const updateTimer = (timer) => {
     let editedTimer = timer
     if (editedTimer.deleted) { editedTimer.deleted = null }
     editedTimer.edited = new Date().toString()
-    debug && console.log('Updating Timer', editedTimer)
+    debug && console.log('[react Data] Updating Timer', editedTimer)
     store.set(`history/timers/${editedTimer.project}/${editedTimer.id}`, editedTimer)
     store.put(`timers/${editedTimer.project}/${editedTimer.id}`, editedTimer)
 }
@@ -75,23 +75,23 @@ export const restoreTimer = (timer) => {
         restoredTimer.status = 'done'
         store.set(`history/timers/${restoreTimer.project}/${restoreTimer.id}`, restoredTimer)
     }
-    debug && console.log('Restoring Timer', restoredTimer)
+    debug && console.log('[react Data] Restoring Timer', restoredTimer)
     store.put(`timer/${restoreTimer.project}/${restoreTimer.id}/`, restoredTimer)
 }
 
 export const endTimer = (timer) => {
-    debug && console.log('Ending', timer)
+    debug && console.log('[react Data] Ending', timer)
     store.set(`history/timers/${timer.project}/${timer.id}`, timer)
     store.put(`timrs/${timer.project}/${timer.id}`, timer)
 }
 
 export const endTimerDestructured = (timer) => {
-    debug && console.log('Ending', timer)
+    debug && console.log('[react Data] Ending', timer)
     store.set(`history/timers/${timer.project}/${timer.id}`, timer)
     const keys = Object.keys(timer)
-    debug && console.log('destructure', keys)
+    debug && console.log('[react Data] destructure', keys)
     keys.map(key => {
-        debug && console.log('Storing', key, timer[key])
+        debug && console.log('[react Data] Storing', key, timer[key])
         // timers > projectId > timerId > timerKey > timervalue
         store.put(`timers/${timer.project}/${timer.id}/${key}`, timer.key)
         return key
@@ -99,7 +99,7 @@ export const endTimerDestructured = (timer) => {
 }
 
 export const deleteTimer = (timer) => {
-    debug && console.log('Deleting Timer', timer)
+    debug && console.log('[react Data] Deleting Timer', timer)
     const timerDelete = timer
     timerDelete.deleted = new Date().toString()
     timerDelete.status = 'deleted'
@@ -113,14 +113,14 @@ export const deleteTimer = (timer) => {
  */
 export const addTimer = (projectId, value) => {
     const timer = cloneTimer(value)
-    debug && console.log('Storing Timer', timer)
+    debug && console.log('[react Data] Storing Timer', timer)
     store.set(`history/timers/${projectId}/${timer.id}`, timer)
     store.put(`timers/${projectId}/${timer.id}`, timer)
 }
 
 export const finishTimer = (timer) => {
     if (isRunning(timer)) {
-        debug && console.log('Finishing', timer)
+        debug && console.log('[react Data] Finishing', timer)
         let done = doneTimer(timer)
         store.put('running', {id: 'none'})
         // Danger zone until endTimer is called
@@ -130,7 +130,7 @@ export const finishTimer = (timer) => {
                 let splitTimer = done
                 splitTimer.started = dayEntry.start
                 splitTimer.ended = dayEntry.end
-                debug && console.log('Split', i, splitTimer)
+                debug && console.log('[react Data] Split', i, splitTimer)
                 if (i === 0) { endTimer(splitTimer) } // use initial timer id for first day
                 else { addTimer(splitTimer.project, splitTimer) }
                 return splitTimer

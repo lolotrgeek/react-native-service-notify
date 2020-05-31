@@ -28,14 +28,12 @@ public class HeartbeatActionReceiver extends BroadcastReceiver {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void stop() {
-        // HeartbeatModule.getInstance().stopService();
         HeartbeatService.getInstance().sendMessageToNode("stop", "");
         HeartbeatService.getInstance().notificationPaused();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void start() {
-        // HeartbeatModule.getInstance().startService();
         HeartbeatService.getInstance().sendMessageToNode("start", "");
     }
 

@@ -17,6 +17,7 @@ export default function App() {
   // const running = useRef({ id: 'none' })
 
   useEffect(() => {
+    // Listens for Data 'done' events, filters them for display
     deviceEmitter.addListener("done", event => {
       let item = JSON.parse(event)
       console.log('[react] Item' + typeof item + ' ', item)
@@ -25,8 +26,11 @@ export default function App() {
       }
       if (item.type === 'timer') {
         if (item.status === 'running') {
-          console.log('[react] running')
           setRunning(item)
+          console.log('[react] running', item)
+        }
+        else if (item.status === 'done' && item.id === running.id) {
+          setRunning({ id: 'none' })
         }
         setTimers(timers => [...timers, item])
       }
@@ -48,8 +52,10 @@ export default function App() {
         renderItem={item => <Text >{item.name}</Text>}
         keyExtractor={item => item.id}
       /> */}
-      <Button title='start' onPress={() => { Data.createTimer('testproject') }} />
-      <Button title='stop' onPress={() => { Data.finishTimer(running) }} />
+      {!running.id || running.id === 'none' ?
+        <Button title='start' onPress={() => Data.createTimer('testproject')} /> :
+        <Button title='stop' onPress={() => Data.finishTimer(running) } />
+      }
     </View>
   );
 }

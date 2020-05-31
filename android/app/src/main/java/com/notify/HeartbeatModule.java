@@ -207,43 +207,12 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @ReactMethod
-    public void startAction() {
-        if (STATUS == "STOPPED") {
-            startService();
-        }
-        try {
-            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "start");
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
-    public void stopAction() {
-        if (STATUS == "STOPPED") {
-            startService();
-        }
+    public void startTimer() {
         try {
-            // notificationPaused(TITLE);
-            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ACTION", "stop");
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @ReactMethod
-    public void resumeCounting() {
-        if (STATUS == "STOPPED") {
-            startService();
-        }
-        try {
-            HeartbeatService.getInstance().pause(); // want to clear any remaining counters before we resume
-            HeartbeatService.getInstance().resume();
-            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("COUNT", "resume");
+            HeartbeatService.getInstance().sendMessageToNode("start", "");
         } catch (Exception e) {
             // TODO: handle exception
         }
@@ -252,13 +221,9 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
-    public void pauseCounting() {
-        if (STATUS == "STOPPED") {
-            startService();
-        }
+    public void stopTimer() {
         try {
-            HeartbeatService.getInstance().pause();
-            this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("COUNT", "pause");
+            HeartbeatService.getInstance().sendMessageToNode("stop", "");
         } catch (Exception e) {
             // TODO: handle exception
         }
