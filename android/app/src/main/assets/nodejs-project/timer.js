@@ -9,7 +9,7 @@ const runTimer = input => {
     console.log('[Timer node] Start - ' + input)
     let i = 0
     timer = setInterval(() => {
-        native.channel.post('notify', { title: input.id, subtitle: i.toString() })
+        native.channel.post('notify', { title: input.id, subtitle: i.toString(), state: "start" })
         i++
     }, 1000)
 }
