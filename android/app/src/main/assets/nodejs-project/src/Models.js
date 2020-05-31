@@ -1,6 +1,6 @@
 // mini nodeified version of Models.js
 
-const Hashids = require('hashids')
+const Hashids = require('hashids/cjs')
 
 exports.newTimer = projectId => {
     const hashids = new Hashids()
