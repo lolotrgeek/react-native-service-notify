@@ -1,9 +1,43 @@
 // mini nodeified version of Functions.js
-const differenceInSeconds = require('date-fns/differenceInSeconds')
-const startOfToday = require('date-fns/startOfToday')
-const addSeconds = require('date-fns/addSeconds')
-const endOfDay = require('date-fns/endOfDay')
-const date = require('date-fns')
+const moment = require('moment')
+
+/**
+ * 
+ * reference: https://stackoverflow.com/questions/41778205/find-time-difference-between-2-times-using-moment-js
+ * @param {Date} start 
+ * @param {Date} end 
+ */
+const differenceInSeconds = (start, end) => {
+    var a = moment(start)
+    var b = moment(end)
+    return a.diff(b, 'seconds')
+}
+
+/**
+ * reference https://stackoverflow.com/questions/49909213/how-to-get-the-beginning-and-end-of-the-day-with-moment
+ */
+const startOfToday = () => {
+    const now = moment()
+    return now.startOf('day')
+}
+
+/**
+ * 
+ * @param {Date} date
+ * reference https://stackoverflow.com/questions/49909213/how-to-get-the-beginning-and-end-of-the-day-with-moment 
+ */
+const endOfDay = (date) => {
+    return moment(date).endOf('day')
+}
+
+/**
+ * reference https://stackoverflow.com/questions/17333425/add-a-duration-to-a-moment-moment-js
+ * @param {Date} date 
+ * @param {Number} amount 
+ */
+const addSeconds = (date, amount) => {
+    return moment(date).add(amount, 'seconds')
+}
 
 const debug = false
 
