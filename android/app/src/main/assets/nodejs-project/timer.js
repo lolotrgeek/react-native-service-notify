@@ -13,7 +13,7 @@ let runningTimer
  * @param {object} input 
  */
 const runTimer = input => {
-    console.log('[Timer node] Start')
+    console.log('[Timer node] Start ', input)
     let i = 0
     timer = setInterval(() => {
         native.channel.post('notify', { title: input.id, subtitle: i.toString(), state: "start" })
@@ -21,9 +21,8 @@ const runTimer = input => {
     }, 1000)
 }
 const stopTimer = () => {
-    console.log('[Timer node] Stop ' + timer)
+    console.log('[Timer node] Stop ', runningTimer)
     clearInterval(timer)
-    // runningTimer = { id: 'none' }
     native.channel.post('notify', { state: "stop" })
 }
 
@@ -47,13 +46,15 @@ const parser = input => {
 store.chainer('running', store.app).on((data, key) => {
     data = JSON.parse(data)
     if (data.type === 'timer') {
+        console.log('[node STOP] data: ', data)
         if (data.status === 'running') {
             runningTimer = data
             console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
             runTimer(data)
         }
-        else if (data.status !== 'running' && data.id === runningTimer.id) {
-            runningTimer = { id: 'none' }
+        else if (data.status === 'done' && data.id === runningTimer.id) {
+            console.log('[node STOP]')
+            runningTimer = data
             stopTimer()
         }
         else if (data.id === 'none') {
@@ -73,16 +74,21 @@ native.channel.on('stop', msg => {
         stopTimer()
         finishTimer(runningTimer)
     } catch (error) {
-        console.log('[Timer node] : Stop failed' + error)
+        console.log('[Timer node] : Stop failed ' + error)
     }
 })
 
 native.channel.on('start', msg => {
     console.log('[React node] incoming Start: ' + typeof msg, msg)
     try {
-        createTimer(runningTimer.project)
-        // runTimer(runningTimer)
+        const runningNew = createTimer(runningTimer.project)
+        runningTimer = runningNew
     } catch (error) {
-        console.log('[Timer node] : Start failed' + error)
+        console.log('[Timer node] : Create failed ' + error)
+    }
+    try {
+        runTimer(runningTimer)
+    } catch (error) {
+        console.log('[Timer node] : Start failed ' + error)
     }
 })

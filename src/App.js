@@ -12,25 +12,32 @@ export default function App() {
   const [status, setStatus] = useState([])
   const [projects, setProjects] = useState([])
   const [timers, setTimers] = useState([])
-  const [running, setRunning] = useState([{ id: 'none' }])
+  // const [running, setRunning] = useState({ id: 'none' })
 
-  // const running = useRef({ id: 'none' })
+  const running = useRef({ id: 'none' })
 
   useEffect(() => {
     // Listens for Data 'done' events, filters them for display
     deviceEmitter.addListener("done", event => {
       let item = JSON.parse(event)
-      console.log('[react] Item' + typeof item + ' ', item)
+      console.log('[react] Done.')
+      console.log(typeof item + ' ', item)
       if (item.type === 'project') {
         setProjects(projects => [...projects, item])
       }
       if (item.type === 'timer') {
+        console.log('[react] timer.')
         if (item.status === 'running') {
-          setRunning(item)
-          console.log('[react] running', item)
+          // setRunning(item)
+          running.current = item
+          console.log('[react] running')
+          console.log(running)
         }
-        else if (item.status === 'done' && item.id === running.id) {
-          setRunning({ id: 'none' })
+        else if (item.status === 'done' && item.id === running.current.id) {
+          console.log('[react] STOP')
+          console.log(item)
+          // setRunning(item)
+          running.current = item
         }
         setTimers(timers => [...timers, item])
       }
@@ -44,7 +51,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text styles={styles.status}>{status}</Text>
-      <Text>Running: {running.id}</Text>
+      <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>
       {/* <Text>Projects:</Text>
       <Button title='create' onPress={() => Data.createProject('test2', '#000')}></Button>
       <FlatList
@@ -52,9 +59,9 @@ export default function App() {
         renderItem={item => <Text >{item.name}</Text>}
         keyExtractor={item => item.id}
       /> */}
-      {!running.id || running.id === 'none' ?
+      {running.current.status !== 'running' || running.current.id === 'none' ?
         <Button title='start' onPress={() => Data.createTimer('testproject')} /> :
-        <Button title='stop' onPress={() => Data.finishTimer(running) } />
+        <Button title='stop' onPress={() => Data.finishTimer(running.current)} />
       }
     </View>
   );

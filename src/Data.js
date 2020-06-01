@@ -82,7 +82,7 @@ export const restoreTimer = (timer) => {
 export const endTimer = (timer) => {
     debug && console.log('[react Data] Ending', timer)
     store.set(`history/timers/${timer.project}/${timer.id}`, timer)
-    store.put(`timrs/${timer.project}/${timer.id}`, timer)
+    store.put(`timers/${timer.project}/${timer.id}`, timer)
 }
 
 export const endTimerDestructured = (timer) => {
@@ -120,9 +120,9 @@ export const addTimer = (projectId, value) => {
 
 export const finishTimer = (timer) => {
     if (isRunning(timer)) {
-        debug && console.log('[react Data] Finishing', timer)
+        debug && console.log('[react Data STOP] Finishing', timer)
         let done = doneTimer(timer)
-        store.put('running', {id: 'none'})
+        store.put('running', done)
         // Danger zone until endTimer is called
         if (multiDay(done.started, done.ended)) {
             const dayEntries = newEntryPerDay(done.started, done.ended)

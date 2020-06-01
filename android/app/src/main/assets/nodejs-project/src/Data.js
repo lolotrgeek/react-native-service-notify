@@ -16,14 +16,15 @@ const createTimer = (projectId) => {
   const timer = newTimer(projectId)
   debug && console.log('Created Timer', timer)
   put('running', timer)
+  debug && console.log('Success! Created Timer.')
   set(`history/timers/${projectId}/${timer.id}`, timer)
-  return true
+  return timer
 }
 
 const endTimer = (timer) => {
   debug && console.log('Ending', timer)
   set(`history/timers/${timer.project}/${timer.id}`, timer)
-  put(`timrs/${timer.project}/${timer.id}`, timer)
+  put(`timers/${timer.project}/${timer.id}`, timer)
 }
 
 /**
@@ -40,9 +41,9 @@ const addTimer = (projectId, value) => {
 
 const finishTimer = (timer) => {
     if (isRunning(timer)) {
-        debug && console.log('Finishing', timer)
         let done = doneTimer(timer)
-        put('running', { id: 'none' })
+        debug && console.log('[node Data STOP]', done)
+        put('running', done)
         // Danger of data loss until endTimer is called
         if (multiDay(done.started, done.ended)) {
             const dayEntries = newEntryPerDay(done.started, done.ended)

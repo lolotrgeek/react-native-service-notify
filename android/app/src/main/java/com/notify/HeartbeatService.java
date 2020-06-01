@@ -174,12 +174,12 @@ public class HeartbeatService extends NodeJS {
                     Log.d(TAG, msg);
                     try {
                         JSONObject update = heartbeatPayloadParse(obj);
-                        Log.i(TAG, "msg from node : notify");
-                        Log.d(TAG, update.toString());
+                        Log.d(TAG, "notify - " + update.toString());
                         sendMessageToReact("notify", update.toString());
                         try {
                             String state = update.get("state").toString();
-                            if (state == "stop") {
+                            Log.d(TAG, "notify STATE - " + state);
+                            if (state.equals("stop")) {
                                 notificationPaused();
                             } else {
                                 String title = update.get("title").toString();

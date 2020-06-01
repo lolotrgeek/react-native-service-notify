@@ -36,8 +36,14 @@ const parser = input => {
 }
 
 const inputParser = msg => {
-  if (typeof msg === 'string') return parser(msg)
-  else if (typeof msg === 'object') return msg
+  if (typeof msg === 'string') {
+    console.log('Parsing String Input')
+    return parser(msg)
+  }
+  else if (typeof msg === 'object') {
+    console.log('Parsing Object Input')
+    return msg
+  }
 }
 
 /**
@@ -96,13 +102,13 @@ const chainer = (input, chain) => {
 
   if (typeof input === 'string') {
     if (input.length === 0) return chain
-    input = input.split('/')
+    inputKeys = input.split('/')
     // chainer(input, chain)
     // if (input.length === 0) return chain
-    while (input.length > 0) {
-      console.log('[Chain node] Chaining key:', input[0])
-      chain = chain.get(input[0])
-      input = input.slice(1)
+    while (inputKeys.length > 0) {
+      console.log('[Chain node] Chaining key:', inputKeys[0])
+      chain = chain.get(inputKeys[0])
+      inputKeys = inputKeys.slice(1)
     }
   }
   console.log('[Chain node] done.')
@@ -139,6 +145,7 @@ const putAll = (msg) => {
   console.log('[NODE_DEBUG_PUT] : ', input)
   const chain = chainer(input.key, app)
   // console.log('[React node] Chain :', chain)
+  console.log('[NODE_DEBUG_PUT] : ', typeof input)
   chain.put(input.value, ack => {
     console.log('[NODE_DEBUG_PUT] ERR? ', ack.err)
     native.channel.post('done', ack.err ? ack : input.value)
@@ -150,11 +157,13 @@ const putAll = (msg) => {
  * @param {*} msg JSON `{key: 'key' || 'key1/key2/...', value: any}`
  */
 const setAll = (msg) => {
+  console.log('[NODE_DEBUG_SET] : parsing - ', msg)
   const input = inputParser(msg)
+  console.log('[NODE_DEBUG_SET] : ', input)
   const chain = chainer(input.key, app)
   // console.log('[React node] Chain :', chain)
   chain.set(input.value, ack => {
-    // console.log('[GUN node] ACK: ', ack)
+    console.log('[NODE_DEBUG_SET] ERR? ', ack.err)
     native.channel.post('done', ack.err ? ack : input.value)
   })
 }

@@ -11,6 +11,7 @@ export const store = Heartbeat
  */
 export function put(key, value) {
     // do validation here...
+    value.status === 'done' ? console.log('[react store STOP] ', value) : console.log('[react store RUN] ', value)
     store.put(key, JSON.stringify(value))
 }
 
