@@ -31,6 +31,7 @@ public class HeartbeatService extends NodeJS {
     private static String TITLE = "Title";
     private static String SUBTITLE = "Subtitle";
     private static int INTERVAL = 1000;
+    private static int COUNT = 0;
     private static HeartbeatService instance;
     private static String TAG = "HEARTBEAT-SERVICE";
 
@@ -53,6 +54,10 @@ public class HeartbeatService extends NodeJS {
     private Runnable runnableCode = new Runnable() {
         @Override
         public void run() {
+            COUNT++;
+            SUBTITLE = Integer.toString(COUNT);
+            notificationUpdate(TITLE, SUBTITLE);
+            sendMessageToReact("count", SUBTITLE);
             countHandler.postDelayed(this, INTERVAL);
         }
     };
@@ -181,14 +186,15 @@ public class HeartbeatService extends NodeJS {
                             Log.d(TAG, "notify STATE - " + state);
                             if (state.equals("stop")) {
                                 notificationPaused();
-                            } else {
+                                this.countHandler.removeCallbacks(this.runnableCode);
+                            }
+                            if(state.equals("start")) {
                                 String title = update.get("title").toString();
                                 TITLE = title;
-                                String subtitle = update.get("subtitle").toString();
-                                SUBTITLE = subtitle;
-
+                                COUNT = 0;
+                                this.countHandler.removeCallbacks(this.runnableCode);
+                                this.countHandler.post(this.runnableCode);
                                 Log.d(TAG, TITLE + " " + SUBTITLE);
-                                notificationUpdate(TITLE, SUBTITLE);
                             }
                         } catch (Exception e) {
 

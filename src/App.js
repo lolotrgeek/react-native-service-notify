@@ -13,10 +13,12 @@ export default function App() {
   const [status, setStatus] = useState([])
   const [projects, setProjects] = useState([])
   const [timers, setTimers] = useState([])
-  const { count, setCount, start, stop } = useCounter(1000, false)
+  const [count, setCount] = useState(0)
+  // const { count, setCount, start, stop } = useCounter(1000, false)
   // const [running, setRunning] = useState({ id: 'none' })
 
   const running = useRef({ id: 'none' })
+  // const count = useRef(0)
 
   useEffect(() => {
     // Listens for Data 'done' events, filters them for display
@@ -32,8 +34,6 @@ export default function App() {
         if (item.status === 'running') {
           // setRunning(item)
           running.current = item
-          setCount(0)
-          start()
           console.log('[react] running')
           console.log(running)
         }
@@ -42,13 +42,22 @@ export default function App() {
           console.log(item)
           // setRunning(item)
           running.current = item
-          stop()
         }
         setTimers(timers => [...timers, item])
       }
     })
 
     return () => deviceEmitter.removeAllListeners("done")
+  }, [])
+
+  useEffect(() => {
+    deviceEmitter.addListener("count", event => {
+
+        setCount(event)
+    
+    })
+    return () => deviceEmitter.removeAllListeners("count")
+
   }, [])
 
   useEffect(() => Data.getProjects(), [online])

@@ -6,27 +6,32 @@ const native = require('./native-bridge')
 
 let timer
 let runningTimer
-
+let count
 // Core Functions
 /**
  * 
  * @param {object} input 
  */
-const runTimer = input => {
-    console.log('[Timer node] Start ', input)
-    let i = 0
-    timer = setInterval(() => {
-        if (!runningTimer || runningTimer.status !== 'running') {
-            clearInterval(timer)
-            return;
-        }
-        native.channel.post('notify', { title: input.id, subtitle: i.toString(), state: "start" })
-        i++
-    }, 1000)
+// const runTimer = () => {
+//     console.log('[Timer node] Start ')
+//     timer = setInterval(() => {
+//         if (!runningTimer || runningTimer.status !== 'running') {
+//             clearInterval(timer)
+//             return;
+//         }
+//         native.channel.post('notify', { title: runningTimer.id, subtitle: count.toString(), state: "start" })
+//         count++
+//     }, 1000)
+// }
+
+const runTimer = () => {
+    console.log('[Timer node] Start ')
+    native.channel.post('notify', { title: runningTimer.id, state: "start" })
+ 
 }
 const stopTimer = () => {
     console.log('[Timer node] Stop ', runningTimer)
-    clearInterval(timer)
+    // clearInterval(timer)
     native.channel.post('notify', { state: "stop" })
 }
 
@@ -52,9 +57,10 @@ store.chainer('running', store.app).on((data, key) => {
     if (data.type === 'timer') {
         console.log('[node STOP] data: ', data)
         if (data.status === 'running') {
+            count = 0
             runningTimer = data
             console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
-            runTimer(data)
+            runTimer()
         }
         else if (data.status === 'done' && data.id === runningTimer.id) {
             console.log('[node STOP]')
@@ -91,7 +97,8 @@ native.channel.on('start', msg => {
         console.log('[Timer node] : Create failed ' + error)
     }
     try {
-        runTimer(runningTimer)
+        count = 0
+        runTimer()
     } catch (error) {
         console.log('[Timer node] : Start failed ' + error)
     }
