@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, Button, NativeEventEmitter, NativeModules, FlatList } from 'react-native';
 import * as Data from './Data'
-import { timeRules } from './Functions';
+import useCounter from './useCounter'
+
 
 const { Heartbeat } = NativeModules;
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
@@ -12,6 +13,7 @@ export default function App() {
   const [status, setStatus] = useState([])
   const [projects, setProjects] = useState([])
   const [timers, setTimers] = useState([])
+  const { count, setCount, start, stop } = useCounter(1000, false)
   // const [running, setRunning] = useState({ id: 'none' })
 
   const running = useRef({ id: 'none' })
@@ -30,6 +32,8 @@ export default function App() {
         if (item.status === 'running') {
           // setRunning(item)
           running.current = item
+          setCount(0)
+          start()
           console.log('[react] running')
           console.log(running)
         }
@@ -38,6 +42,7 @@ export default function App() {
           console.log(item)
           // setRunning(item)
           running.current = item
+          stop()
         }
         setTimers(timers => [...timers, item])
       }
@@ -52,13 +57,7 @@ export default function App() {
     <View style={styles.container}>
       <Text styles={styles.status}>{status}</Text>
       <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>
-      {/* <Text>Projects:</Text>
-      <Button title='create' onPress={() => Data.createProject('test2', '#000')}></Button>
-      <FlatList
-        data={projects}
-        renderItem={item => <Text >{item.name}</Text>}
-        keyExtractor={item => item.id}
-      /> */}
+      <Text>{count}</Text>
       {running.current.status !== 'running' || running.current.id === 'none' ?
         <Button title='start' onPress={() => Data.createTimer('testproject')} /> :
         <Button title='stop' onPress={() => Data.finishTimer(running.current)} />

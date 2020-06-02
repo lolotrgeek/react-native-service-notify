@@ -163,51 +163,6 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
-    public void setCountStatus(String status) {
-        COUNT = status;
-        Toast.makeText(this.reactContext, COUNT, Toast.LENGTH_SHORT).show();
-    }
-
-    @ReactMethod
-    public void getCountStatus(Callback successCallback) {
-        try {
-            successCallback.invoke(instance.COUNT);
-        } catch (Exception e) {
-
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @ReactMethod
-    public void startService() {
-        instance = this;
-        if (STATUS == "STOPPED") {
-            try {
-                this.reactContext.startForegroundService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE));
-                // this.reactContext.startService(new Intent(this.reactContext, HeartbeatService.class).putExtra("TITLE", TITLE)); 
-                STATUS = "STARTED";
-                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS", STATUS);
-            } catch (Exception e) {
-                // TODO: handle exception, consider callback
-            }
-        }
-    }
-
-    @ReactMethod
-    public void stopService() {
-        if (STATUS == "STARTED") {
-            try {
-                this.reactContext.stopService(new Intent(this.reactContext, HeartbeatService.class));
-                STATUS = "STOPPED";
-                this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("STATUS",
-                        STATUS);
-            } catch (Exception e) {
-                // TODO: handle exception, consider callback
-            }
-        }
-    }
-
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
