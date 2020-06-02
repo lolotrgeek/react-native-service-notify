@@ -15,16 +15,16 @@ const createTimer = (projectId) => {
   debug && console.log('Creating Timer', projectId)
   const timer = newTimer(projectId)
   debug && console.log('Created Timer', timer)
-  put('running', timer)
+  put('running', JSON.stringify(timer))
   debug && console.log('Success! Created Timer.')
-  set(`history/timers/${projectId}/${timer.id}`, timer)
+  set(`history/timers/${projectId}/${timer.id}`, JSON.stringify(timer))
   return timer
 }
 
 const endTimer = (timer) => {
   debug && console.log('Ending', timer)
-  set(`history/timers/${timer.project}/${timer.id}`, timer)
-  put(`timers/${timer.project}/${timer.id}`, timer)
+  set(`history/timers/${timer.project}/${timer.id}`, JSON.stringify(timer))
+  put(`timers/${timer.project}/${timer.id}`, JSON.stringify(timer))
 }
 
 /**
@@ -35,15 +35,15 @@ const endTimer = (timer) => {
 const addTimer = (projectId, value) => {
   const timer = cloneTimer(value)
   debug && console.log('[react Data] Storing Timer', timer)
-  set(`history/timers/${projectId}/${timer.id}`, timer)
-  put(`timers/${projectId}/${timer.id}`, timer)
+  set(`history/timers/${projectId}/${timer.id}`, JSON.stringify(timer))
+  put(`timers/${projectId}/${timer.id}`, JSON.stringify(timer))
 }
 
 const finishTimer = (timer) => {
     if (isRunning(timer)) {
         let done = doneTimer(timer)
         debug && console.log('[node Data STOP]', done)
-        put('running', done)
+        put('running', JSON.stringify(done))
         // Danger of data loss until endTimer is called
         if (multiDay(done.started, done.ended)) {
             const dayEntries = newEntryPerDay(done.started, done.ended)
