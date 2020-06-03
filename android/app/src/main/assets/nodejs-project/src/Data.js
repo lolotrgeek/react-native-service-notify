@@ -5,10 +5,12 @@ const newEntryPerDay = require('./Functions').newEntryPerDay
 const doneTimer = require('./Models').doneTimer
 const newTimer = require('./Models').newTimer
 const store = require('./Store')
+
 const debug = true
 
 const put = (key, value) => store.put({key : key, value : value})
 const set = (key, value) => store.set({key : key, value : value})
+const get = key => store.get(key)
 
 const createTimer = (projectId) => {
   if (!projectId || typeof projectId !== 'string' || projectId.length < 9) return false
@@ -60,7 +62,19 @@ const finishTimer = (timer) => {
     } else { return timer }
 }
 
+/**
+ * 
+ * @param {string} projectId 
+ * @param {function} handler 
+ */
+const getProject = (projectId, handler) => {
+  get(`projects/${projectId}`)
+  store.channel.addListener('done', handler)
+}
+
+
 module.exports = {
   finishTimer : finishTimer,
   createTimer : createTimer,
+  getProject : getProject
 }

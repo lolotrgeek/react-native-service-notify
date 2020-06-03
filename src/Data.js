@@ -145,3 +145,7 @@ export const getProjects = () => {
     store.getAll('projects')
     // return store.off('projects')
 }
+
+export const getProject = projectId => {
+    store.get(`projects/${projectId}`)
+}

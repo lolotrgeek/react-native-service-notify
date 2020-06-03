@@ -2,10 +2,12 @@
 const store = require('./src/Store')
 const createTimer = require('./src/Data').createTimer
 const finishTimer = require('./src/Data').finishTimer
+const getProject = require('./src/Data').getProject
 const native = require('./native-bridge')
 
 let timer
 let runningTimer
+let runningProject
 let count
 // Core Functions
 /**
@@ -26,8 +28,8 @@ let count
 
 const runTimer = () => {
     console.log('[Timer node] Start ')
-    native.channel.post('notify', { title: runningTimer.id, state: "start" })
- 
+    native.channel.post('notify', { title: runningProject.name, state: "start" })
+
 }
 const stopTimer = () => {
     console.log('[Timer node] Stop ', runningTimer)
@@ -55,12 +57,24 @@ const inputParser = msg => {
 store.chainer('running', store.app).on((data, key) => {
     data = JSON.parse(data)
     if (data.type === 'timer') {
-        console.log('[node STOP] data: ', data)
+        console.log('[node STOP] found timer: ', data)
         if (data.status === 'running') {
             count = 0
             runningTimer = data
             console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
-            runTimer()
+            getProject(runningTimer.project, event => {
+                let item = JSON.parse(event)
+                console.log('[node STOP] found item: ', typeof item , item)
+                if (item.type === 'project') {
+                    // console.log('[node STOP] found project: ', item)
+                    if (item.id === data.project) {
+                        console.log('[NODE_DEBUG_PUT] : Running Project ', runningTimer)
+                        runningProject = item
+                        runTimer()
+                    }
+                }
+            })
+            
         }
         else if (data.status === 'done' && data.id === runningTimer.id) {
             console.log('[node STOP]')

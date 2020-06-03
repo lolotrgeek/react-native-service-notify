@@ -5,6 +5,10 @@ const config = {
 const Gun = require('gun')
 const path = require('path')
 
+// events
+const events = require('events');
+const eventEmitter = new events.EventEmitter();
+
 config.server = require('http').createServer(Gun.serve(__dirname));
 
 // console.log('GUN config ', config)
@@ -18,7 +22,8 @@ const gun = new Gun({
 })
 console.log('Relay peer started on port ' + config.port + ' with /gun');
 
-const native = require('../native-bridge')
+const native = require('../native-bridge');
+const { node } = require('gun');
 const app = gun.get('app')
 
 /**
@@ -121,6 +126,7 @@ const getOne = (msg) => {
   chain.on((data, key) => {
     console.log('[GUN node] Data Found: ' + data)
     // if doesn't send each, might want to put in an array...
+    eventEmitter.emit('done', data)
     native.channel.post('done', data)
   })
 }
@@ -244,6 +250,7 @@ module.exports = {
   getAll: getAll,
   put: putAll,
   set: setAll,
-  off: offAll
+  off: offAll,
+  channel : eventEmitter
 };
 
