@@ -31,7 +31,7 @@ public class HeartbeatService extends NodeJS {
     private static String TITLE = "Title";
     private static String SUBTITLE = "Subtitle";
     private static int INTERVAL = 1000;
-    private static int COUNT = 0;
+    public static int COUNT = 0;
     private static HeartbeatService instance;
     private static String TAG = "HEARTBEAT-SERVICE";
 
@@ -56,7 +56,7 @@ public class HeartbeatService extends NodeJS {
         public void run() {
             COUNT++;
             SUBTITLE = Integer.toString(COUNT);
-            notificationUpdate(TITLE, SUBTITLE);
+            notificationUpdate();
             sendMessageToReact("count", SUBTITLE);
             countHandler.postDelayed(this, INTERVAL);
         }
@@ -186,15 +186,15 @@ public class HeartbeatService extends NodeJS {
                             Log.d(TAG, "notify STATE - " + state);
                             if (state.equals("stop")) {
                                 notificationPaused();
-                                this.countHandler.removeCallbacks(this.runnableCode);
                             }
                             if(state.equals("start")) {
                                 String title = update.get("title").toString();
+                                String subtitle = update.get("subtitle").toString();
                                 TITLE = title;
-                                COUNT = 0;
-                                this.countHandler.removeCallbacks(this.runnableCode);
-                                this.countHandler.post(this.runnableCode);
+                                SUBTITLE = subtitle;
                                 Log.d(TAG, TITLE + " " + SUBTITLE);
+                                notificationUpdate();
+                                sendMessageToReact("count", SUBTITLE);
                             }
                         } catch (Exception e) {
 
@@ -250,10 +250,8 @@ public class HeartbeatService extends NodeJS {
         super.systemMessageToNode();
     }
 
-    public void notificationUpdate(String title, String subtitle) {
+    public void notificationUpdate() {
         Log.i(TAG, "updating notification");
-        TITLE = title;
-        SUBTITLE = subtitle;
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
@@ -269,7 +267,7 @@ public class HeartbeatService extends NodeJS {
 
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(title).setContentText(SUBTITLE)
+                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(TITLE).setContentText(SUBTITLE)
                 .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_HIGH).setOnlyAlertOnce(true)
                 .setOngoing(true).addAction(buttonAction);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);

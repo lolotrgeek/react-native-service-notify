@@ -36,5 +36,4 @@ public class HeartbeatActionReceiver extends BroadcastReceiver {
     public void start() {
         HeartbeatService.getInstance().sendMessageToNode("start", "");
     }
-
 }
