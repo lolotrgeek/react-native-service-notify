@@ -1,7 +1,6 @@
 // mini nodeified version of Data.js
 
 const isRunning = require('./Functions').isRunning
-const isToday = require('./Functions').isToday
 const newEntryPerDay = require('./Functions').newEntryPerDay
 const formatDate = require('./Functions').formatDate
 const doneTimer = require('./Models').doneTimer

@@ -88,7 +88,7 @@ const sumTimers = timers => {
  * 
  * @param {*} timer 
  */
-exports.isRunning = timer => timer && typeof timer === 'object' && timer.status === 'running' ? true : false
+const isRunning = timer => timer && typeof timer === 'object' && timer.status === 'running' ? true : false
 
 /**
  * Split a timer into one timer per day
@@ -143,6 +143,7 @@ exports.newEntryPerDay = (started, ended) => {
 module.exports = {
     differenceInSeconds: differenceInSeconds,
     isToday: isToday,
+    isRunning : isRunning,
     getTimersForToday: getTimersForToday,
     sumTimers: sumTimers,
     timerRanToday: timerRanToday,
