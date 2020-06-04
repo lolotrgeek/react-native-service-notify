@@ -27,7 +27,7 @@ export default function App() {
       console.log(typeof item + ' ', item)
       if (item.type === 'project') {
         setProjects(projects => [...projects, item])
-        if(item.id === running.current.project) {
+        if (item.id === running.current.project) {
           runningProject.current = item
         }
       }
@@ -55,15 +55,23 @@ export default function App() {
 
   useEffect(() => {
     deviceEmitter.addListener("count", event => {
-
-        setCount(event)
-    
+      setCount(event)
     })
     return () => deviceEmitter.removeAllListeners("count")
 
   }, [])
 
-  useEffect(() => Data.createProject('testproject', '#ccc'), [online])
+  useEffect(() => {
+    deviceEmitter.addListener("running", event => {
+      let item = JSON.parse(event)
+      running.current = item
+      console.log('[react] running')
+      console.log(running)
+    })
+    return () => deviceEmitter.removeAllListeners("running")
+  }, [])
+
+  useEffect(() => Data.createProject('react project', '#ccc'), [online])
   useEffect(() => Data.createTestProject(), [online])
   useEffect(() => Data.getProjects(), [online])
 

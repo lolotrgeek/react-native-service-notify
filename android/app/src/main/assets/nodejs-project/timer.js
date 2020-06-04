@@ -4,6 +4,7 @@ const createTimer = require('./src/Data').createTimer
 const finishTimer = require('./src/Data').finishTimer
 const getProject = require('./src/Data').getProject
 const getTimers = require('./src/Data').getTimers
+const getRunning = require('./src/Data').getRunning
 const { differenceInSeconds, timerRanToday } = require('./src/Functions')
 const native = require('./native-bridge')
 
@@ -79,13 +80,15 @@ store.chainer('running', store.app).on((data, key) => {
                                 count = count + differenceInSeconds(timer.started, timer.ended)
                             }
                         })
+                        let running = runningTimer
+                        running.color = runningProject.color
+                        running.name = runningProject.name
+                        native.channel.post('running', running)
                         runTimer()
                     }
                 }
-                
             })
 
-            
         }
         else if (data.status === 'done' && data.id === runningTimer.id) {
             console.log('[node STOP]')

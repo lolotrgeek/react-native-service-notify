@@ -180,14 +180,13 @@ public class HeartbeatService extends NodeJS {
                     try {
                         JSONObject update = heartbeatPayloadParse(obj);
                         Log.d(TAG, "notify - " + update.toString());
-                        sendMessageToReact("notify", update.toString());
                         try {
                             String state = update.get("state").toString();
                             Log.d(TAG, "notify STATE - " + state);
                             if (state.equals("stop")) {
                                 notificationPaused();
                             }
-                            if(state.equals("start")) {
+                            if (state.equals("start")) {
                                 String title = update.get("title").toString();
                                 String subtitle = update.get("subtitle").toString();
                                 TITLE = title;
@@ -203,6 +202,11 @@ public class HeartbeatService extends NodeJS {
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage());
                     }
+                    break;
+                case "running":
+                    JSONObject update = heartbeatPayloadParse(obj);
+                    Log.d(TAG, "running - " + update.toString());
+                    sendMessageToReact("running", update.toString());
                     break;
             }
         } catch (Throwable t) {

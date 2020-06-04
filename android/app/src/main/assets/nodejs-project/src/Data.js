@@ -85,9 +85,15 @@ const getTimers = (projectId, handler) => {
   store.channel.addListener(`timers/${projectId}`, handler)
 }
 
+const getRunning = handler => {
+  getAll('running')
+  store.channel.addListener('running', handler)
+}
+
 module.exports = {
   finishTimer : finishTimer,
   createTimer : createTimer,
   getProject : getProject,
-  getTimers : getTimers
+  getTimers : getTimers,
+  getRunning : getRunning
 }

@@ -250,6 +250,6 @@ module.exports = {
   put: putAll,
   set: setAll,
   off: offAll,
-  channel : eventEmitter
+  channel : eventEmitter,
 };
 
