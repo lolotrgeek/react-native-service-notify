@@ -57,6 +57,23 @@ const inputParser = msg => {
     else if (typeof msg === 'object') return msg
 }
 
+const getCount = projectId => {
+    const currentTimers = []
+    getTimers(projectId, timer => {
+        timer = JSON.parse(timer)
+        let check = currentTimers.some(id => id === timer.id)
+        if (check) {
+            currentTimers.push(timer.id)
+            console.log('[NODE_DEBUG_PUT] : Got timer', timer)
+
+            if (timerRanToday(timer)) {
+                console.log('[NODE_DEBUG_PUT] : Setting count', count)
+                count = count + differenceInSeconds(timer.ended, timer.started)
+            }
+        }
+    })
+}
+
 // Remote Commands Handler, listens to finishTimer or createTimer
 store.chainer('running', store.app).on((data, key) => {
     data = JSON.parse(data)
@@ -73,22 +90,31 @@ store.chainer('running', store.app).on((data, key) => {
                     if (item.id === data.project) {
                         console.log('[NODE_DEBUG_PUT] : Running Project ', runningTimer)
                         runningProject = item
+                        count = 0
+                        const currentTimers = []
                         getTimers(runningProject.id, timer => {
-                            console.log('[NODE_DEBUG_PUT] : Got timer', timer)
-                            if (timerRanToday(timer)) {
-                                console.log('[NODE_DEBUG_PUT] : Setting count', count)
-                                count = count + differenceInSeconds(timer.started, timer.ended)
+                            timer = JSON.parse(timer)
+                            let check = currentTimers.some(id => id === timer.id)
+                            if (!check) {
+                                currentTimers.push(timer.id)
+                                console.log('[NODE_DEBUG_PUT] : Got timer', timer)
+                    
+                                if (timerRanToday(timer)) {
+                                    count = count + differenceInSeconds(timer.ended, timer.started)
+                                    console.log('[NODE_DEBUG_PUT] : Setting count', count)
+
+                                }
                             }
                         })
                         let running = runningTimer
                         running.color = runningProject.color
                         running.name = runningProject.name
                         native.channel.post('running', running)
+
                         runTimer()
                     }
                 }
             })
-
         }
         else if (data.status === 'done' && data.id === runningTimer.id) {
             console.log('[node STOP]')
