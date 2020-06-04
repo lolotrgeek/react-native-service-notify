@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, Button, NativeEventEmitter, NativeModules, FlatList } from 'react-native';
 import * as Data from './Data'
-import useCounter from './useCounter'
-
 
 const { Heartbeat } = NativeModules;
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
@@ -66,6 +64,7 @@ export default function App() {
   }, [])
 
   useEffect(() => Data.createProject('testproject', '#ccc'), [online])
+  useEffect(() => Data.createTestProject(), [online])
   useEffect(() => Data.getProjects(), [online])
 
   return (

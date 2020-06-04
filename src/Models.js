@@ -34,6 +34,17 @@ export const doneTimer = (timer) => {
     return done
 }
 
+export const testProject = () => {
+    return {
+        id: 'testproject',
+        created: new Date().toString(),
+        type: 'project',
+        status: 'active',
+        name: 'test project',
+        color: '#ccc',        
+    }
+}
+
 export const newProject = (name, color) => {
     const hashids = new Hashids()
     const key = hashids.encode(Date.now().toString())

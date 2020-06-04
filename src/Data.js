@@ -1,4 +1,4 @@
-import { cloneTimer, newProject, doneTimer, newTimer } from './Models'
+import { cloneTimer, newProject, doneTimer, newTimer, testProject } from './Models'
 import { isRunning, multiDay, newEntryPerDay } from './Functions'
 import * as store from './Store'
 
@@ -6,6 +6,14 @@ const debug = true
 
 export const createProject = (name, color) => {
     const project = newProject(name, color)
+    if (!project) return false
+    debug && console.log('[react Data] Creating Project', project)
+    store.set(`history/projects/${project.id}`, project)
+    store.put(`projects/${project.id}`, project)
+}
+
+export const createTestProject = () => {
+    const project = testProject()
     if (!project) return false
     debug && console.log('[react Data] Creating Project', project)
     store.set(`history/projects/${project.id}`, project)
