@@ -3,6 +3,8 @@ const store = require('./src/Store')
 const createTimer = require('./src/Data').createTimer
 const finishTimer = require('./src/Data').finishTimer
 const getProject = require('./src/Data').getProject
+const getTimers = require('./src/Data').getTimers
+const { differenceInSeconds, timerRanToday } = require('./src/Functions')
 const native = require('./native-bridge')
 
 let timer
@@ -64,16 +66,25 @@ store.chainer('running', store.app).on((data, key) => {
             console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
             getProject(runningTimer.project, event => {
                 let item = JSON.parse(event)
-                console.log('[node STOP] found item: ', typeof item , item)
+                console.log('[node STOP] found item: ', typeof item, item)
                 if (item.type === 'project') {
                     // console.log('[node STOP] found project: ', item)
                     if (item.id === data.project) {
                         console.log('[NODE_DEBUG_PUT] : Running Project ', runningTimer)
                         runningProject = item
+                        getTimers(runningProject.id, timer => {
+                            console.log('[NODE_DEBUG_PUT] : Got timer', timer)
+                            if (timerRanToday(timer)) {
+                                console.log('[NODE_DEBUG_PUT] : Setting count', count)
+                                count = count + differenceInSeconds(timer.started, timer.ended)
+                            }
+                        })
                         runTimer()
                     }
                 }
+                
             })
+
             
         }
         else if (data.status === 'done' && data.id === runningTimer.id) {

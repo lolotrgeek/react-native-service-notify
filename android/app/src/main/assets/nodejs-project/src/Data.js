@@ -1,7 +1,9 @@
 // mini nodeified version of Data.js
 
 const isRunning = require('./Functions').isRunning
+const isToday = require('./Functions').isToday
 const newEntryPerDay = require('./Functions').newEntryPerDay
+const formatDate = require('./Functions').formatDate
 const doneTimer = require('./Models').doneTimer
 const newTimer = require('./Models').newTimer
 const store = require('./Store')
@@ -11,22 +13,27 @@ const debug = true
 const put = (key, value) => store.put({key : key, value : value})
 const set = (key, value) => store.set({key : key, value : value})
 const get = key => store.get(key)
+const getAll = key => store.getAll(key)
 
 const createTimer = (projectId) => {
   if (!projectId || typeof projectId !== 'string' || projectId.length < 9) return false
   debug && console.log('Creating Timer', projectId)
-  const timer = newTimer(projectId)
+  let timer = newTimer(projectId)
+  timer = JSON.stringify(timer)
   debug && console.log('Created Timer', timer)
-  put('running', JSON.stringify(timer))
+  put('running', timer)
   debug && console.log('Success! Created Timer.')
-  set(`history/timers/${projectId}/${timer.id}`, JSON.stringify(timer))
+  set(`history/timers/${projectId}/${timer.id}`, timer)
   return timer
 }
 
 const endTimer = (timer) => {
   debug && console.log('Ending', timer)
-  set(`history/timers/${timer.project}/${timer.id}`, JSON.stringify(timer))
-  put(`timers/${timer.project}/${timer.id}`, JSON.stringify(timer))
+  timer = JSON.stringify(timer)
+  set(`history/timers/${timer.project}/${timer.id}`, timer)
+  put(`timers/${timer.project}/${timer.id}`, timer)
+  // organizing...
+  // put(`${timer.project}/timers`, timer.id)
 }
 
 /**
@@ -35,10 +42,11 @@ const endTimer = (timer) => {
  * @param {Object} value a timer object
  */
 const addTimer = (projectId, value) => {
-  const timer = cloneTimer(value)
+  let timer = cloneTimer(value)
+  timer = JSON.stringify(timer)
   debug && console.log('[react Data] Storing Timer', timer)
-  set(`history/timers/${projectId}/${timer.id}`, JSON.stringify(timer))
-  put(`timers/${projectId}/${timer.id}`, JSON.stringify(timer))
+  set(`history/timers/${projectId}/${timer.id}`, timer)
+  put(`timers/${projectId}/${timer.id}`, timer)
 }
 
 const finishTimer = (timer) => {
@@ -69,12 +77,17 @@ const finishTimer = (timer) => {
  */
 const getProject = (projectId, handler) => {
   get(`projects/${projectId}`)
-  store.channel.addListener('done', handler)
+  store.channel.addListener(`projects/${projectId}`, handler)
 }
 
+const getTimers = (projectId, handler) => {
+  getAll(`timers/${projectId}`)
+  store.channel.addListener(`timers/${projectId}`, handler)
+}
 
 module.exports = {
   finishTimer : finishTimer,
   createTimer : createTimer,
-  getProject : getProject
+  getProject : getProject,
+  getTimers : getTimers
 }

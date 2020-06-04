@@ -1,5 +1,24 @@
 // mini nodeified version of Functions.js
 const moment = require('moment')
+const debug = false
+
+
+const formatDate = date => moment(dateTime).format("YYYY-MM-DD")
+
+/**
+ * reference : https://stackoverflow.com/questions/24883760/moment-js-check-a-date-is-today/24884339
+ * @param {*} date 
+ */
+const isToday = date => {
+    const today = moment(new Date())
+    date = moment(date)
+    if (today.isSame(date, 'd')) {
+        console.log('Checking day.')
+        return true
+    } else {
+        return false
+    }
+}
 
 /**
  * 
@@ -39,7 +58,31 @@ const addSeconds = (date, amount) => {
     return moment(date).add(amount, 'seconds')
 }
 
-const debug = false
+/**
+ * 
+ * @param {*} timer 
+ * @return {boolean}
+ */
+const timerRanToday = timer => isToday(timer.started)
+
+/**
+ * 
+ * @param {Array} timers 
+ */
+const getTimersForToday = timers => timers.filter(timer => timerRanToday(timer))
+
+/**
+ * 
+ * @param {Array} timers
+ * @returns {number} sum
+ */
+const sumTimers = timers => {
+    let sum = 0
+    timers.map(timer => {
+        sum = sum + differenceInSeconds(timer.started, timer.ended)
+    })
+    return sum
+}
 
 /**
  * 
@@ -94,4 +137,14 @@ exports.newEntryPerDay = (started, ended) => {
         return []
     }
 
+}
+
+
+module.exports = {
+    differenceInSeconds: differenceInSeconds,
+    isToday: isToday,
+    getTimersForToday: getTimersForToday,
+    sumTimers: sumTimers,
+    timerRanToday: timerRanToday,
+    formatDate: formatDate
 }

@@ -125,8 +125,7 @@ const getOne = (msg) => {
   // console.log('[React node] Chain :', chain)
   chain.on((data, key) => {
     console.log('[GUN node] Data Found: ' + data)
-    // if doesn't send each, might want to put in an array...
-    eventEmitter.emit('done', data)
+    eventEmitter.emit(msg, data)
     native.channel.post('done', data)
   })
 }
@@ -136,8 +135,8 @@ const getAll = (msg) => {
   // console.log('[React node] Chain :', chain)
   chain.map().on((data, key) => {
     console.log('[GUN node] Data Found: ', data)
-    // if doesn't send each, might want to put in an array...
     native.channel.post('done', data)
+    eventEmitter.emit(msg, data)
   })
   chain.off()
 }
