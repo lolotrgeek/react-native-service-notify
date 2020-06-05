@@ -86,6 +86,7 @@ export default function App() {
         <Button title='start' onPress={() => Data.createTimer(projects[0].id)} /> :
         <Button title='stop' onPress={() => Data.finishTimer(running.current)} />
       }
+      <Button title='test' onPress={() => Data.createTimer('testproject')} />
     </View>
   );
 }

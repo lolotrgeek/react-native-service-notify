@@ -141,6 +141,20 @@ const getAll = (msg) => {
   chain.off()
 }
 
+const getAllOnce = (msg) => {
+  const chain = chainer(msg, app)
+  // console.log('[React node] Chain :', chain)
+  chain.once().map().once((data, key) => {
+    if(!data) {
+      console.log('[GUN node] No Data Found',)
+    }
+    console.log('[GUN node] Data Found: ', data)
+    native.channel.post('done', data)
+    eventEmitter.emit(msg, data)
+  })
+  chain.off()
+}
+
 /**
  * Assign a value to keys, needs to parse msg first
  * @param {*} msg JSON or object`{key: 'key' || 'key1/key2/...', value: any}`
@@ -247,6 +261,7 @@ module.exports = {
   app: app,
   get: getOne,
   getAll: getAll,
+  getAllOnce : getAllOnce,
   put: putAll,
   set: setAll,
   off: offAll,

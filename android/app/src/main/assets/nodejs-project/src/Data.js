@@ -13,6 +13,7 @@ const put = (key, value) => store.put({key : key, value : value})
 const set = (key, value) => store.set({key : key, value : value})
 const get = key => store.get(key)
 const getAll = key => store.getAll(key)
+const getAllOnce = key => store.getAllOnce(key)
 
 const createTimer = (projectId) => {
   if (!projectId || typeof projectId !== 'string' || projectId.length < 9) return false
@@ -80,8 +81,10 @@ const getProject = (projectId, handler) => {
 }
 
 const getTimers = (projectId, handler) => {
-  getAll(`timers/${projectId}`)
-  store.channel.addListener(`timers/${projectId}`, handler)
+  getAllOnce(`timers/${projectId}`)
+  store.channel.addListener(`timers/${projectId}`, event => {handler()
+    
+  })
 }
 
 const getRunning = handler => {

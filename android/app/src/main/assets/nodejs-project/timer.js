@@ -18,7 +18,7 @@ let count = 0
  * @param {object} input 
  */
 const runTimer = () => {
-    console.log('[Timer node] Start ')
+    console.log('[Timer node] run timer ')
     clearInterval(timer)
     timer = setInterval(() => {
         if (!runningTimer || runningTimer.status !== 'running') {
@@ -30,11 +30,6 @@ const runTimer = () => {
     }, 1000)
 }
 
-// const runTimer = () => {
-//     console.log('[Timer node] Start ')
-//     native.channel.post('notify', { title: runningProject.name, state: "start" })
-
-// }
 const stopTimer = () => {
     console.log('[Timer node] Stop ', runningTimer)
     clearInterval(timer)
@@ -57,64 +52,97 @@ const inputParser = msg => {
     else if (typeof msg === 'object') return msg
 }
 
+const getTimersAsync = (projectId) => new Promise((resolve, reject) => {
+    try {
+        const timers = []
+        getTimers(projectId, timer => timers.push(JSON.parse(timer)))
+        resolve(timers)
+    } catch (error) {
+        reject(error)
+    }
+})
+
+const findTodaysTimers = projectId => new Promise((resolve, reject) => {
+    getTimersAsync(projectId).then(timers => {
+        console.log('[NODE_DEBUG_PUT] : Got timers', timers)
+        const uniqueTimers = Array.from(new Set(timers))
+        const timersToday = uniqueTimers.filter(timer => timerRanToday(timer))
+        resolve(timersToday)
+    })
+
+})
+
 const getCount = projectId => {
+    count = 0
+    console.log(`[NODE_DEBUG_RUN] : Getting Count ${count} | ${projectId}` )
     const currentTimers = []
     getTimers(projectId, timer => {
         timer = JSON.parse(timer)
+        console.log('[NODE_DEBUG_PUT] : Got timer', timer.id)
+        // let DAYTOTAL = count
         let check = currentTimers.some(id => id === timer.id)
-        if (check) {
+        if (!check && timerRanToday(timer)) {
             currentTimers.push(timer.id)
-            console.log('[NODE_DEBUG_PUT] : Got timer', timer)
-
-            if (timerRanToday(timer)) {
-                console.log('[NODE_DEBUG_PUT] : Setting count', count)
-                count = count + differenceInSeconds(timer.ended, timer.started)
-            }
+            let TIMERTOTAL = differenceInSeconds(timer.ended, timer.started)
+            console.log(`[NODE_DEBUG_RUN] : Got count ${projectId}/${timer.id} , ${TIMERTOTAL}`)
+            count = count + TIMERTOTAL
+            console.log('[NODE_DEBUG_RUN] : Updating count ', count)
         }
+        console.log('[NODE_DEBUG_PUT] : Got counts', currentTimers)
     })
+}
+
+const findRunningProject = runningTimer => new Promise((resolve, reject) => {
+    if (!runningTimer || runningTimer.status !== 'running') {
+        reject(null)
+    } else {
+        getProject(runningTimer.project, event => {
+            let item = JSON.parse(event)
+            console.log('[NODE_DEBUG_PUT] : Running Project ', item.id)
+            if (item.type === 'project' && item.id === runningTimer.project) {
+                resolve(item)
+            } else {
+                reject(null)
+            }
+        })
+    }
+})
+
+
+function updateRunning(runningTimer, runningProject) {
+    let running = runningTimer
+    running.color = runningProject.color
+    running.name = runningProject.name
+    native.channel.post('running', running)
 }
 
 // Remote Commands Handler, listens to finishTimer or createTimer
 store.chainer('running', store.app).on((data, key) => {
     data = JSON.parse(data)
     if (data.type === 'timer') {
-        console.log('[node STOP] found timer: ', data)
         if (data.status === 'running') {
+            if (runningTimer && runningTimer.project !== data.project) {
+                console.log(`get count ${runningTimer.project} != ${data.project}`)
+                getCount(data.project)
+                console.log(`count ${count}`)
+
+            } 
+            else if (runningTimer && runningTimer.project === data.project) {
+                console.log(`same count ${runningTimer.project} = ${data.project}`)
+                count = count
+                console.log(`count ${count}`)
+            } 
+            else {
+                console.log(`new count ${data.project}`)
+                count = 0
+                console.log(`count ${count}`)
+            }
             runningTimer = data
             console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
-            getProject(runningTimer.project, event => {
-                let item = JSON.parse(event)
-                console.log('[node STOP] found item: ', typeof item, item)
-                if (item.type === 'project') {
-                    // console.log('[node STOP] found project: ', item)
-                    if (item.id === data.project) {
-                        console.log('[NODE_DEBUG_PUT] : Running Project ', runningTimer)
-                        runningProject = item
-                        count = 0
-                        const currentTimers = []
-                        getTimers(runningProject.id, timer => {
-                            timer = JSON.parse(timer)
-                            let check = currentTimers.some(id => id === timer.id)
-                            if (!check) {
-                                currentTimers.push(timer.id)
-                                console.log('[NODE_DEBUG_PUT] : Got timer', timer)
-                    
-                                if (timerRanToday(timer)) {
-                                    count = count + differenceInSeconds(timer.ended, timer.started)
-                                    console.log('[NODE_DEBUG_PUT] : Setting count', count)
-
-                                }
-                            }
-                        })
-                        let running = runningTimer
-                        running.color = runningProject.color
-                        running.name = runningProject.name
-                        native.channel.post('running', running)
-
-                        runTimer()
-                    }
-                }
+            findRunningProject(runningTimer).then(found => {
+                runningProject = found
             })
+            runTimer()
         }
         else if (data.status === 'done' && data.id === runningTimer.id) {
             console.log('[node STOP]')
