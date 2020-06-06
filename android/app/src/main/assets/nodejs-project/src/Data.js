@@ -9,8 +9,8 @@ const store = require('./Store')
 
 const debug = true
 
-const put = (key, value) => store.put({key : key, value : value})
-const set = (key, value) => store.set({key : key, value : value})
+const put = (key, value) => store.put({ key: key, value: value })
+const set = (key, value) => store.set({ key: key, value: value })
 const get = key => store.get(key)
 const getAll = key => store.getAll(key)
 const getAllOnce = key => store.getAllOnce(key)
@@ -50,24 +50,24 @@ const addTimer = (projectId, value) => {
 }
 
 const finishTimer = (timer) => {
-    if (isRunning(timer)) {
-        let done = doneTimer(timer)
-        debug && console.log('[node Data STOP]', done)
-        put('running', JSON.stringify(done))
-        // Danger of data loss until endTimer is called
-        if (multiDay(done.started, done.ended)) {
-            const dayEntries = newEntryPerDay(done.started, done.ended)
-            dayEntries.map((dayEntry, i) => {
-                let splitTimer = done
-                splitTimer.started = dayEntry.start
-                splitTimer.ended = dayEntry.end
-                debug && console.log('Split', i, splitTimer)
-                if (i === 0) { endTimer(splitTimer) } // use initial timer id for first day
-                else { addTimer(splitTimer.project, splitTimer) }
-                return splitTimer
-            })
-        } else { endTimer(done) }
-    } else { return timer }
+  if (isRunning(timer)) {
+    let done = doneTimer(timer)
+    debug && console.log('[node Data STOP]', done)
+    put('running', JSON.stringify(done))
+    // Danger of data loss until endTimer is called
+    if (multiDay(done.started, done.ended)) {
+      const dayEntries = newEntryPerDay(done.started, done.ended)
+      dayEntries.map((dayEntry, i) => {
+        let splitTimer = done
+        splitTimer.started = dayEntry.start
+        splitTimer.ended = dayEntry.end
+        debug && console.log('Split', i, splitTimer)
+        if (i === 0) { endTimer(splitTimer) } // use initial timer id for first day
+        else { addTimer(splitTimer.project, splitTimer) }
+        return splitTimer
+      })
+    } else { endTimer(done) }
+  } else { return timer }
 }
 
 /**
@@ -81,9 +81,15 @@ const getProject = (projectId, handler) => {
 }
 
 const getTimers = (projectId, handler) => {
-  getAllOnce(`timers/${projectId}`)
-  store.channel.addListener(`timers/${projectId}`, event => {handler()
-    
+  return new Promise((resolve, reject) => {
+    try {
+      const chain = store.chainer(`timers/${projectId}`, store.app)
+      // console.log('[React node] Chain :', chain)
+      chain.once((data, key) => resolve(data))
+    } catch(err) {
+      reject(err)
+    }
+
   })
 }
 
@@ -92,10 +98,17 @@ const getRunning = handler => {
   store.channel.addListener('running', handler)
 }
 
+const trimSoul = data => {
+  if (!data || !data['_'] || typeof data['_'] !== 'object') return data
+  delete data['_']
+  return data
+}
+
 module.exports = {
-  finishTimer : finishTimer,
-  createTimer : createTimer,
-  getProject : getProject,
-  getTimers : getTimers,
-  getRunning : getRunning
+  finishTimer: finishTimer,
+  createTimer: createTimer,
+  getProject: getProject,
+  getTimers: getTimers,
+  getRunning: getRunning,
+  trimSoul : trimSoul
 }

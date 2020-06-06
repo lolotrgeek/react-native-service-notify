@@ -12,14 +12,6 @@ export const createProject = (name, color) => {
     store.put(`projects/${project.id}`, project)
 }
 
-export const createTestProject = () => {
-    const project = testProject()
-    if (!project) return false
-    debug && console.log('[react Data] Creating Project', project)
-    store.set(`history/projects/${project.id}`, project)
-    store.put(`projects/${project.id}`, project)
-}
-
 export const updateProject = (project, updates) => {
     let projectEdit = project
     Object.assign(projectEdit, updates)

@@ -72,7 +72,7 @@ export default function App() {
   }, [])
 
   useEffect(() => Data.createProject('react project', '#ccc'), [online])
-  useEffect(() => Data.createTestProject(), [online])
+  useEffect(() => Data.createProject('test project', '#ccc'), [online])
   useEffect(() => Data.getProjects(), [online])
 
   return (
@@ -86,7 +86,11 @@ export default function App() {
         <Button title='start' onPress={() => Data.createTimer(projects[0].id)} /> :
         <Button title='stop' onPress={() => Data.finishTimer(running.current)} />
       }
-      <Button title='test' onPress={() => Data.createTimer('testproject')} />
+      {projects[1] && projects[1].id ?
+        <Button title='test' onPress={() => Data.createTimer(projects[1].id)} /> :
+        <Text>No Second project</Text>
+      }
+
     </View>
   );
 }

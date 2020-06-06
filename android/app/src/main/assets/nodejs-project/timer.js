@@ -5,6 +5,7 @@ const finishTimer = require('./src/Data').finishTimer
 const getProject = require('./src/Data').getProject
 const getTimers = require('./src/Data').getTimers
 const getRunning = require('./src/Data').getRunning
+const trimSoul = require('./src/Data').trimSoul
 const { differenceInSeconds, timerRanToday } = require('./src/Functions')
 const native = require('./native-bridge')
 
@@ -13,6 +14,7 @@ let runningTimer
 let runningProject
 let count = 0
 // Core Functions
+
 /**
  * 
  * @param {object} input 
@@ -25,8 +27,13 @@ const runTimer = () => {
             clearInterval(timer)
             return;
         }
-        native.channel.post('notify', { title: runningProject.name, subtitle: count.toString(), state: "start" })
-        count++
+        if (runningProject && typeof runningProject === 'object' && runningProject.name) {
+            native.channel.post('notify', { title: runningProject.name, subtitle: count.toString(), state: "start" })
+            count = count + 1
+        } else {
+            clearInterval(timer)
+            return;
+        }
     }, 1000)
 }
 
@@ -52,45 +59,6 @@ const inputParser = msg => {
     else if (typeof msg === 'object') return msg
 }
 
-const getTimersAsync = (projectId) => new Promise((resolve, reject) => {
-    try {
-        const timers = []
-        getTimers(projectId, timer => timers.push(JSON.parse(timer)))
-        resolve(timers)
-    } catch (error) {
-        reject(error)
-    }
-})
-
-const findTodaysTimers = projectId => new Promise((resolve, reject) => {
-    getTimersAsync(projectId).then(timers => {
-        console.log('[NODE_DEBUG_PUT] : Got timers', timers)
-        const uniqueTimers = Array.from(new Set(timers))
-        const timersToday = uniqueTimers.filter(timer => timerRanToday(timer))
-        resolve(timersToday)
-    })
-
-})
-
-const getCount = projectId => {
-    count = 0
-    console.log(`[NODE_DEBUG_RUN] : Getting Count ${count} | ${projectId}` )
-    const currentTimers = []
-    getTimers(projectId, timer => {
-        timer = JSON.parse(timer)
-        console.log('[NODE_DEBUG_PUT] : Got timer', timer.id)
-        // let DAYTOTAL = count
-        let check = currentTimers.some(id => id === timer.id)
-        if (!check && timerRanToday(timer)) {
-            currentTimers.push(timer.id)
-            let TIMERTOTAL = differenceInSeconds(timer.ended, timer.started)
-            console.log(`[NODE_DEBUG_RUN] : Got count ${projectId}/${timer.id} , ${TIMERTOTAL}`)
-            count = count + TIMERTOTAL
-            console.log('[NODE_DEBUG_RUN] : Updating count ', count)
-        }
-        console.log('[NODE_DEBUG_PUT] : Got counts', currentTimers)
-    })
-}
 
 const findRunningProject = runningTimer => new Promise((resolve, reject) => {
     if (!runningTimer || runningTimer.status !== 'running') {
@@ -122,16 +90,32 @@ store.chainer('running', store.app).on((data, key) => {
     if (data.type === 'timer') {
         if (data.status === 'running') {
             if (runningTimer && runningTimer.project !== data.project) {
-                console.log(`get count ${runningTimer.project} != ${data.project}`)
-                getCount(data.project)
-                console.log(`count ${count}`)
-
-            } 
+                console.log(`getting count ${runningTimer.project} != ${data.project}`)
+                getTimers(data.project).then(timers => {
+                    console.log(`Got timers ${typeof timers} `, timers)
+                    count = 0
+                    for (timer in timers) {
+                        // console.log(`Got timer ${typeof timers[timer]} `, timers[timer] )
+                        let foundTimer = trimSoul(timers[timer])
+                        if (typeof foundTimer === 'string') {
+                            foundTimer = JSON.parse(foundTimer)
+                            // console.log(`Got timer ${typeof foundTimer}`, foundTimer)
+                            if (timerRanToday(foundTimer)) {
+                                let TIMERTOTAL = differenceInSeconds(foundTimer.ended, foundTimer.started)
+                                console.log(`Got count ${foundTimer.project}/${foundTimer.id} , ${TIMERTOTAL}`)
+                                count = count + TIMERTOTAL
+                                console.log('Updating count ', count)
+                            }
+                        }
+                    }
+                    console.log(`count ${count}`)
+                })
+            }
             else if (runningTimer && runningTimer.project === data.project) {
                 console.log(`same count ${runningTimer.project} = ${data.project}`)
                 count = count
                 console.log(`count ${count}`)
-            } 
+            }
             else {
                 console.log(`new count ${data.project}`)
                 count = 0

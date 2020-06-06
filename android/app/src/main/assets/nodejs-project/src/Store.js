@@ -145,13 +145,20 @@ const getAllOnce = (msg) => {
   const chain = chainer(msg, app)
   // console.log('[React node] Chain :', chain)
   chain.once().map().once((data, key) => {
-    if(!data) {
+    if (!data) {
       console.log('[GUN node] No Data Found',)
     }
     console.log('[GUN node] Data Found: ', data)
     native.channel.post('done', data)
     eventEmitter.emit(msg, data)
   })
+  chain.off()
+}
+
+const getOnce = (msg, cb) => {
+  const chain = chainer(msg, app)
+  // console.log('[React node] Chain :', chain)
+  chain.on((data, key) => { console.log('Got Once ', data) })
   chain.off()
 }
 
@@ -222,7 +229,7 @@ native.channel.on('getAll', msg => {
     console.log('[GUN node] Getting All: ' + msg)
     getAll(msg)
   } catch (error) {
-    console.log('[GUN node] : Getting All failed' + error)
+    console.log('[GUN node] : Getting All failed ' + error)
   }
 })
 
@@ -232,7 +239,7 @@ native.channel.on('put', msg => {
     console.log('[React node] storing - ' + msg)
     putAll(msg)
   } catch (error) {
-    console.log('[GUN node] : Putting failed' + error)
+    console.log('[GUN node] : Putting failed ' + error)
   }
 })
 
@@ -242,7 +249,7 @@ native.channel.on('set', msg => {
     console.log('[React node] storing - ' + msg)
     setAll(msg)
   } catch (error) {
-    console.log('[GUN node] : Setting failed' + error)
+    console.log('[GUN node] : Setting failed ' + error)
   }
 })
 
@@ -252,7 +259,7 @@ native.channel.on('off', msg => {
     console.log('[React node] Off - ' + msg)
     offAll(msg)
   } catch (error) {
-    console.log('[GUN node] : Off failed' + error)
+    console.log('[GUN node] : Off failed ' + error)
   }
 })
 
@@ -260,11 +267,12 @@ module.exports = {
   chainer: chainer,
   app: app,
   get: getOne,
+  getOnce: getOnce,
   getAll: getAll,
-  getAllOnce : getAllOnce,
+  getAllOnce: getAllOnce,
   put: putAll,
   set: setAll,
   off: offAll,
-  channel : eventEmitter,
+  channel: eventEmitter,
 };
 
