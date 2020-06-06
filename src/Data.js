@@ -2,7 +2,7 @@ import { cloneTimer, newProject, doneTimer, newTimer, testProject } from './Mode
 import { isRunning, multiDay, newEntryPerDay } from './Functions'
 import * as store from './Store'
 
-const debug = true
+const debug = false
 
 export const createProject = (name, color) => {
     const project = newProject(name, color)

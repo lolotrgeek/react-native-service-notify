@@ -9,10 +9,13 @@ const trimSoul = require('./src/Data').trimSoul
 const { differenceInSeconds, timerRanToday } = require('./src/Functions')
 const native = require('./native-bridge')
 
+const debug = false
+
 let timer
 let runningTimer
 let runningProject
 let count = 0
+
 // Core Functions
 
 /**
@@ -20,7 +23,7 @@ let count = 0
  * @param {object} input 
  */
 const runTimer = () => {
-    console.log('[Timer node] run timer ')
+    debug && console.log('[Timer node] run timer ')
     clearInterval(timer)
     timer = setInterval(() => {
         if (!runningTimer || runningTimer.status !== 'running') {
@@ -35,7 +38,7 @@ const runTimer = () => {
 }
 
 const stopTimer = () => {
-    console.log('[Timer node] Stop ', runningTimer)
+    debug && console.log('[Timer node] Stop ', runningTimer)
     clearInterval(timer)
     native.channel.post('notify', { state: "stop" })
 }
@@ -45,7 +48,7 @@ const parser = input => {
     try {
         input = JSON.parse(input)
     } catch (error) {
-        console.log('[Parse node] not a JSON object')
+        debug && console.log('[Parse node] not a JSON object')
     } finally {
         return input
     }
@@ -63,7 +66,7 @@ const findRunningProject = runningTimer => new Promise((resolve, reject) => {
     } else {
         getProject(runningTimer.project, event => {
             let item = JSON.parse(event)
-            console.log('[NODE_DEBUG_PUT] : Running Project ', item.id)
+            debug && console.log('[NODE_DEBUG_PUT] : Running Project ', item.id)
             if (item.type === 'project' && item.id === runningTimer.project) {
                 resolve(item)
             } else {
@@ -75,39 +78,39 @@ const findRunningProject = runningTimer => new Promise((resolve, reject) => {
 
 getCount = (data) => new Promise((resolve, reject) => {
     if (runningTimer && runningTimer.project !== data.project) {
-        console.log(`getting count ${runningTimer.project} != ${data.project}`)
+        debug && console.log(`getting count ${runningTimer.project} != ${data.project}`)
         getTimers(data.project).then(timers => {
-            console.log(`Got timers ${typeof timers} `, timers)
+            debug && console.log(`Got timers ${typeof timers} `, timers)
             count = 0
             for (timer in timers) {
-                // console.log(`Got timer ${typeof timers[timer]} `, timers[timer] )
+                // debug && console.log(`Got timer ${typeof timers[timer]} `, timers[timer] )
                 let foundTimer = trimSoul(timers[timer])
                 if (typeof foundTimer === 'string') {
                     foundTimer = JSON.parse(foundTimer)
-                    // console.log(`Got timer ${typeof foundTimer}`, foundTimer)
+                    // debug && console.log(`Got timer ${typeof foundTimer}`, foundTimer)
                     if (timerRanToday(foundTimer)) {
                         let TIMERTOTAL = differenceInSeconds(foundTimer.ended, foundTimer.started)
-                        console.log(`Got count ${foundTimer.project}/${foundTimer.id} , ${TIMERTOTAL}`)
+                        debug && console.log(`Got count ${foundTimer.project}/${foundTimer.id} , ${TIMERTOTAL}`)
                         count = count + TIMERTOTAL
-                        console.log('Updating count ', count)
+                        debug && console.log('Updating count ', count)
                     }
                 }
             }
-            console.log(`count ${count}`)
+            debug && console.log(`count ${count}`)
             resolve(count)
         })
     }
     else if (runningTimer && runningTimer.project === data.project) {
-        console.log(`same count ${runningTimer.project} = ${data.project}`)
+        debug && console.log(`same count ${runningTimer.project} = ${data.project}`)
         count = count
         resolve(count)
-        console.log(`count ${count}`)
+        debug && console.log(`count ${count}`)
     }
     else {
-        console.log(`new count ${data.project}`)
+        debug && console.log(`new count ${data.project}`)
         count = 0
         resolve(count)
-        console.log(`count ${count}`)
+        debug && console.log(`count ${count}`)
     }
 })
 
@@ -125,17 +128,17 @@ store.chainer('running', store.app).on((data, key) => {
         if (data.status === 'running') {
            getCount(data).then(count => {
             runningTimer = data
-            console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
+            debug && console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
             findRunningProject(runningTimer).then(found => {
                 runningProject = found
             })
             runTimer()
-            // console.log('run timer: ', timer)
+            // debug && console.log('run timer: ', timer)
            })
 
         }
         else if (data.status === 'done' && data.id === runningTimer.id) {
-            console.log('[node STOP]')
+            debug && console.log('[node STOP]')
             runningTimer = data
             stopTimer()
         }
@@ -151,26 +154,26 @@ store.chainer('running', store.app).on((data, key) => {
 
 // Native Commands Handler, listens to notification action buttons
 native.channel.on('stop', msg => {
-    console.log('[React node] incoming Stop: ' + typeof msg, msg)
+    debug && console.log('[React node] incoming Stop: ' + typeof msg, msg)
     try {
         stopTimer()
         finishTimer(runningTimer)
     } catch (error) {
-        console.log('[Timer node] : Stop failed ' + error)
+        debug && console.log('[Timer node] : Stop failed ' + error)
     }
 })
 
 native.channel.on('start', msg => {
-    console.log('[React node] incoming Start: ' + typeof msg, msg)
+    debug && console.log('[React node] incoming Start: ' + typeof msg, msg)
     try {
         const runningNew = createTimer(runningTimer.project)
         runningTimer = runningNew
     } catch (error) {
-        console.log('[Timer node] : Create failed ' + error)
+        debug && console.log('[Timer node] : Create failed ' + error)
     }
     try {
         runTimer()
     } catch (error) {
-        console.log('[Timer node] : Start failed ' + error)
+        debug && console.log('[Timer node] : Start failed ' + error)
     }
 })

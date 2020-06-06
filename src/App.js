@@ -5,6 +5,8 @@ import * as Data from './Data'
 const { Heartbeat } = NativeModules;
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
 
+const debug = false
+
 export default function App() {
 
   const [online, setOnline] = useState([])
@@ -23,8 +25,8 @@ export default function App() {
     // Listens for Data 'done' events, filters them for display
     deviceEmitter.addListener("done", event => {
       let item = JSON.parse(event)
-      console.log('[react] Done.')
-      console.log(typeof item + ' ', item)
+      debug && console.log('[react] Done.')
+      debug && console.log(typeof item + ' ', item)
       if (item.type === 'project') {
         setProjects(projects => [...projects, item])
         if (item.id === running.current.project) {
@@ -32,17 +34,17 @@ export default function App() {
         }
       }
       if (item.type === 'timer') {
-        console.log('[react] timer.')
+        debug && console.log('[react] timer.')
         if (item.status === 'running') {
           // setRunning(item)
           running.current = item
-          console.log('[react] running')
-          console.log(running)
+          debug && console.log('[react] running')
+          debug && console.log(running)
           Data.getProject(item.project)
         }
         else if (item.status === 'done' && item.id === running.current.id) {
-          console.log('[react] STOP')
-          console.log(item)
+          debug && console.log('[react] STOP')
+          debug && console.log(item)
           // setRunning(item)
           running.current = item
         }
@@ -65,8 +67,8 @@ export default function App() {
     deviceEmitter.addListener("running", event => {
       let item = JSON.parse(event)
       running.current = item
-      console.log('[react] running')
-      console.log(running)
+      debug && console.log('[react] running')
+      debug && console.log(running)
     })
     return () => deviceEmitter.removeAllListeners("running")
   }, [])
