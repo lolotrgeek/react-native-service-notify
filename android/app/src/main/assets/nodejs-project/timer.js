@@ -22,19 +22,22 @@ let count = 0
  * 
  * @param {object} input 
  */
-const runTimer = () => {
+const runTimer = (running, project) => {
     debug && console.log('[Timer node] run timer ')
     clearInterval(timer)
-    timer = setInterval(() => {
-        if (!runningTimer || runningTimer.status !== 'running') {
-            clearInterval(timer)
-            return;
-        }
-        if (runningProject && typeof runningProject === 'object' && runningProject.name) {
-            native.channel.post('notify', { title: runningProject.name, subtitle: count.toString(), state: "start" })
-            count = count + 1
-        }
-    }, 1000)
+    if (project && typeof project === 'object' && project.name) {
+        native.channel.post('notify', { title: project.name, subtitle: count.toString(), state: "start" })
+        timer = setInterval(() => {
+            if (!running || running.status !== 'running') {
+                clearInterval(timer)
+                return;
+            }
+            // console.log('count ' + count)
+            native.channel.post('count', count.toString())
+            // count = count + 1
+            count++
+        }, 1000)
+    }
 }
 
 const stopTimer = () => {
@@ -60,24 +63,25 @@ const inputParser = msg => {
 }
 
 
-const findRunningProject = runningTimer => new Promise((resolve, reject) => {
-    if (!runningTimer || runningTimer.status !== 'running') {
-        reject(null)
+const findRunningProject = running => new Promise((resolve, reject) => {
+    if (!running || running.status !== 'running') {
+        reject('no running timer')
     } else {
-        getProject(runningTimer.project, event => {
+        getProject(running.project, event => {
             let item = JSON.parse(event)
             debug && console.log('[NODE_DEBUG_PUT] : Running Project ', item.id)
-            if (item.type === 'project' && item.id === runningTimer.project) {
+            if (item.type === 'project' && item.id === running.project) {
                 resolve(item)
             } else {
-                reject(null)
+                reject('no running project found')
             }
         })
     }
 })
 
 getCount = (data) => new Promise((resolve, reject) => {
-    if (runningTimer && runningTimer.project !== data.project) {
+    if (!data) reject('no data')
+    else if (runningTimer && runningTimer.project !== data.project) {
         debug && console.log(`getting count ${runningTimer.project} != ${data.project}`)
         getTimers(data.project).then(timers => {
             debug && console.log(`Got timers ${typeof timers} `, timers)
@@ -126,15 +130,16 @@ store.chainer('running', store.app).on((data, key) => {
     data = JSON.parse(data)
     if (data.type === 'timer') {
         if (data.status === 'running') {
-           getCount(data).then(count => {
-            runningTimer = data
-            debug && console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
-            findRunningProject(runningTimer).then(found => {
-                runningProject = found
+            getCount(data).then(count => {
+                runningTimer = data
+                debug && console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
+                findRunningProject(runningTimer).then(found => {
+                    runningProject = found
+                    runTimer(runningTimer, runningProject)
+                })
+                
+                // debug && console.log('run timer: ', timer)
             })
-            runTimer()
-            // debug && console.log('run timer: ', timer)
-           })
 
         }
         else if (data.status === 'done' && data.id === runningTimer.id) {
@@ -164,16 +169,20 @@ native.channel.on('stop', msg => {
 })
 
 native.channel.on('start', msg => {
-    debug && console.log('[React node] incoming Start: ' + typeof msg, msg)
+     console.log('[React node] incoming Start: ' + typeof msg, msg)
     try {
         const runningNew = createTimer(runningTimer.project)
-        runningTimer = runningNew
+        getCount(runningNew).then(count => {
+            runningTimer = runningNew
+             console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
+            findRunningProject(runningTimer).then(found => {
+                runningProject = found
+                runTimer(runningTimer, runningProject)
+            })
+             console.log('run timer: ', timer)
+        })
+
     } catch (error) {
-        debug && console.log('[Timer node] : Create failed ' + error)
-    }
-    try {
-        runTimer()
-    } catch (error) {
-        debug && console.log('[Timer node] : Start failed ' + error)
+         console.log('[Timer node] : Create failed ' + error)
     }
 })

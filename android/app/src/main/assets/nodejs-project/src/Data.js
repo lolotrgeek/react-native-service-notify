@@ -7,7 +7,7 @@ const doneTimer = require('./Models').doneTimer
 const newTimer = require('./Models').newTimer
 const store = require('./Store')
 
-const debug = false
+const debug = true
 
 const put = (key, value) => store.put({ key: key, value: value })
 const set = (key, value) => store.set({ key: key, value: value })
@@ -19,11 +19,11 @@ const createTimer = (projectId) => {
   if (!projectId || typeof projectId !== 'string' || projectId.length < 9) return false
   debug && console.log('Creating Timer', projectId)
   let timer = newTimer(projectId)
-  timer = JSON.stringify(timer)
+  let timerToString = JSON.stringify(timer)
   debug && console.log('Created Timer', timer)
-  put('running', timer)
+  put('running', timerToString)
   debug && console.log('Success! Created Timer.')
-  set(`history/timers/${projectId}/${timer.id}`, timer)
+  set(`history/timers/${projectId}/${timer.id}`, timerToString)
   return timer
 }
 

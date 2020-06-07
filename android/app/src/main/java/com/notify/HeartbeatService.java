@@ -34,7 +34,7 @@ public class HeartbeatService extends NodeJS {
     public static int COUNT = 0;
     private static HeartbeatService instance;
     private static String TAG = "HEARTBEAT-SERVICE";
-
+    private static boolean DEBUG = false;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -78,17 +78,6 @@ public class HeartbeatService extends NodeJS {
         this.countHandler.removeCallbacks(this.runnableCode);
     }
 
-    public JSONObject heartbeatPayloadParse(JSONObject obj) {
-        JSONObject request = null;
-        try {
-            Log.i(TAG, "Parsing Payload...");
-            JSONArray payload = new JSONArray(obj.get("payload").toString());
-            request = new JSONObject(payload.get(0).toString());
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-        }
-        return request;
-    }
 
     public void sendMessageToReact(String event, String msg) {
         HeartbeatModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(event, msg);
@@ -99,8 +88,8 @@ public class HeartbeatService extends NodeJS {
         if (isJSONValid(msg)) {
             try {
                 obj = new JSONObject(msg);
-                Log.i(TAG, "Parsing Msg...");
-                Log.d(TAG, obj.toString());
+                if (DEBUG) {Log.i(TAG, "Parsing Msg...");}
+                if (DEBUG)  {Log.d(TAG, obj.toString());}
             } catch (JSONException e) {
                 Log.e(TAG, e.getMessage());
             }
@@ -125,12 +114,24 @@ public class HeartbeatService extends NodeJS {
         String event = null;
         try {
             event = obj.get("event").toString();
-            Log.i(TAG, "Parsing Event");
-            Log.d(TAG, event);
+            if (DEBUG) {Log.i(TAG, "Parsing Event");}
+            if (DEBUG) {Log.d(TAG, event);}
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
         return event;
+    }
+
+    public JSONObject heartbeatPayloadParse(JSONObject obj) {
+        JSONObject request = null;
+        try {
+            if (DEBUG) {Log.i(TAG, "Parsing Payload...");}
+            JSONArray payload = new JSONArray(obj.get("payload").toString());
+            request = new JSONObject(payload.get(0).toString());
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        return request;
     }
 
     /**
@@ -165,24 +166,22 @@ public class HeartbeatService extends NodeJS {
             String event = eventParse(obj);
             switch (event) {
                 case "done":
-                    Log.d(TAG, msg);
                     try {
                         JSONObject request = heartbeatPayloadParse(obj);
-                        Log.i(TAG, "msg from node : done");
-                        Log.d("NODE_DEBUG_PUT", "done: " + request.toString());
+                        if (DEBUG) {Log.i(TAG, "msg from node : done");}
+                        if (DEBUG) {Log.d("NODE_DEBUG_PUT", "done: " + request.toString());}
                         sendMessageToReact("done", request.toString());
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage());
                     }
                     break;
                 case "notify":
-                    Log.d(TAG, msg);
                     try {
                         JSONObject update = heartbeatPayloadParse(obj);
-                        Log.d(TAG, "notify - " + update.toString());
+                        if (DEBUG) {Log.d(TAG, "notify - " + update.toString());}
                         try {
                             String state = update.get("state").toString();
-                            Log.d(TAG, "notify STATE - " + state);
+                            if (DEBUG) {Log.d(TAG, "notify STATE - " + state);}
                             if (state.equals("stop")) {
                                 notificationPaused();
                             }
@@ -191,12 +190,10 @@ public class HeartbeatService extends NodeJS {
                                 String subtitle = update.get("subtitle").toString();
                                 TITLE = title;
                                 SUBTITLE = subtitle;
-                                Log.d(TAG, TITLE + " " + SUBTITLE);
+                                if (DEBUG)  {Log.d(TAG, TITLE + " " + SUBTITLE);}
                                 notificationUpdate();
-                                sendMessageToReact("count", SUBTITLE);
                             }
                         } catch (Exception e) {
-
                             Log.e(TAG, e.getMessage());
                         }
                     } catch (Exception e) {
@@ -205,8 +202,15 @@ public class HeartbeatService extends NodeJS {
                     break;
                 case "running":
                     JSONObject update = heartbeatPayloadParse(obj);
-                    Log.d(TAG, "running - " + update.toString());
+                    if (DEBUG) {Log.d(TAG, "running - " + update.toString());}
                     sendMessageToReact("running", update.toString());
+                    break;
+                case "count":
+                    JSONArray payload = new JSONArray(obj.get("payload").toString());
+                    String count = payload.get(0).toString();
+                    SUBTITLE = count;
+                    notificationUpdate();
+                    sendMessageToReact("count", SUBTITLE);
                     break;
             }
         } catch (Throwable t) {
@@ -255,7 +259,7 @@ public class HeartbeatService extends NodeJS {
     }
 
     public void notificationUpdate() {
-        Log.i(TAG, "updating notification");
+        if (DEBUG) {Log.i(TAG, "updating notification");}
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
@@ -284,7 +288,7 @@ public class HeartbeatService extends NodeJS {
     }
 
     public void notificationPaused() {
-        Log.i(TAG, "pausing notification");
+        if (DEBUG) {Log.i(TAG, "pausing notification");}
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
