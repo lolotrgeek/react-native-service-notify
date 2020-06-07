@@ -21,6 +21,8 @@ export default function App() {
   // const runningProject = useRef({})
   // const count = useRef(0)
 
+  useEffect(() => Heartbeat.get('running'), [online])
+
   useEffect(() => {
     // Listens for Data 'done' events, filters them for display
     // OPTIMIZE, could remove listeners for running in favor of node's runningTimer()
