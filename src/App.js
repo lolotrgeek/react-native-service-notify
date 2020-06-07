@@ -18,11 +18,12 @@ export default function App() {
   // const [running, setRunning] = useState({ id: 'none' })
 
   const running = useRef({ id: 'none' })
-  const runningProject = useRef({})
+  // const runningProject = useRef({})
   // const count = useRef(0)
 
   useEffect(() => {
     // Listens for Data 'done' events, filters them for display
+    // OPTIMIZE, could remove listeners for running in favor of node's runningTimer()
     deviceEmitter.addListener("done", event => {
       let item = JSON.parse(event)
       debug && console.log('[react] Done.')
@@ -30,7 +31,9 @@ export default function App() {
       if (item.type === 'project') {
         setProjects(projects => [...projects, item])
         if (item.id === running.current.project) {
-          runningProject.current = item
+          // runningProject.current = item
+          running.current.color = item.color
+          running.current.name = item.name
         }
       }
       if (item.type === 'timer') {
@@ -81,7 +84,7 @@ export default function App() {
     <View style={styles.container}>
       <Text styles={styles.status}>{status}</Text>
       {/* <Text>{projects.length > 0 ? projects[0].name : 'first project'}</Text> */}
-      <Text>{runningProject.current.name}</Text>
+      <Text>{running.current.name}</Text>
       <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>
       <Text>{count}</Text>
       {running.current.status !== 'running' || running.current.id === 'none' ?

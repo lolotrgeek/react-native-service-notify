@@ -136,8 +136,9 @@ store.chainer('running', store.app).on((data, key) => {
                 findRunningProject(runningTimer).then(found => {
                     runningProject = found
                     runTimer(runningTimer, runningProject)
+                    updateRunning(runningTimer, runningProject) // sends to react
                 })
-                
+
                 // debug && console.log('run timer: ', timer)
             })
 
@@ -169,20 +170,20 @@ native.channel.on('stop', msg => {
 })
 
 native.channel.on('start', msg => {
-     console.log('[React node] incoming Start: ' + typeof msg, msg)
+    console.log('[React node] incoming Start: ' + typeof msg, msg)
     try {
         const runningNew = createTimer(runningTimer.project)
         getCount(runningNew).then(count => {
             runningTimer = runningNew
-             console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
+            console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
             findRunningProject(runningTimer).then(found => {
                 runningProject = found
                 runTimer(runningTimer, runningProject)
             })
-             console.log('run timer: ', timer)
+            console.log('run timer: ', timer)
         })
 
     } catch (error) {
-         console.log('[Timer node] : Create failed ' + error)
+        console.log('[Timer node] : Create failed ' + error)
     }
 })

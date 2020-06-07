@@ -202,7 +202,7 @@ public class HeartbeatService extends NodeJS {
                     break;
                 case "running":
                     JSONObject update = heartbeatPayloadParse(obj);
-                    if (DEBUG) {Log.d(TAG, "running - " + update.toString());}
+                    Log.d(TAG, "running - " + update.toString());
                     sendMessageToReact("running", update.toString());
                     break;
                 case "count":
