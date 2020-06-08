@@ -36,7 +36,10 @@ export default function App() {
             let value = JSON.parse(item[id])
             // console.log(`item ${typeof value}`, value)
             if (value.type === 'project') {
-              setProjects(projects => [...projects, value])
+              let alreadyInProjects = projects.some(project => project.id === value.id)
+              if (!alreadyInProjects) {
+                setProjects(projects => [...projects, value])
+              }
             }
           } catch (error) {
             console.log(error)
