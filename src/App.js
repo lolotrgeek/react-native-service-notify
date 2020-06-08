@@ -101,8 +101,11 @@ export default function App() {
   };
   const renderRow = ({ item }) => {
     return (
+      <View>
+        <Text style={{ color: 'red' }}>{item.id}</Text>
+        <Button title='start' onPress={() => Data.createTimer(item.id)} />
+      </View>
 
-      <Text style={{ color: 'red' }}>{item.id}</Text>
 
     );
   };
@@ -111,19 +114,17 @@ export default function App() {
       <Text styles={styles.status}>{status}</Text>
       {/* <Text>{projects.length > 0 ? projects[0].name : 'first project'}</Text> */}
       <Text>{running.current.name}</Text>
+      <Text>{'Project: ' + running.current.project }</Text>
       <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>
       <Text>{count}</Text>
       {running.current.status !== 'running' || running.current.id === 'none' ?
-        <Button title='start' onPress={() => Data.createTimer(projects[0].id)} /> :
+        <Text >No Running Timer</Text> :
         <Button title='stop' onPress={() => Data.finishTimer(running.current)} />
-      }
-      {projects[1] && projects[1].id ?
-        <Button title='test' onPress={() => Data.createTimer(projects[1].id)} /> :
-        <Text>No Second project</Text>
       }
       <SafeAreaView style={styles.container}>
         {console.log(projects)}
         <FlatList
+          style={styles.list}
           data={projects}
           // refreshing={refresh}
           renderItem={renderRow}
@@ -142,6 +143,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  list: {
+    alignSelf: 'stretch',
   },
   button: {
     margin: 20,
