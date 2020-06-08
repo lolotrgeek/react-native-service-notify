@@ -61,6 +61,8 @@ public class NodeJS extends Service {
     private static String SYSTEM_CHANNEL = "_SYSTEM_";
     private static String EVENT_CHANNEL = "_EVENTS_";
 
+    private static boolean DEBUG = false;
+
     private static boolean engineAlreadyStarted = false;
 
     private static final Object onlyOneEngineStartingAtATimeLock = new Object();
@@ -94,7 +96,7 @@ public class NodeJS extends Service {
     public void onCreate() {
         instance = this;
         super.onCreate();
-        Log.d(LOGTAG, "Node Service Initialize");
+        if(DEBUG) Log.d(LOGTAG, "Node Service Initialize");
 
         context = getApplicationContext();
         assetManager = context.getAssets();
@@ -154,7 +156,7 @@ public class NodeJS extends Service {
 
     public void systemMessageToNode() {
         if (nodeIsReadyForAppEvents) {
-            Log.d(LOGTAG, "System msg to Node");
+            if(DEBUG) Log.d(LOGTAG, "System msg to Node");
             sendMessageToNodeChannel(SYSTEM_CHANNEL, "alive");
         }
     }
@@ -171,8 +173,8 @@ public class NodeJS extends Service {
             Log.e(LOGTAG, e.getMessage());
         }
         if (nodeIsReadyForAppEvents) {
-            Log.i(LOGTAG, "Sending msg from Android to Node.");
-            Log.d(LOGTAG, message.toString());
+            if(DEBUG) Log.i(LOGTAG, "Sending msg from Android to Node.");
+            if(DEBUG) Log.d(LOGTAG, message.toString());
             sendMessageToNodeChannel(EVENT_CHANNEL, message.toString());
         } else {
             Log.e(LOGTAG, "Unable to Send - " + message.toString());
@@ -201,20 +203,20 @@ public class NodeJS extends Service {
     }
 
     public void startEngine(final String scriptFileName) {
-        Log.d(LOGTAG, "StartEngine: " + scriptFileName);
+        if(DEBUG) Log.d(LOGTAG, "StartEngine: " + scriptFileName);
 
         if (NodeJS.engineAlreadyStarted == true) {
-            Log.i(LOGTAG, "Engine already started");
+            if(DEBUG) Log.i(LOGTAG, "Engine already started");
             return;
         }
 
         if (scriptFileName == null || scriptFileName.isEmpty()) {
-            Log.i(LOGTAG, "Invalid filename");
+            if(DEBUG) Log.i(LOGTAG, "Invalid filename");
             return;
         }
 
         final String scriptFileAbsolutePath = new String(NodeJS.nodeAppRootAbsolutePath + "/" + scriptFileName);
-        Log.d(LOGTAG, "Script absolute path: " + scriptFileAbsolutePath);
+        if(DEBUG) Log.d(LOGTAG, "Script absolute path: " + scriptFileAbsolutePath);
 
         new Thread(new Runnable() {
             @Override
@@ -222,24 +224,24 @@ public class NodeJS extends Service {
                 waitForInit();
 
                 if (ioe != null) {
-                    Log.i(LOGTAG, "Initialization failed: " + ioe.toString());
+                    if(DEBUG) Log.i(LOGTAG, "Initialization failed: " + ioe.toString());
                     return;
                 }
 
                 synchronized (onlyOneEngineStartingAtATimeLock) {
                     if (NodeJS.engineAlreadyStarted == true) {
-                        Log.i(LOGTAG, "Engine already started");
+                        if(DEBUG) Log.i(LOGTAG, "Engine already started");
                         return;
                     }
                     File fileObject = new File(scriptFileAbsolutePath);
                     if (!fileObject.exists()) {
-                        Log.i(LOGTAG, "File not found");
+                        if(DEBUG) Log.i(LOGTAG, "File not found");
                         return;
                     }
                     NodeJS.engineAlreadyStarted = true;
                 }
 
-                Log.i(LOGTAG, "Engine Starting");
+                if(DEBUG) Log.i(LOGTAG, "Engine Starting");
 
                 startNodeWithArguments(new String[]{"node", scriptFileAbsolutePath},
                         NodeJS.nodePath, true);
@@ -249,15 +251,15 @@ public class NodeJS extends Service {
     }
 
     public void startEngineWithScript(final String scriptBody) {
-        Log.d(LOGTAG, "StartEngineWithScript: " + scriptBody);
+        if(DEBUG) Log.d(LOGTAG, "StartEngineWithScript: " + scriptBody);
 
         if (NodeJS.engineAlreadyStarted == true) {
-            Log.i(LOGTAG, "Engine already started");
+            if(DEBUG) Log.i(LOGTAG, "Engine already started");
             return;
         }
 
         if (scriptBody == null || scriptBody.isEmpty()) {
-            Log.i(LOGTAG, "Script is empty");
+            if(DEBUG) Log.i(LOGTAG, "Script is empty");
             return;
         }
 
@@ -270,19 +272,19 @@ public class NodeJS extends Service {
                 waitForInit();
 
                 if (ioe != null) {
-                    Log.i(LOGTAG, "Initialization failed: " + ioe.toString());
+                    if(DEBUG) Log.i(LOGTAG, "Initialization failed: " + ioe.toString());
                     return;
                 }
 
                 synchronized (onlyOneEngineStartingAtATimeLock) {
                     if (NodeJS.engineAlreadyStarted == true) {
-                        Log.i(LOGTAG, "Engine already started");
+                        if(DEBUG) Log.i(LOGTAG, "Engine already started");
                         return;
                     }
                     NodeJS.engineAlreadyStarted = true;
                 }
 
-                Log.i(LOGTAG, "Engine Started");
+                if(DEBUG) Log.i(LOGTAG, "Engine Started");
 
                 startNodeWithArguments(
                         new String[]{"node", "-e", scriptBodyToRun},
@@ -342,18 +344,18 @@ public class NodeJS extends Service {
 
         // Copy additional asset files to project working folder
         if (nativeFiles.size() > 0) {
-            Log.d(LOGTAG, "Building folder hierarchy for " + nativeAssetsPath);
+            if(DEBUG) Log.d(LOGTAG, "Building folder hierarchy for " + nativeAssetsPath);
             for (String dir : nativeDirs) {
                 new File(nodeAppRootAbsolutePath + "/" + dir).mkdirs();
             }
-            Log.d(LOGTAG, "Copying assets using file list for " + nativeAssetsPath);
+            if(DEBUG) Log.d(LOGTAG, "Copying assets using file list for " + nativeAssetsPath);
             for (String file : nativeFiles) {
                 String src = nativeAssetsPath + "/" + file;
                 String dest = nodeAppRootAbsolutePath + "/" + file;
                 copyAssetFile(src, dest);
             }
         } else {
-            Log.d(LOGTAG, "No assets to copy from " + nativeAssetsPath);
+            if(DEBUG) Log.d(LOGTAG, "No assets to copy from " + nativeAssetsPath);
         }
     }
 
@@ -369,7 +371,7 @@ public class NodeJS extends Service {
         // If present, move the existing node project root to the trash
         File nodejsProjectFolder = new File(NodeJS.filesDir + "/" + PROJECT_ROOT);
         if (nodejsProjectFolder.exists()) {
-            Log.d(LOGTAG, "Moving existing project folder to trash");
+            if(DEBUG) Log.d(LOGTAG, "Moving existing project folder to trash");
             File trash = new File(NodeJS.trashDir);
             nodejsProjectFolder.renameTo(trash);
         }
@@ -381,7 +383,7 @@ public class NodeJS extends Service {
 
         // Copy the node project files to the project working folder
         if (files.size() > 0) {
-            Log.d(LOGTAG, "Copying node project assets using the files list");
+            if(DEBUG) Log.d(LOGTAG, "Copying node project assets using the files list");
 
             for (String dir : dirs) {
                 new File(NodeJS.filesDir + "/" + dir).mkdirs();
@@ -393,14 +395,14 @@ public class NodeJS extends Service {
                 NodeJS.copyAssetFile(src, dest);
             }
         } else {
-            Log.d(LOGTAG, "Copying node project assets enumerating the APK assets folder");
+            if(DEBUG) Log.d(LOGTAG, "Copying node project assets enumerating the APK assets folder");
             copyFolder(PROJECT_ROOT);
         }
 
         // Copy native modules assets
         copyNativeAssets();
 
-        Log.d(LOGTAG, "Node assets copied");
+        if(DEBUG) Log.d(LOGTAG, "Node assets copied");
         saveLastUpdateTime();
     }
 
@@ -415,7 +417,7 @@ public class NodeJS extends Service {
             }
             reader.close();
         } catch (FileNotFoundException e) {
-            Log.d(LOGTAG, "File not found: " + filename);
+            if(DEBUG) Log.d(LOGTAG, "File not found: " + filename);
         } catch (IOException e) {
             e.printStackTrace();
             lines = new ArrayList();
@@ -482,7 +484,7 @@ public class NodeJS extends Service {
             if (startOptions.names() != null) {
                 for (int i = 0; i < startOptions.names().length(); i++) {
                     try {
-                        Log.d(LOGTAG, "Start engine option: " + startOptions.names().getString(i));
+                        if(DEBUG) Log.d(LOGTAG, "Start engine option: " + startOptions.names().getString(i));
                     } catch (JSONException e) {
                     }
                 }

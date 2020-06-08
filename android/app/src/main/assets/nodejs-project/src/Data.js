@@ -9,11 +9,11 @@ const store = require('./Store')
 
 const debug = false
 
-const put = (key, value, channel) => store.put({ key: key, value: value }, channel)
-const set = (key, value, channel) => store.set({ key: key, value: value }, channel)
-const get = (key, channel) => store.get(key, channel)
-const getAll = (key, channel) => store.getAll(key, channel)
-const getAllOnce = (key, channel) => store.getAllOnce(key, channel)
+const put = (key, value) => store.put({ key: key, value: value })
+const set = (key, value) => store.set({ key: key, value: value })
+const get = (key) => store.get(key)
+const getAll = (key) => store.getAll(key)
+const getAllOnce = (key) => store.getAllOnce(key)
 
 const createTimer = (projectId) => {
   if (!projectId || typeof projectId !== 'string' || projectId.length < 9) return false
@@ -31,7 +31,7 @@ const endTimer = (timer) => {
   debug && console.log('Ending', timer)
   timer = JSON.stringify(timer)
   set(`history/timers/${timer.project}/${timer.id}`)
-  put(`timers/${timer.project}/${timer.id}`, 'timers')
+  put(`timers/${timer.project}/${timer.id}`)
   // organizing...
   // put(`${timer.project}/timers`, timer.id)
 }
@@ -46,7 +46,7 @@ const addTimer = (projectId, value) => {
   timer = JSON.stringify(timer)
   debug && console.log('[react Data] Storing Timer', timer)
   set(`history/timers/${projectId}/${timer.id}`, timer)
-  put(`timers/${projectId}/${timer.id}`, timer, 'timers')
+  put(`timers/${projectId}/${timer.id}`, timer)
 }
 
 const finishTimer = (timer) => {
@@ -76,7 +76,7 @@ const finishTimer = (timer) => {
  * @param {function} handler 
  */
 const getProject = (projectId, handler) => {
-  get(`projects/${projectId}`, 'projects')
+  get(`projects/${projectId}`)
   store.channel.addListener(`projects/${projectId}`, handler)
 }
 

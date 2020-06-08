@@ -27,7 +27,7 @@ const isToday = date => {
  * @param {Date} end 
  */
 const differenceInSeconds = (start, end) => {
-    console.log('Difference: ', start , ' - ', end)
+    debug && console.log('Difference: ', start , ' - ', end)
     var a = moment(start)
     var b = moment(end)
     return a.diff(b, 'seconds')
