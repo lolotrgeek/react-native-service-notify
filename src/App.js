@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Button, NativeEventEmitter, NativeModules, FlatList } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, Button, NativeEventEmitter, NativeModules, FlatList } from 'react-native';
 import * as Data from './Data'
 
 const { Heartbeat } = NativeModules;
@@ -14,8 +14,6 @@ export default function App() {
   const [projects, setProjects] = useState([])
   const [timers, setTimers] = useState([])
   const [count, setCount] = useState(0)
-  // const { count, setCount, start, stop } = useCounter(1000, false)
-  // const [running, setRunning] = useState({ id: 'none' })
 
   const running = useRef({ id: 'none' })
   // const runningProject = useRef({})
@@ -29,9 +27,22 @@ export default function App() {
     deviceEmitter.addListener("done", event => {
       let item = JSON.parse(event)
       debug && console.log('[react] Done.')
+      item = Data.trimSoul(item)
       debug && console.log(typeof item + ' ', item)
-      if (item.type === 'project') {
-        setProjects(projects => [...projects, item])
+
+      if (typeof item === 'object') {
+        for (id in item) {
+          try {
+            let value = JSON.parse(item[id])
+            // console.log(`item ${typeof value}`, value)
+            if (value.type === 'project') {
+              setProjects(projects => [...projects, value])
+            }
+          } catch (error) {
+            console.log(error)
+          }
+        }
+
         if (item.id === running.current.project) {
           // runningProject.current = item
           running.current.color = item.color
@@ -78,12 +89,22 @@ export default function App() {
     return () => deviceEmitter.removeAllListeners("running")
   }, [])
 
-  useEffect(() => Data.createProject('react project', '#ccc'), [online])
-  useEffect(() => Data.createProject('test project', '#ccc'), [online])
+  // useEffect(() => Data.createProject('react project', '#ccc'), [online])
+  // useEffect(() => Data.createProject('test project', '#ccc'), [online])
   useEffect(() => Data.getProjects(), [online])
 
+  const onRefresh = () => {
+
+  };
+  const renderRow = ({ item }) => {
+    return (
+
+      <Text style={{ color: 'red' }}>{item.id}</Text>
+
+    );
+  };
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text styles={styles.status}>{status}</Text>
       {/* <Text>{projects.length > 0 ? projects[0].name : 'first project'}</Text> */}
       <Text>{running.current.name}</Text>
@@ -97,8 +118,18 @@ export default function App() {
         <Button title='test' onPress={() => Data.createTimer(projects[1].id)} /> :
         <Text>No Second project</Text>
       }
+      <SafeAreaView style={styles.container}>
+        {console.log(projects)}
+        <FlatList
+          data={projects}
+          // refreshing={refresh}
+          renderItem={renderRow}
+          keyExtractor={project => project.id}
+        // onRefresh={onRefresh()}
+        />
+      </SafeAreaView>
 
-    </View>
+    </SafeAreaView>
   );
 }
 

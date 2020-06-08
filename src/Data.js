@@ -4,6 +4,12 @@ import * as store from './Store'
 
 const debug = false
 
+export const trimSoul = data => {
+    if (!data || !data['_'] || typeof data['_'] !== 'object') return data
+    delete data['_']
+    return data
+  }
+
 export const createProject = (name, color) => {
     const project = newProject(name, color)
     if (!project) return false
@@ -142,7 +148,7 @@ export const finishTimer = (timer) => {
 }
 
 export const getProjects = () => {
-    store.getAll('projects')
+    store.get('projects')
     // return store.off('projects')
 }
 
