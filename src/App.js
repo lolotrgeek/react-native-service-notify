@@ -5,7 +5,7 @@ import * as Data from './Data'
 const { Heartbeat } = NativeModules;
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
 
-const debug = false
+const debug = true
 
 export default function App() {
 
@@ -16,20 +16,16 @@ export default function App() {
   const [count, setCount] = useState(0)
 
   const running = useRef({ id: 'none' })
-  // const runningProject = useRef({})
   // const count = useRef(0)
 
   useEffect(() => Heartbeat.get('running'), [online])
 
   useEffect(() => {
-    // Listens for Data 'done' events, filters them for display
-    // OPTIMIZE, could remove listeners for running in favor of node's runningTimer()
-    deviceEmitter.addListener("done", event => {
+    deviceEmitter.addListener("projects", event => {
       let item = JSON.parse(event)
-      debug && console.log('[react] Done.')
+      debug && console.log('[react] Projects.')
       item = Data.trimSoul(item)
       debug && console.log(typeof item + ' ', item)
-
       if (typeof item === 'object') {
         for (id in item) {
           try {
@@ -52,6 +48,16 @@ export default function App() {
           running.current.name = item.name
         }
       }
+    })
+    return deviceEmitter.removeAllListeners("projects")
+  }, [])
+
+  useEffect(() => {
+    deviceEmitter.addListener("timers", event => {
+      let item = JSON.parse(event)
+      debug && console.log('[react] Timers.')
+      item = Data.trimSoul(item)
+      debug && console.log(typeof item + ' ', item)
       if (item.type === 'timer') {
         debug && console.log('[react] timer.')
         if (item.status === 'running') {
@@ -69,11 +75,11 @@ export default function App() {
         }
         setTimers(timers => [...timers, item])
       }
+
     })
-
-    return () => deviceEmitter.removeAllListeners("done")
+    return deviceEmitter.removeAllListeners("timers")
   }, [])
-
+  
   useEffect(() => {
     deviceEmitter.addListener("count", event => {
       setCount(event)
@@ -99,6 +105,7 @@ export default function App() {
   const onRefresh = () => {
 
   };
+  
   const renderRow = ({ item }) => {
     return (
       <View style={{flexDirection: 'row', margin : 20}}>

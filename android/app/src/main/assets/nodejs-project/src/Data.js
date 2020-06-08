@@ -7,13 +7,13 @@ const doneTimer = require('./Models').doneTimer
 const newTimer = require('./Models').newTimer
 const store = require('./Store')
 
-const debug = true
+const debug = false
 
-const put = (key, value) => store.put({ key: key, value: value })
-const set = (key, value) => store.set({ key: key, value: value })
-const get = key => store.get(key)
-const getAll = key => store.getAll(key)
-const getAllOnce = key => store.getAllOnce(key)
+const put = (key, value, channel) => store.put({ key: key, value: value }, channel)
+const set = (key, value, channel) => store.set({ key: key, value: value }, channel)
+const get = (key, channel) => store.get(key, channel)
+const getAll = (key, channel) => store.getAll(key, channel)
+const getAllOnce = (key, channel) => store.getAllOnce(key, channel)
 
 const createTimer = (projectId) => {
   if (!projectId || typeof projectId !== 'string' || projectId.length < 9) return false
@@ -21,7 +21,7 @@ const createTimer = (projectId) => {
   let timer = newTimer(projectId)
   let timerToString = JSON.stringify(timer)
   debug && console.log('Created Timer', timer)
-  put('running', timerToString)
+  put('running', timerToString, 'running')
   debug && console.log('Success! Created Timer.')
   set(`history/timers/${projectId}/${timer.id}`, timerToString)
   return timer
@@ -30,8 +30,8 @@ const createTimer = (projectId) => {
 const endTimer = (timer) => {
   debug && console.log('Ending', timer)
   timer = JSON.stringify(timer)
-  set(`history/timers/${timer.project}/${timer.id}`, timer)
-  put(`timers/${timer.project}/${timer.id}`, timer)
+  set(`history/timers/${timer.project}/${timer.id}`)
+  put(`timers/${timer.project}/${timer.id}`, 'timers')
   // organizing...
   // put(`${timer.project}/timers`, timer.id)
 }
@@ -46,14 +46,14 @@ const addTimer = (projectId, value) => {
   timer = JSON.stringify(timer)
   debug && console.log('[react Data] Storing Timer', timer)
   set(`history/timers/${projectId}/${timer.id}`, timer)
-  put(`timers/${projectId}/${timer.id}`, timer)
+  put(`timers/${projectId}/${timer.id}`, timer, 'timers')
 }
 
 const finishTimer = (timer) => {
   if (isRunning(timer)) {
     let done = doneTimer(timer)
     debug && console.log('[node Data STOP]', done)
-    put('running', JSON.stringify(done))
+    put('running', JSON.stringify(done), 'running')
     // Danger of data loss until endTimer is called
     if (multiDay(done.started, done.ended)) {
       const dayEntries = newEntryPerDay(done.started, done.ended)
@@ -76,7 +76,7 @@ const finishTimer = (timer) => {
  * @param {function} handler 
  */
 const getProject = (projectId, handler) => {
-  get(`projects/${projectId}`)
+  get(`projects/${projectId}`, 'projects')
   store.channel.addListener(`projects/${projectId}`, handler)
 }
 
