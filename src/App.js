@@ -92,8 +92,8 @@ export default function App() {
     return () => deviceEmitter.removeAllListeners("running")
   }, [])
 
-  // useEffect(() => Data.createProject('react project', '#ccc'), [online])
-  // useEffect(() => Data.createProject('test project', '#ccc'), [online])
+  useEffect(() => Data.createProject('react project', '#ccc'), [online])
+  useEffect(() => Data.createProject('test project', '#ccc'), [online])
   useEffect(() => Data.getProjects(), [online])
 
   const onRefresh = () => {
@@ -101,9 +101,13 @@ export default function App() {
   };
   const renderRow = ({ item }) => {
     return (
-      <View>
-        <Text style={{ color: 'red' }}>{item.id}</Text>
-        <Button title='start' onPress={() => Data.createTimer(item.id)} />
+      <View style={{flexDirection: 'row', margin : 20}}>
+        <View style={{ width: '50%' }}>
+          <Text style={{ color: 'red' }}>{item.id}</Text>
+        </View>
+        <View style={{ width: '50%' }}>
+          <Button title='start' onPress={() => Data.createTimer(item.id)} />
+        </View>
       </View>
 
 
@@ -114,17 +118,15 @@ export default function App() {
       <Text styles={styles.status}>{status}</Text>
       {/* <Text>{projects.length > 0 ? projects[0].name : 'first project'}</Text> */}
       <Text>{running.current.name}</Text>
-      <Text>{'Project: ' + running.current.project }</Text>
+      <Text>{'Project: ' + running.current.project}</Text>
       <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>
       <Text>{count}</Text>
       {running.current.status !== 'running' || running.current.id === 'none' ?
         <Text >No Running Timer</Text> :
         <Button title='stop' onPress={() => Data.finishTimer(running.current)} />
       }
-      <SafeAreaView style={styles.container}>
-        {console.log(projects)}
+      <SafeAreaView style={styles.list}>
         <FlatList
-          style={styles.list}
           data={projects}
           // refreshing={refresh}
           renderItem={renderRow}
@@ -145,7 +147,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   list: {
-    alignSelf: 'stretch',
+    flexDirection: 'row'
   },
   button: {
     margin: 20,

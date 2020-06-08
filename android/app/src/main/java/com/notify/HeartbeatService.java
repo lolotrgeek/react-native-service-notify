@@ -88,8 +88,12 @@ public class HeartbeatService extends NodeJS {
         if (isJSONValid(msg)) {
             try {
                 obj = new JSONObject(msg);
-                if (DEBUG) {Log.i(TAG, "Parsing Msg...");}
-                if (DEBUG)  {Log.d(TAG, obj.toString());}
+                if (DEBUG) {
+                    Log.i(TAG, "Parsing Msg...");
+                }
+                if (DEBUG) {
+                    Log.d(TAG, obj.toString());
+                }
             } catch (JSONException e) {
                 Log.e(TAG, e.getMessage());
             }
@@ -114,8 +118,12 @@ public class HeartbeatService extends NodeJS {
         String event = null;
         try {
             event = obj.get("event").toString();
-            if (DEBUG) {Log.i(TAG, "Parsing Event");}
-            if (DEBUG) {Log.d(TAG, event);}
+            if (DEBUG) {
+                Log.i(TAG, "Parsing Event");
+            }
+            if (DEBUG) {
+                Log.d(TAG, event);
+            }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -125,7 +133,9 @@ public class HeartbeatService extends NodeJS {
     public JSONObject heartbeatPayloadParse(JSONObject obj) {
         JSONObject request = null;
         try {
-            if (DEBUG) {Log.i(TAG, "Parsing Payload...");}
+            if (DEBUG) {
+                Log.i(TAG, "Parsing Payload...");
+            }
             JSONArray payload = new JSONArray(obj.get("payload").toString());
             request = new JSONObject(payload.get(0).toString());
         } catch (JSONException e) {
@@ -152,6 +162,21 @@ public class HeartbeatService extends NodeJS {
         }
     }
 
+    public void routeMessage(String event, JSONObject obj) {
+        try {
+            JSONObject request = heartbeatPayloadParse(obj);
+            if (DEBUG) {
+                Log.i(TAG, "msg from node : " + event);
+            }
+            if (DEBUG) {
+                Log.d("NODE_DEBUG_PUT", event + " - " + request.toString());
+            }
+            sendMessageToReact(event, request.toString());
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
     /**
      * Incoming Messages from Node to Android, adds data React cases
      *
@@ -165,23 +190,17 @@ public class HeartbeatService extends NodeJS {
             JSONObject obj = msgParse(msg);
             String event = eventParse(obj);
             switch (event) {
-                case "done":
-                    try {
-                        JSONObject request = heartbeatPayloadParse(obj);
-                        if (DEBUG) {Log.i(TAG, "msg from node : done");}
-                        if (DEBUG) {Log.d("NODE_DEBUG_PUT", "done: " + request.toString());}
-                        sendMessageToReact("done", request.toString());
-                    } catch (Exception e) {
-                        Log.e(TAG, e.getMessage());
-                    }
-                    break;
                 case "notify":
                     try {
                         JSONObject update = heartbeatPayloadParse(obj);
-                        if (DEBUG) {Log.d(TAG, "notify - " + update.toString());}
+                        if (DEBUG) {
+                            Log.d(TAG, "notify - " + update.toString());
+                        }
                         try {
                             String state = update.get("state").toString();
-                            if (DEBUG) {Log.d(TAG, "notify STATE - " + state);}
+                            if (DEBUG) {
+                                Log.d(TAG, "notify STATE - " + state);
+                            }
                             if (state.equals("stop")) {
                                 notificationPaused();
                             }
@@ -190,7 +209,9 @@ public class HeartbeatService extends NodeJS {
                                 String subtitle = update.get("subtitle").toString();
                                 TITLE = title;
                                 SUBTITLE = subtitle;
-                                if (DEBUG)  {Log.d(TAG, TITLE + " " + SUBTITLE);}
+                                if (DEBUG) {
+                                    Log.d(TAG, TITLE + " " + SUBTITLE);
+                                }
                                 notificationUpdate();
                             }
                         } catch (Exception e) {
@@ -200,17 +221,24 @@ public class HeartbeatService extends NodeJS {
                         Log.e(TAG, e.getMessage());
                     }
                     break;
-                case "running":
-                    JSONObject update = heartbeatPayloadParse(obj);
-                    if (DEBUG) {Log.d(TAG, "running - " + update.toString());}
-                    sendMessageToReact("running", update.toString());
-                    break;
                 case "count":
                     JSONArray payload = new JSONArray(obj.get("payload").toString());
                     String count = payload.get(0).toString();
                     SUBTITLE = count;
                     notificationUpdate();
                     sendMessageToReact("count", SUBTITLE);
+                    break;
+                case "running":
+                    routeMessage("running", obj);
+                    break;
+                case "project":
+                    routeMessage("project", obj);
+                    break;
+                case "timer":
+                    routeMessage("timer", obj);
+                    break;
+                case "done":
+                    routeMessage("done", obj);
                     break;
             }
         } catch (Throwable t) {
@@ -259,7 +287,9 @@ public class HeartbeatService extends NodeJS {
     }
 
     public void notificationUpdate() {
-        if (DEBUG) {Log.i(TAG, "updating notification");}
+        if (DEBUG) {
+            Log.i(TAG, "updating notification");
+        }
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
@@ -288,7 +318,9 @@ public class HeartbeatService extends NodeJS {
     }
 
     public void notificationPaused() {
-        if (DEBUG) {Log.i(TAG, "pausing notification");}
+        if (DEBUG) {
+            Log.i(TAG, "pausing notification");
+        }
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
