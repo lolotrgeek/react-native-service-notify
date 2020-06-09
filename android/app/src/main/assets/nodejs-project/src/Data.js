@@ -7,7 +7,7 @@ const doneTimer = require('./Models').doneTimer
 const newTimer = require('./Models').newTimer
 const store = require('./Store')
 
-const debug = false
+const debug = true
 
 const put = (key, value) => store.put({ key: key, value: value })
 const set = (key, value) => store.set({ key: key, value: value })

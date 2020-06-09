@@ -5,7 +5,7 @@ const config = {
 const Gun = require('gun')
 const path = require('path')
 
-const debug = false
+const debug = true
 
 // events
 const events = require('events');
@@ -145,24 +145,25 @@ const channelSet = (input) => {
 
 const getOne = (msg) => {
   const input = inputParser(msg)
-  const channel = channelSet(input)
   const chain = chainer(input, app)
   // debug && console.log('[React node] Chain :', chain)
-  chain.on((data, key) => {
-    debug && console.log('[GUN node] getOne Data Found: ', data)
-    eventEmitter.emit(msg, data)
-    native.channel.post(channel, data)
+  chain.once((data, key) => {
+    const foundData = trimSoul(data)
+    debug && console.log('[GUN node] getOne Data Found: ', foundData)
+    eventEmitter.emit(msg, foundData)
+    native.channel.post('done', foundData)
   })
 }
 
 const getAll = (msg) => {
   const input = inputParser(msg)
-  const channel = channelSet(input)
+
   const chain = chainer(input, app)
   // debug && console.log('[React node] Chain :', chain)
   chain.map().on((data, key) => {
+    data = trimSoul(data)
     debug && console.log('[GUN node] getAll Data Found: ', data)
-    native.channel.post(channel, data)
+    native.channel.post('done', data)
     eventEmitter.emit(msg, data)
   })
   chain.off()
@@ -170,15 +171,16 @@ const getAll = (msg) => {
 
 const getAllOnce = (msg) => {
   const input = inputParser(msg)
-  const channel = channelSet(input)
+
   const chain = chainer(input, app)
   // debug && console.log('[React node] Chain :', chain)
   chain.once().map().once((data, key) => {
     if (!data) {
       debug && console.log('[GUN node] getAllOnce No Data Found',)
     }
+    data = trimSoul(data)
     debug && console.log('[GUN node] getAllOnce Data Found: ', data)
-    native.channel.post(channel, data)
+    native.channel.post('done', data)
     eventEmitter.emit(msg, data)
   })
   chain.off()
@@ -192,6 +194,7 @@ const getAllOnce = (msg) => {
 const getOnce = (msg, cb) => {
   const chain = chainer(msg, app)
   // debug && console.log('[React node] Chain :', chain)
+  data = trimSoul(data)
   chain.on((data, key) => { debug && console.log('Got Once ', data) })
   chain.off()
 }
@@ -207,12 +210,12 @@ const putAll = (msg) => {
   const input = inputParser(msg)
   debug && console.log('[NODE_DEBUG_PUT] : ', input)
   const chain = chainer(input.key, app)
-  const channel = channelSet(input.key)
   // debug && console.log('[React node] Chain :', chain)
   debug && console.log('[NODE_DEBUG_PUT] : ', typeof input)
   chain.put(input.value, ack => {
+    const data = trimSoul(input.value)
     debug && console.log('[NODE_DEBUG_PUT] ERR? ', ack.err)
-    native.channel.post(channel, ack.err ? ack : input.value)
+    native.channel.post('put', ack.err ? ack : data)
   })
 }
 
@@ -225,11 +228,11 @@ const setAll = (msg) => {
   const input = inputParser(msg)
   debug && console.log('[NODE_DEBUG_SET] : ', input)
   const chain = chainer(input.key, app)
-  const channel = channelSet(input.key)
   // debug && console.log('[React node] Chain :', chain)
   chain.set(input.value, ack => {
+    const data = trimSoul(input.value)
     debug && console.log('[NODE_DEBUG_SET] ERR? ', ack.err)
-    native.channel.post(channel, ack.err ? ack : input.value)
+    native.channel.post('set', ack.err ? ack : data)
   })
 }
 
@@ -242,8 +245,9 @@ const putAllCompat = (msg) => {
   const input = inputParser(msg)
   const chain = chainerCompat(input)
   chain.put(input, ack => {
+    const data = trimSoul(input.value)
     // debug && console.log('[GUN node] ACK: ', ack)
-    native.channel.post('done', ack.err ? ack : input.value)
+    native.channel.post('put', ack.err ? ack : data)
   })
 }
 

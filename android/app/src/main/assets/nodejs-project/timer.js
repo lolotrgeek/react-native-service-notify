@@ -88,7 +88,8 @@ getCount = (data) => new Promise((resolve, reject) => {
             count = 0
             for (timer in timers) {
                 // debug && console.log(`Got timer ${typeof timers[timer]} `, timers[timer] )
-                let foundTimer = trimSoul(timers[timer])
+                // let foundTimer = trimSoul(timers[timer])
+                let foundTimer = timers[timer]
                 if (typeof foundTimer === 'string') {
                     foundTimer = JSON.parse(foundTimer)
                     // debug && console.log(`Got timer ${typeof foundTimer}`, foundTimer)

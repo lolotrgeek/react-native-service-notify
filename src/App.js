@@ -21,12 +21,21 @@ export default function App() {
   useEffect(() => Heartbeat.get('running'), [online])
 
   useEffect(() => {
-    deviceEmitter.addListener("projects", event => {
+    deviceEmitter.addListener("put", event => {
+      debug && console.log('[react] successful put.')
       let item = JSON.parse(event)
-      debug && console.log('[react] Projects.')
       item = Data.trimSoul(item)
-      debug && console.log(typeof item + ' ', item)
-      if (typeof item === 'object') {
+      debug && console.log('put ' + typeof item + ' ', item)
+    })
+    return () => deviceEmitter.removeAllListeners("put")
+
+  }, [])
+  useEffect(() => {
+    deviceEmitter.addListener("done", event => {
+      debug && console.log('[react] successful get.')
+      let item = JSON.parse(event)
+      debug && console.log('get ' + typeof item + ' ', item)
+       if (typeof item === 'object') {
         for (id in item) {
           try {
             let value = JSON.parse(item[id])
@@ -48,16 +57,6 @@ export default function App() {
           running.current.name = item.name
         }
       }
-    })
-    return deviceEmitter.removeAllListeners("projects")
-  }, [])
-
-  useEffect(() => {
-    deviceEmitter.addListener("timers", event => {
-      let item = JSON.parse(event)
-      debug && console.log('[react] Timers.')
-      item = Data.trimSoul(item)
-      debug && console.log(typeof item + ' ', item)
       if (item.type === 'timer') {
         debug && console.log('[react] timer.')
         if (item.status === 'running') {
@@ -75,10 +74,9 @@ export default function App() {
         }
         setTimers(timers => [...timers, item])
       }
-
     })
-    return deviceEmitter.removeAllListeners("timers")
-  }, [])
+    return () => deviceEmitter.removeAllListeners("done")
+  },[])
   
   useEffect(() => {
     deviceEmitter.addListener("count", event => {
@@ -100,7 +98,10 @@ export default function App() {
 
   useEffect(() => Data.createProject('react project', '#ccc'), [online])
   useEffect(() => Data.createProject('test project', '#ccc'), [online])
-  useEffect(() => Data.getProjects(), [online])
+  useEffect(() => {
+    console.log('Get projects...')
+    Data.getProjects()
+  }, [online])
 
   const onRefresh = () => {
 

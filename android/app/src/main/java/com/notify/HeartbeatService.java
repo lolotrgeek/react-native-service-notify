@@ -35,7 +35,7 @@ public class HeartbeatService extends NodeJS {
     private static HeartbeatService instance;
     private static String TAG = "HEARTBEAT-SERVICE";
     private static boolean DEBUG = false;
-    private static boolean DEBUG_PUT = false;
+    private static boolean DEBUG_PUT = true;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -81,6 +81,7 @@ public class HeartbeatService extends NodeJS {
 
 
     public void sendMessageToReact(String event, String msg) {
+        if(DEBUG_PUT) Log.d(TAG, "Android to react: "+ event + " data: " + msg);
         HeartbeatModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(event, msg);
     }
 
@@ -159,7 +160,7 @@ public class HeartbeatService extends NodeJS {
         try {
             JSONObject request = heartbeatPayloadParse(obj);
             if (DEBUG) Log.i(TAG, "msg from node : " + event);
-            if (DEBUG_PUT) Log.d("event from node ", event + " data: " + request.toString());
+            if (DEBUG_PUT) Log.d("CHANNEL ", event + " data: " + request.toString());
             sendMessageToReact(event, request.toString());
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -217,23 +218,14 @@ public class HeartbeatService extends NodeJS {
                 case "running":
                     routeMessage("running", obj);
                     break;
-                case "projects":
-                    routeMessage("projects", obj);
-                    break;
-                case "timers":
-                    routeMessage("timers", obj);
-                    break;
                 case "done":
-                    try {
-                        JSONObject request = heartbeatPayloadParse(obj);
-                        if (DEBUG) Log.i(TAG, "msg from node : " + event);
-
-                        if (DEBUG_PUT)
-                            Log.d("event from node ", event + " data: " + request.toString());
-
-                    } catch (Exception e) {
-                        Log.e(TAG, e.getMessage());
-                    }
+                    routeMessage("done", obj);
+                    break;
+                case "put":
+                    routeMessage("put", obj);
+                    break;
+                case "set":
+                    routeMessage("set", obj);
                     break;
             }
         } catch (Throwable t) {
