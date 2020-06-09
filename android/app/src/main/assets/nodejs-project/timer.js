@@ -177,6 +177,7 @@ native.channel.on('stop', msg => {
 native.channel.on('start', msg => {
     console.log('[React node] incoming Start: ' + typeof msg, msg)
     try {
+        if(runningTimer && runningTimer.status === 'running') finishTimer(runningTimer)
         const runningNew = createTimer(runningTimer.project)
         getCount(runningNew).then(count => {
             runningTimer = runningNew
