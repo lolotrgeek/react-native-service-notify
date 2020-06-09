@@ -15,12 +15,13 @@ let timer
 let runningTimer
 let runningProject
 let count = 0
-
 // Core Functions
 
 /**
  * 
- * @param {object} input 
+ * @param {object} running 
+ * @param {object} project 
+ * @param {number} count 
  */
 const runTimer = (running, project) => {
     debug && console.log('[Timer node] run timer ')
@@ -32,7 +33,7 @@ const runTimer = (running, project) => {
                 clearInterval(timer)
                 return;
             }
-            // console.log('count ' + count)
+            console.log(`running timer: ${running.id} | project: ${running.project}`)
             native.channel.post('count', count.toString())
             // count = count + 1
             count++
@@ -40,8 +41,8 @@ const runTimer = (running, project) => {
     }
 }
 
-const stopTimer = () => {
-    debug && console.log('[Timer node] Stop ', runningTimer)
+const stopTimer = (running) => {
+    debug && console.log('[Timer node] Stop ', running)
     clearInterval(timer)
     native.channel.post('notify', { state: "stop" })
 }
@@ -136,7 +137,7 @@ store.chainer('running', store.app).on((data, key) => {
                 debug && console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
                 findRunningProject(runningTimer).then(found => {
                     runningProject = found
-                    runTimer(runningTimer, runningProject)
+                    runTimer(runningTimer, runningProject, count)
                     updateRunning(runningTimer, runningProject) // sends to react
                 })
 
@@ -147,14 +148,14 @@ store.chainer('running', store.app).on((data, key) => {
         else if (data.status === 'done' && data.id === runningTimer.id) {
             debug && console.log('[node STOP]')
             runningTimer = data
-            stopTimer()
+            stopTimer(runningTimer)
         }
         else if (data.id === 'none') {
             runningTimer = data
-            stopTimer()
+            stopTimer(runningTimer)
         }
         else {
-            stopTimer()
+            stopTimer({id: 'none', status: 'done'})
         }
     }
 })
@@ -163,8 +164,11 @@ store.chainer('running', store.app).on((data, key) => {
 native.channel.on('stop', msg => {
     debug && console.log('[React node] incoming Stop: ' + typeof msg, msg)
     try {
-        stopTimer()
+        runningTimer.status = 'done'
+        console.log('[NODE_DEBUG_PUT] : Running Timer Stopped ', runningTimer)
+        stopTimer(runningTimer)
         finishTimer(runningTimer)
+        console.log('stop timer: ', timer)
     } catch (error) {
         debug && console.log('[Timer node] : Stop failed ' + error)
     }

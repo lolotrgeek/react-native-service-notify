@@ -53,7 +53,7 @@ const finishTimer = (timer) => {
   if (isRunning(timer)) {
     let done = doneTimer(timer)
     debug && console.log('[node Data STOP]', done)
-    put('running', JSON.stringify(done), 'running')
+    put('running', JSON.stringify(done))
     // Danger of data loss until endTimer is called
     if (multiDay(done.started, done.ended)) {
       const dayEntries = newEntryPerDay(done.started, done.ended)

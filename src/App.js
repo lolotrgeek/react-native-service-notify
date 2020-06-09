@@ -26,7 +26,25 @@ export default function App() {
       let item = JSON.parse(event)
       item = Data.trimSoul(item)
       debug && console.log('put ' + typeof item + ' ', item)
+      if (item.type === 'timer') {
+        debug && console.log('[react] timer.')
+        if (item.status === 'running') {
+          // setRunning(item)
+          running.current = item
+          debug && console.log('[react] running')
+          debug && console.log(running)
+          Data.getProject(item.project)
+        }
+        else if (item.status === 'done' && item.id === running.current.id) {
+          debug && console.log('[react] STOP')
+          debug && console.log(item)
+          // setRunning(item)
+          running.current = item
+        }
+        setTimers(timers => [...timers, item])
+      }
     })
+
     return () => deviceEmitter.removeAllListeners("put")
 
   }, [])
@@ -35,7 +53,7 @@ export default function App() {
       debug && console.log('[react] successful get.')
       let item = JSON.parse(event)
       debug && console.log('get ' + typeof item + ' ', item)
-       if (typeof item === 'object') {
+      if (typeof item === 'object') {
         for (id in item) {
           try {
             let value = JSON.parse(item[id])
@@ -76,8 +94,8 @@ export default function App() {
       }
     })
     return () => deviceEmitter.removeAllListeners("done")
-  },[])
-  
+  }, [])
+
   useEffect(() => {
     deviceEmitter.addListener("count", event => {
       setCount(event)
@@ -96,8 +114,8 @@ export default function App() {
     return () => deviceEmitter.removeAllListeners("running")
   }, [])
 
-  useEffect(() => Data.createProject('react project', '#ccc'), [online])
-  useEffect(() => Data.createProject('test project', '#ccc'), [online])
+  useEffect(() => { if (projects.length === 0) Data.createProject('react project', '#ccc') }, [online])
+  useEffect(() => { if (projects.length === 0) Data.createProject('test project', '#ccc') }, [online])
   useEffect(() => {
     console.log('Get projects...')
     Data.getProjects()
@@ -106,15 +124,18 @@ export default function App() {
   const onRefresh = () => {
 
   };
-  
+
   const renderRow = ({ item }) => {
     return (
-      <View style={{flexDirection: 'row', margin : 20}}>
+      <View style={{ flexDirection: 'row', margin: 20 }}>
         <View style={{ width: '50%' }}>
           <Text style={{ color: 'red' }}>{item.id}</Text>
         </View>
         <View style={{ width: '50%' }}>
-          <Button title='start' onPress={() => Data.createTimer(item.id)} />
+          <Button title='start' onPress={() => {
+            Data.finishTimer(running.current)
+            Data.createTimer(item.id)
+          }} />
         </View>
       </View>
 
@@ -129,8 +150,8 @@ export default function App() {
       <Text>{'Project: ' + running.current.project}</Text>
       <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>
       <Text>{count}</Text>
-      {running.current.status !== 'running' || running.current.id === 'none' ?
-        <Text >No Running Timer</Text> :
+      {running.current.status === 'done' || running.current.id === 'none' ?
+        <Text >Not Running</Text> :
         <Button title='stop' onPress={() => Data.finishTimer(running.current)} />
       }
       <SafeAreaView style={styles.list}>

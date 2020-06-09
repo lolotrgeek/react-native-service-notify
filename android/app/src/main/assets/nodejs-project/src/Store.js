@@ -5,7 +5,7 @@ const config = {
 const Gun = require('gun')
 const path = require('path')
 
-const debug = true
+const debug = false
 
 // events
 const events = require('events');

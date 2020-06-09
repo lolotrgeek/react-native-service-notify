@@ -35,7 +35,8 @@ public class HeartbeatService extends NodeJS {
     private static HeartbeatService instance;
     private static String TAG = "HEARTBEAT-SERVICE";
     private static boolean DEBUG = false;
-    private static boolean DEBUG_PUT = true;
+    private static boolean DEBUG_PUT = false;
+    private static boolean DEBUG_COUNT = true;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -197,7 +198,7 @@ public class HeartbeatService extends NodeJS {
                                 String subtitle = update.get("subtitle").toString();
                                 TITLE = title;
                                 SUBTITLE = subtitle;
-                                if (DEBUG) Log.d(TAG, TITLE + " " + SUBTITLE);
+                                if (DEBUG || DEBUG_COUNT) Log.d(TAG, TITLE + " " + SUBTITLE);
 
                                 notificationUpdate();
                             }
@@ -274,7 +275,7 @@ public class HeartbeatService extends NodeJS {
     }
 
     public void notificationUpdate() {
-        if (DEBUG) Log.i(TAG, "updating notification");
+        if (DEBUG || DEBUG_COUNT) Log.i(TAG, "updating notification");
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
@@ -303,7 +304,7 @@ public class HeartbeatService extends NodeJS {
     }
 
     public void notificationPaused() {
-        if (DEBUG) Log.i(TAG, "pausing notification");
+        if (DEBUG || DEBUG_COUNT) Log.i(TAG, "pausing notification");
         // set Intent for what happens when tapping notification
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
