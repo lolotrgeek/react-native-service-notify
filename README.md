@@ -1,15 +1,17 @@
-# Notify Native
-Create a reboot tolerant persistent service for react native that runs in foreground or background with an updatable notification.
+# NodeJS Notify Native
+Create a reboot tolerant persistent service for react native that runs a nodeJS instance in foreground or background with an updatable notification.
 
 * Project is a Work In Progress, in Demo Mode for Testing
 
 ## Features
-- uses HeadlessJS
 - runs a service in a separate thread
 - service spawns a persistent notification
 - service restarts on reboot
 - service task defined in JS
-- uses redux for headless data store
+
+## Future
+* Heavily integrated with timer, could decouple and create build process...
+
 
 ## Install
 ```
@@ -22,7 +24,7 @@ react-native run-android
 ```
 
 ## Notes
-Using Redux instead of useEffects so counter is predicatable and exists outside of app state.
+When testing remote with android emulator use `adb forward tcp:8765 tcp:8765` 
 
 ## ToDo
 - decouple HeartbeatModule from timer example
