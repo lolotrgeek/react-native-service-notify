@@ -55,31 +55,8 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void notificationPaused(String title) {
-        // set Intent for what happens when tapping notification
-        Intent notificationIntent = new Intent(this.reactContext, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        // Intend and Build Action Buttons
-        Intent startIntent = new Intent(this.reactContext, HeartbeatActionReceiver.class);
-        startIntent.putExtra("ACTION", "start");
-        PendingIntent startPendingIntent = PendingIntent.getBroadcast(this.reactContext, 1, startIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Action buttonAction = new NotificationCompat.Action.Builder(R.mipmap.ic_launcher, "Start",
-                startPendingIntent).build();
-
-        // Build the notification
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(title).setContentText(TICK)
-                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_HIGH).setOnlyAlertOnce(true)
-                .setOngoing(false).addAction(buttonAction);
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
-
-        // send notification
-        // SERVICE_NOTIFICATION_ID is a unique int for each notification that you must
-        // define
-        notificationManager.notify(SERVICE_NOTIFICATION_ID, builder.build());
+    public void notificationPaused() {
+        HeartbeatService.getInstance().notificationPaused();
     }
 
     @ReactMethod
@@ -183,35 +160,5 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             // TODO: handle exception
         }
-    }
-
-    @ReactMethod
-    public void notificationUpdate(int tick, String title) {
-        TICK = Integer.toString(tick);
-        // set Intent for what happens when tapping notification
-        Intent notificationIntent = new Intent(this.reactContext, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this.reactContext, 0, notificationIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        // Intend and Build Action Buttons
-        Intent actionIntent = new Intent(this.reactContext, HeartbeatActionReceiver.class);
-        actionIntent.putExtra("ACTION", "stop");
-        PendingIntent actionPendingIntent = PendingIntent.getBroadcast(this.reactContext, 1, actionIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Action buttonAction = new NotificationCompat.Action.Builder(R.mipmap.ic_launcher, "Stop",
-                actionPendingIntent).build();
-
-        // Build the notification
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this.reactContext, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher).setContentTitle(title).setContentText(TICK)
-                .setContentIntent(contentIntent).setPriority(NotificationCompat.PRIORITY_HIGH).setOnlyAlertOnce(true)
-                .setOngoing(true).addAction(buttonAction);
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this.reactContext);
-
-        // send notification
-        // SERVICE_NOTIFICATION_ID is a unique int for each notification that you must
-        // define
-        notificationManager.notify(SERVICE_NOTIFICATION_ID, builder.build());
-
     }
 }

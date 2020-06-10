@@ -28,15 +28,15 @@ public class HeartbeatService extends NodeJS {
 
     private static final int SERVICE_NOTIFICATION_ID = 12345;
     private static final String CHANNEL_ID = "HEARTBEAT";
-    private static String TITLE = "Title";
-    private static String SUBTITLE = "Subtitle";
+    public static String TITLE = "Title";
+    public static String SUBTITLE = "Subtitle";
     private static int INTERVAL = 1000;
     public static int COUNT = 0;
     private static HeartbeatService instance;
     private static String TAG = "HEARTBEAT-SERVICE";
     private static boolean DEBUG = false;
     private static boolean DEBUG_PUT = false;
-    private static boolean DEBUG_COUNT = true;
+    private static boolean DEBUG_COUNT = false;
 
     // Used to load the 'native-lib' library on application startup.
     static {
