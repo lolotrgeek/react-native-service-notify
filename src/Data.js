@@ -155,3 +155,17 @@ export const getProjects = () => {
 export const getProject = projectId => {
     store.get(`projects/${projectId}`)
 }
+
+/**
+ * query store with keychain, listen for keychain events, handle events, update state, cleanup
+ * @param {string} keychain
+ * @param {object | array} state 
+ * @param {function} handler 
+ */
+export const getSomething = (keychain, state, handler) => {
+    store.get(keychain)
+    messenger.addListener(keychain, event => {
+        handler(event, state)
+    })
+    return () => messenger.removeAllListeners(keychain)
+}

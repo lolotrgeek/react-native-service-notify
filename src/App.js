@@ -49,7 +49,7 @@ export default function App() {
 
   }, [])
   useEffect(() => {
-    deviceEmitter.addListener("done", event => {
+    deviceEmitter.addListener("projects", event => {
       debug && console.log('[react] successful get.')
       let item = JSON.parse(event)
       debug && console.log('get ' + typeof item + ' ', item)
@@ -70,31 +70,72 @@ export default function App() {
         }
 
         if (item.id === running.current.project) {
-          // runningProject.current = item
           running.current.color = item.color
           running.current.name = item.name
         }
       }
-      if (item.type === 'timer') {
-        debug && console.log('[react] timer.')
-        if (item.status === 'running') {
-          // setRunning(item)
-          running.current = item
-          debug && console.log('[react] running')
-          debug && console.log(running)
-          Data.getProject(item.project)
+    })
+    return () => deviceEmitter.removeAllListeners("projects")
+  }, [])
+
+  useEffect(() => {
+    deviceEmitter.addListener("timers", event => {
+      debug && console.log('[react] successful timers get.')
+      let item = JSON.parse(event)
+      debug && console.log('get ' + typeof item + ' ', item)
+      if (typeof item === 'object') {
+        for (id in item) {
+          try {
+            let timer = JSON.parse(item[id])
+            // console.log(`item ${typeof value}`, value)
+            if (timer.type === 'timer') {
+              let alreadyFound = timers.some(found => found.id === value.id)
+              if (!alreadyFound) {
+                setTimers(timers => [...timers, value])
+              }
+              if (timer.status === 'running') {
+                // setRunning(item)
+                running.current = timer
+                debug && console.log('[react] running')
+                debug && console.log(running)
+                // Data.getProject(item.project)
+              }
+              else if (timer.status === 'done' && timer.id === running.current.id) {
+                debug && console.log('[react] STOP')
+                debug && console.log(timer)
+                // setRunning(item)
+                running.current = timer
+              }
+            }
+          } catch (error) {
+            console.log(error)
+          }
         }
-        else if (item.status === 'done' && item.id === running.current.id) {
-          debug && console.log('[react] STOP')
-          debug && console.log(item)
-          // setRunning(item)
-          running.current = item
-        }
-        setTimers(timers => [...timers, item])
+
       }
     })
-    return () => deviceEmitter.removeAllListeners("done")
+    return () => deviceEmitter.removeAllListeners("timers")
   }, [])
+
+  // useEffect (() => {
+  //   if (item.type === 'timer') {
+  //     debug && console.log('[react] timer.')
+  //     if (item.status === 'running') {
+  //       // setRunning(item)
+  //       running.current = item
+  //       debug && console.log('[react] running')
+  //       debug && console.log(running)
+  //       Data.getProject(item.project)
+  //     }
+  //     else if (item.status === 'done' && item.id === running.current.id) {
+  //       debug && console.log('[react] STOP')
+  //       debug && console.log(item)
+  //       // setRunning(item)
+  //       running.current = item
+  //     }
+  //     setTimers(timers => [...timers, item])
+  //   }
+  // }, [])
 
   useEffect(() => {
     deviceEmitter.addListener("count", event => {

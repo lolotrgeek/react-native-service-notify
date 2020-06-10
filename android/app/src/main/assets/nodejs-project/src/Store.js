@@ -52,39 +52,6 @@ const inputParser = msg => {
     return msg
   }
 }
-
-/**
- * Create a chain by recursing nested objects, adding each key to the chain until hitting a string value
- * 
- * @param {*} input `{key1: {key2: ''}}`
- * @param {*} chain 
- */
-const chainerCompat = (input, chain) => {
-  if (!input || !chain) {
-    debug && console.log('[Chain node] no input or chain')
-    return false
-  }
-  input = parser(input)
-  if (typeof input === 'string') {
-    debug && console.log('[Chain node] Ending chain with: ', input)
-    if (input.length === 0) return chain
-    chain = chain.get(input)
-  }
-  else if (typeof input === 'object' && Object.keys(input).length > 0) {
-    for (key in input) {
-      debug && console.log('[Chain node] Chaining key:', key)
-      let value = input[key]
-      if (typeof value === 'object') {
-        debug && console.log('[Chain node] Extending chain: ', value)
-        chain = chain.get(key)
-      }
-      chainerCompat(value, chain)
-    }
-  }
-  debug && console.log('[Chain node] done.')
-  return chain
-}
-
 /**
  * removes soul from given data
  * @param {*} data 
@@ -151,19 +118,18 @@ const getOne = (msg) => {
     const foundData = trimSoul(data)
     debug && console.log('[GUN node] getOne Data Found: ', foundData)
     eventEmitter.emit(msg, foundData)
-    native.channel.post('done', foundData)
+    native.channel.post(input, foundData)
   })
 }
 
 const getAll = (msg) => {
   const input = inputParser(msg)
-
   const chain = chainer(input, app)
   // debug && console.log('[React node] Chain :', chain)
   chain.map().on((data, key) => {
     data = trimSoul(data)
     debug && console.log('[GUN node] getAll Data Found: ', data)
-    native.channel.post('done', data)
+    native.channel.post(input, data)
     eventEmitter.emit(msg, data)
   })
   chain.off()
@@ -171,7 +137,6 @@ const getAll = (msg) => {
 
 const getAllOnce = (msg) => {
   const input = inputParser(msg)
-
   const chain = chainer(input, app)
   // debug && console.log('[React node] Chain :', chain)
   chain.once().map().once((data, key) => {
@@ -180,7 +145,7 @@ const getAllOnce = (msg) => {
     }
     data = trimSoul(data)
     debug && console.log('[GUN node] getAllOnce Data Found: ', data)
-    native.channel.post('done', data)
+    native.channel.post(input, data)
     eventEmitter.emit(msg, data)
   })
   chain.off()
@@ -236,20 +201,6 @@ const setAll = (msg) => {
   })
 }
 
-/**
- * Assign msg, will automatically chain a nested object
- * @deprecated expensive and messy since it allows for deep unstructured chains
- * @param {*} msg JSON { key1: {key2: any}, ...}
- */
-const putAllCompat = (msg) => {
-  const input = inputParser(msg)
-  const chain = chainerCompat(input)
-  chain.put(input, ack => {
-    const data = trimSoul(input.value)
-    // debug && console.log('[GUN node] ACK: ', ack)
-    native.channel.post('put', ack.err ? ack : data)
-  })
-}
 
 const offAll = msg => {
   const input = inputParser(msg)

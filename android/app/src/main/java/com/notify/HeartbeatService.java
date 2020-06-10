@@ -216,17 +216,8 @@ public class HeartbeatService extends NodeJS {
                     notificationUpdate();
                     sendMessageToReact("count", SUBTITLE);
                     break;
-                case "running":
-                    routeMessage("running", obj);
-                    break;
-                case "done":
-                    routeMessage("done", obj);
-                    break;
-                case "put":
-                    routeMessage("put", obj);
-                    break;
-                case "set":
-                    routeMessage("set", obj);
+                default :
+                    routeMessage(event, obj);
                     break;
             }
         } catch (Throwable t) {
