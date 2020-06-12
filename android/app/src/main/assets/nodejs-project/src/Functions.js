@@ -6,6 +6,17 @@ const debug = false
 const formatDate = date => moment(dateTime).format("YYYY-MM-DD")
 
 /**
+ * Create a date String of Today
+ * `MM-DD-YYYY`
+ */
+const dateToday = () => {
+    const today = new Date();
+    const date = moment(today).format('DD-MM-YYYY')
+    // const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+    return date;
+}
+
+/**
  * reference : https://stackoverflow.com/questions/24883760/moment-js-check-a-date-is-today/24884339
  * @param {*} date 
  */
@@ -148,5 +159,6 @@ module.exports = {
     getTimersForToday: getTimersForToday,
     sumTimers: sumTimers,
     timerRanToday: timerRanToday,
-    formatDate: formatDate
+    formatDate: formatDate,
+    dateToday : dateToday
 }

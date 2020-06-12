@@ -112,6 +112,7 @@ const channelSet = (input) => {
 
 const getOne = (msg) => {
   const input = inputParser(msg)
+  console.log('getOne input' , input)
   const chain = chainer(input, app)
   // debug && console.log('[React node] Chain :', chain)
   chain.once((data, key) => {

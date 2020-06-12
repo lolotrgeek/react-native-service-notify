@@ -1,5 +1,5 @@
 import { cloneTimer, newProject, doneTimer, newTimer, testProject } from './Models'
-import { isRunning, multiDay, newEntryPerDay } from './Functions'
+import { isRunning, multiDay, newEntryPerDay, dateToday } from './Functions'
 import * as store from './Store'
 
 const debug = false
@@ -8,7 +8,7 @@ export const trimSoul = data => {
     if (!data || !data['_'] || typeof data['_'] !== 'object') return data
     delete data['_']
     return data
-  }
+}
 
 export const createProject = (name, color) => {
     const project = newProject(name, color)
@@ -88,7 +88,9 @@ export const restoreTimer = (timer) => {
 export const endTimer = (timer) => {
     debug && console.log('[react Data] Ending', timer)
     store.set(`history/timers/${timer.project}/${timer.id}`, timer)
-    store.put(`timers/${timer.project}/${timer.id}`, timer)
+    store.put(`timers/${timer.id}`, timer)
+    store.put(`timers/project/${timer.project}`, timer.id)
+    store.put(`timers/date/${dateToday()}`, timer.id)
 }
 
 export const endTimerDestructured = (timer) => {
@@ -120,8 +122,7 @@ export const deleteTimer = (timer) => {
 export const addTimer = (projectId, value) => {
     const timer = cloneTimer(value)
     debug && console.log('[react Data] Storing Timer', timer)
-    store.set(`history/timers/${projectId}/${timer.id}`, timer)
-    store.put(`timers/${projectId}/${timer.id}`, timer)
+    endTimer(timer)
 }
 
 export const finishTimer = (timer) => {
@@ -156,7 +157,21 @@ export const getProject = projectId => {
     store.get(`projects/${projectId}`)
 }
 
+export const getTimers = () => {
+    store.get('timers')
+}
+
+export const getProjectTimers = (projectId) => {
+    store.get(`timers/${projectId}`)
+}
+export const getDayTimers = (date) => {
+    if (!date) date = dateToday()
+    store.get(`timers/date/${date}`)
+}
+
 /**
+ * PATTERN FUNCTION
+ * 
  * query store with keychain, listen for keychain events, handle events, update state, cleanup
  * @param {string} keychain
  * @param {object | array} state 

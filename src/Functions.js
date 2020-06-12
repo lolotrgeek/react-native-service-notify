@@ -16,15 +16,42 @@ export const trimSoul = data => {
     return data
 }
 
+/**
+ * 
+ * @param {*} input
+ * @returns {object | undefined} 
+ */
+export const parse = (input) => {
+    let output
+    if (typeof input === 'string') {
+        try { output = JSON.parse(input) }
+        catch (error) { console.error(error) }
+    } else if (typeof input === 'object') {
+        output = input
+    }
+    return output
+}
+
 // TIME FUNCTIONS
 /**
- * Create a date String of Today
+ * Create a datetime String of Today
  */
-export const dateCreator = () => {
+export const datetimeCreator = () => {
     const today = new Date();
     const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
     const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     return date + ' ' + time;
+}
+
+/**
+ * Create a date String of Today
+ * `MM-DD-YYYY`
+ */
+export const dateToday = () => {
+    const today = new Date();
+    const date = moment(today).format('DD-MM-YYYY')
+    // const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+    return date;
 }
 /**
  * Convert seconds to string `hh : mm : ss`

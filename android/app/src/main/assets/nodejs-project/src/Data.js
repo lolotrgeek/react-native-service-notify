@@ -2,7 +2,7 @@
 
 const isRunning = require('./Functions').isRunning
 const newEntryPerDay = require('./Functions').newEntryPerDay
-const formatDate = require('./Functions').formatDate
+const dateToday = require('./Functions').dateToday
 const doneTimer = require('./Models').doneTimer
 const newTimer = require('./Models').newTimer
 const store = require('./Store')
@@ -32,6 +32,9 @@ const endTimer = (timer) => {
   timer = JSON.stringify(timer)
   set(`history/timers/${timer.project}/${timer.id}`)
   put(`timers/${timer.project}/${timer.id}`)
+  store.put(`timers/${timer.id}`, timer)
+  store.put(`timers/project/${timer.project}`, timer.id)
+  store.put(`timers/date/${dateToday()}`, timer.id)
   // organizing...
   // put(`${timer.project}/timers`, timer.id)
 }

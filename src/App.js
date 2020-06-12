@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, Button, NativeEventEmitter, NativeModules, FlatList } from 'react-native';
+import { parse, dateToday } from './Functions'
 import * as Data from './Data'
 
 const { Heartbeat } = NativeModules;
@@ -23,7 +24,7 @@ export default function App() {
   useEffect(() => {
     deviceEmitter.addListener("put", event => {
       debug && console.log('[react] successful put.')
-      let item = JSON.parse(event)
+      let item = parse(event)
       item = Data.trimSoul(item)
       debug && console.log('put ' + typeof item + ' ', item)
       if (item.type === 'timer') {
@@ -41,7 +42,7 @@ export default function App() {
           // setRunning(item)
           running.current = item
         }
-        setTimers(timers => [...timers, item])
+        // setTimers(timers => [...timers, item])
       }
     })
 
@@ -50,8 +51,8 @@ export default function App() {
   }, [])
   useEffect(() => {
     deviceEmitter.addListener("projects", event => {
-      debug && console.log('[react] successful get.')
-      let item = JSON.parse(event)
+      debug && console.log('[react] successful projects get.')
+      let item = parse(event)
       debug && console.log('get ' + typeof item + ' ', item)
       if (typeof item === 'object') {
         for (id in item) {
@@ -79,19 +80,19 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    deviceEmitter.addListener("timers", event => {
+    deviceEmitter.addListener(`timers/date/${dateToday()}`, event => {
       debug && console.log('[react] successful timers get.')
-      let item = JSON.parse(event)
+      let item = parse(event)
       debug && console.log('get ' + typeof item + ' ', item)
       if (typeof item === 'object') {
         for (id in item) {
           try {
-            let timer = JSON.parse(item[id])
+            let found = parse(item[id])
             // console.log(`item ${typeof value}`, value)
-            if (timer.type === 'timer') {
-              let alreadyFound = timers.some(found => found.id === value.id)
+            if (found.type === 'timer') {
+              let alreadyFound = timers.some(timer => timer.id === found.id)
               if (!alreadyFound) {
-                setTimers(timers => [...timers, value])
+                setTimers(timers => [...timers, found])
               }
               if (timer.status === 'running') {
                 // setRunning(item)
@@ -117,25 +118,6 @@ export default function App() {
     return () => deviceEmitter.removeAllListeners("timers")
   }, [])
 
-  // useEffect (() => {
-  //   if (item.type === 'timer') {
-  //     debug && console.log('[react] timer.')
-  //     if (item.status === 'running') {
-  //       // setRunning(item)
-  //       running.current = item
-  //       debug && console.log('[react] running')
-  //       debug && console.log(running)
-  //       Data.getProject(item.project)
-  //     }
-  //     else if (item.status === 'done' && item.id === running.current.id) {
-  //       debug && console.log('[react] STOP')
-  //       debug && console.log(item)
-  //       // setRunning(item)
-  //       running.current = item
-  //     }
-  //     setTimers(timers => [...timers, item])
-  //   }
-  // }, [])
 
   useEffect(() => {
     deviceEmitter.addListener("count", event => {
@@ -155,12 +137,24 @@ export default function App() {
     return () => deviceEmitter.removeAllListeners("running")
   }, [])
 
-  useEffect(() => { if (projects.length === 0) Data.createProject('react project', '#ccc') }, [online])
-  useEffect(() => { if (projects.length === 0) Data.createProject('test project', '#ccc') }, [online])
   useEffect(() => {
     console.log('Get projects...')
     Data.getProjects()
   }, [online])
+
+  useEffect(() => {
+    if (projects.length === 0) {
+      Data.createProject('react project', '#ccc')
+      Data.createProject('test project', '#ccc')
+    }
+  }, [projects])
+
+
+  useEffect(() => {
+    console.log('Get timers...')
+    // Data.getTimers()
+    Data.getDayTimers()
+  }, [running])
 
   const onRefresh = () => {
 
@@ -168,7 +162,7 @@ export default function App() {
 
   const renderRow = ({ item }) => {
     return (
-      <View style={{ flexDirection: 'row', margin: 20 }}>
+      <View style={{ flexDirection: 'row', margin: 10 }}>
         <View style={{ width: '50%' }}>
           <Text style={{ color: 'red' }}>{item.id}</Text>
         </View>
@@ -179,10 +173,17 @@ export default function App() {
           }} />
         </View>
       </View>
-
-
     );
   };
+
+  const renderTimer = ({ item }) => {
+    return (
+      <View style={{ flexDirection: 'row', margin: 10 }}>
+        <Text style={{ color: 'red' }}>{item.id}</Text>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text styles={styles.status}>{status}</Text>
@@ -201,6 +202,16 @@ export default function App() {
           // refreshing={refresh}
           renderItem={renderRow}
           keyExtractor={project => project.id}
+        // onRefresh={onRefresh()}
+        />
+      </SafeAreaView>
+      <Text>Timers: </Text>
+      <SafeAreaView style={styles.list}>
+        <FlatList
+          data={timers}
+          // refreshing={refresh}
+          renderItem={renderTimer}
+          keyExtractor={timer => timer.id}
         // onRefresh={onRefresh()}
         />
       </SafeAreaView>
