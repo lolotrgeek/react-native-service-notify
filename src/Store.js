@@ -36,7 +36,11 @@ export function get(key) {
 
 /**
  * 
- * @param {string} key 
+ * @param {string} key
+ * @param {object} filter removes data that does not match given key/value pair
+ * @param {string} filter.key 
+ * @param {*} filter.value
+ * @issue gets all data then filters, would be better to ignore while getting not after
  */
 export function getAll(key, filter) {
     // do validation here...

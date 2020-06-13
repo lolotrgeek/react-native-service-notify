@@ -30,6 +30,22 @@ const app = gun.get('app')
 
 /**
  * 
+ * @param {*} input
+ * @returns {object | undefined} 
+ */
+const parse = (input) => {
+  let output
+  if (typeof input === 'string') {
+      try { output = JSON.parse(input) }
+      catch (error) { console.error(error) }
+  } else if (typeof input === 'object') {
+      output = input
+  }
+  return output
+}
+
+/**
+ * 
  * @param {*} input 
  */
 const parser = input => {
@@ -127,20 +143,37 @@ const getOne = (msg) => {
 const getAll = (msg) => {
   const input = inputParser(msg)
   console.log('getAll input' , input)
-  const chain = chainer(input, app)
+  const chain = chainer(input.key, app)
   const filter = JSON.parse(input.filter)
   // debug && console.log('[React node] Chain :', chain)
-  chain.map(item => {
-    console.log('getAll item', item)
-    console.log('getAll key', item[filter.key])
-    item[filter.key] === filter.value ? item : undefined
-  }).once((data, key) => {
-    data = trimSoul(data)
-    console.log('[GUN node] getAll Data Found: ', data)
-    native.channel.post(input.key, data)
-    eventEmitter.emit(input.key, data)
+  // chain.map(item => {
+  //   console.log('getAll item', item)
+  //   console.log('getAll key', item[filter.key])
+  //   return item[filter.key] === filter.value ? item : undefined
+  // }).once((data, key) => {
+  //   data = trimSoul(data)
+  //   console.log('[GUN node] getAll Data Found: ', data)
+  //   native.channel.post(input.key, data)
+  //   eventEmitter.emit(input.key, data)
+  // })
+  chain.once((data, key) => {
+    const foundData = trimSoul(data)
+    console.log('[GUN node] getAll Data Found: ', foundData)
+    let dataFiltered = []
+    for(id in foundData) {
+      let item = parse(data[id])
+      console.log('getAll item', item)
+      if(item[filter.key]) {
+          console.log('getAll key', item[filter.key])
+          if (item[filter.key] === filter.value) {
+            dataFiltered.push(item)
+          }
+      }
+    }
+    console.log('[GUN node] getAll Data Sending: ', dataFiltered)
+    native.channel.post(input.key, dataFiltered)
+    eventEmitter.emit(input.key, dataFiltered)
   })
-  chain.off()
 }
 
 const getAllOnce = (msg) => {

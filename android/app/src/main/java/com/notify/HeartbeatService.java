@@ -130,9 +130,20 @@ public class HeartbeatService extends NodeJS {
         JSONObject request = null;
         try {
             if (DEBUG) Log.i(TAG, "Parsing Payload...");
-
             JSONArray payload = new JSONArray(obj.get("payload").toString());
             request = new JSONObject(payload.get(0).toString());
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        return request;
+    }
+
+    public String payloadParse(JSONObject obj) {
+        String request = null;
+        try {
+            if (DEBUG) Log.i(TAG, "Parsing Payload...");
+            JSONArray payload = new JSONArray(obj.get("payload").toString());
+            request = payload.get(0).toString();
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -159,10 +170,11 @@ public class HeartbeatService extends NodeJS {
 
     public void routeMessage(String event, JSONObject obj) {
         try {
-            JSONObject request = heartbeatPayloadParse(obj);
-            Log.i(TAG, "msg from node : " + event);
-            if (DEBUG_PUT) Log.d("CHANNEL ", event + " data: " + request.toString());
-            sendMessageToReact(event, request.toString());
+            String request = payloadParse(obj);
+            if (DEBUG) Log.i(TAG, "msg from node : " + event);
+            if (DEBUG_PUT) Log.d("CHANNEL ", event + " data: " + request);
+            Log.i(TAG, "msg " + event + " : " +  request);
+            sendMessageToReact(event, request);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }

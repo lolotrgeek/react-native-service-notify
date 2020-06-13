@@ -23,6 +23,7 @@ export default function App() {
 
   useEffect(() => {
     deviceEmitter.addListener("put", event => {
+      if(!event) return
       debug && console.log('[react] successful put.')
       let item = parse(event)
       item = Data.trimSoul(item)
@@ -53,6 +54,7 @@ export default function App() {
   useEffect(() => {
 
     deviceEmitter.addListener("projects", event => {
+      if(!event) return
       debug && console.log('[react] successful projects get.')
       let item = parse(event)
       debug && console.log('get ' + typeof item + ' ', item)
@@ -81,39 +83,49 @@ export default function App() {
     return () => deviceEmitter.removeAllListeners("projects")
   }, [online])
 
+  const timerParse = (found) => {
+    try {
+      // console.log(`item ${typeof value}`, value)
+      if (found.type === 'timer') {
+        let alreadyFound = timers.some(timer => timer.id === found.id)
+        if (!alreadyFound) {
+          setTimers(timers => [...timers, found])
+        }
+        if (timer.status === 'running') {
+          // setRunning(item)
+          running.current = timer
+          debug && console.log('[react] running')
+          debug && console.log(running)
+          // Data.getProject(item.project)
+        }
+        else if (timer.status === 'done' && timer.id === running.current.id) {
+          debug && console.log('[react] STOP')
+          debug && console.log(timer)
+          // setRunning(item)
+          running.current = timer
+        }
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     console.log(`msg listener : timers`)
     deviceEmitter.addListener("timers", event => {
+      if(!event) return
       debug && console.log('[react] msg timers get.')
       let item = parse(event)
-      debug && console.log('get ' + typeof item + ' ', item)
-      if (typeof item === 'object') {
+      debug && console.log('timers get ' + typeof item + ' ', item)
+      if (Array.isArray(item)) {
+        item.map(found => {
+          timerParse(parse(found))
+        })
+      }
+      else if (typeof item === 'object') {
         for (id in item) {
-          try {
-            let found = parse(item[id])
-            // console.log(`item ${typeof value}`, value)
-            if (found.type === 'timer') {
-              let alreadyFound = timers.some(timer => timer.id === found.id)
-              if (!alreadyFound) {
-                setTimers(timers => [...timers, found])
-              }
-              if (timer.status === 'running') {
-                // setRunning(item)
-                running.current = timer
-                debug && console.log('[react] running')
-                debug && console.log(running)
-                // Data.getProject(item.project)
-              }
-              else if (timer.status === 'done' && timer.id === running.current.id) {
-                debug && console.log('[react] STOP')
-                debug && console.log(timer)
-                // setRunning(item)
-                running.current = timer
-              }
-            }
-          } catch (error) {
-            console.log(error)
-          }
+          let found = parse(item[id])
+          timerParse(parse(found))
         }
 
       }
