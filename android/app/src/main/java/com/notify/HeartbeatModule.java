@@ -36,6 +36,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     private static String STATUS = "STOPPED";
     private static String COUNT = "PAUSED";
     private static String TICK;
+    private static boolean DEBUG = false;
     private static HeartbeatModule instance;
 
     public HeartbeatModule(@Nonnull ReactApplicationContext reactContext) {
@@ -74,6 +75,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     @ReactMethod
     private void get(String key) {
         try {
+            Log.i("HEARTBEAT-MODULE", "msg from react : "+ key);
             HeartbeatService.getInstance().sendMessageToNode("get", key);
         } catch (Exception e) {
             Log.e("HEARTBEAT-MODULE", "get - " + e.getMessage());
@@ -82,9 +84,12 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @ReactMethod
-    private void getAll(String key) {
+    private void getAll(String key, String filter) {
         try {
-            HeartbeatService.getInstance().sendMessageToNode("getAll", key);
+            JSONObject msg = new JSONObject();
+            msg.put("key", key);
+            msg.put("filter", filter);
+            HeartbeatService.getInstance().sendMessageToNode("getAll", msg.toString());
         } catch (Exception e) {
             Log.e("HEARTBEAT-MODULE", "getAll - " + e.getMessage());
         }
@@ -97,8 +102,8 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
             JSONObject msg = new JSONObject();
             msg.put("key", key);
             msg.put("value", value);
-            Log.d("NODE_DEBUG_STOP", value);
-//            Log.d("NODE_DEBUG_PUT", msg.toString());
+            if(DEBUG) Log.d("NODE_DEBUG_STOP", value);
+            if(DEBUG) Log.d("NODE_DEBUG_PUT", msg.toString());
             HeartbeatService.getInstance().sendMessageToNode("put", msg.toString());
         } catch (Exception e) {
             Log.e("HEARTBEAT-MODULE", "put - " + e.getMessage());

@@ -89,8 +89,8 @@ export const endTimer = (timer) => {
     debug && console.log('[react Data] Ending', timer)
     store.set(`history/timers/${timer.project}/${timer.id}`, timer)
     store.put(`timers/${timer.id}`, timer)
-    store.put(`timers/project/${timer.project}`, timer.id)
-    store.put(`timers/date/${dateToday()}`, timer.id)
+    // store.set(`timers/project/${timer.project}`, timer.id)
+    // store.set(`timers/date/${dateToday()}`, timer.id) // might be unnecessary
 }
 
 export const endTimerDestructured = (timer) => {
@@ -161,12 +161,17 @@ export const getTimers = () => {
     store.get('timers')
 }
 
-export const getProjectTimers = (projectId) => {
-    store.get(`timers/${projectId}`)
+export const getProjectTimers = projectId => {
+    // store.get(`timers/project/${projectId}`)
+    store.getAll("timers", {key: 'project', value: projectId})
 }
-export const getDayTimers = (date) => {
+export const getDayTimers = date => {
     if (!date) date = dateToday()
     store.get(`timers/date/${date}`)
+}
+
+export const getTimer = timerId => {
+    store.get(`timers/${timerId}`)
 }
 
 /**

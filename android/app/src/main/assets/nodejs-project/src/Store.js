@@ -112,12 +112,13 @@ const channelSet = (input) => {
 
 const getOne = (msg) => {
   const input = inputParser(msg)
-  console.log('getOne input' , input)
+  console.log('msg from android' , input)
   const chain = chainer(input, app)
   // debug && console.log('[React node] Chain :', chain)
   chain.once((data, key) => {
     const foundData = trimSoul(data)
     debug && console.log('[GUN node] getOne Data Found: ', foundData)
+    console.log('msg found' , foundData)
     eventEmitter.emit(msg, foundData)
     native.channel.post(input, foundData)
   })
@@ -125,13 +126,19 @@ const getOne = (msg) => {
 
 const getAll = (msg) => {
   const input = inputParser(msg)
+  console.log('getAll input' , input)
   const chain = chainer(input, app)
+  const filter = JSON.parse(input.filter)
   // debug && console.log('[React node] Chain :', chain)
-  chain.map().on((data, key) => {
+  chain.map(item => {
+    console.log('getAll item', item)
+    console.log('getAll key', item[filter.key])
+    item[filter.key] === filter.value ? item : undefined
+  }).once((data, key) => {
     data = trimSoul(data)
-    debug && console.log('[GUN node] getAll Data Found: ', data)
-    native.channel.post(input, data)
-    eventEmitter.emit(msg, data)
+    console.log('[GUN node] getAll Data Found: ', data)
+    native.channel.post(input.key, data)
+    eventEmitter.emit(input.key, data)
   })
   chain.off()
 }

@@ -33,8 +33,8 @@ const endTimer = (timer) => {
   set(`history/timers/${timer.project}/${timer.id}`)
   put(`timers/${timer.project}/${timer.id}`)
   store.put(`timers/${timer.id}`, timer)
-  store.put(`timers/project/${timer.project}`, timer.id)
-  store.put(`timers/date/${dateToday()}`, timer.id)
+  store.set(`timers/project/${timer.project}`, timer.id)
+  store.set(`timers/date/${dateToday()}`, timer.id) 
   // organizing...
   // put(`${timer.project}/timers`, timer.id)
 }

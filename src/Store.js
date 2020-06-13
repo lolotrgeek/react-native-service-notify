@@ -38,7 +38,8 @@ export function get(key) {
  * 
  * @param {string} key 
  */
-export function getAll(key) {
+export function getAll(key, filter) {
     // do validation here...
-    store.getAll(key)
+    console.log(`getAll request: ${key} ,`, JSON.stringify(filter) )
+    store.getAll(key, JSON.stringify(filter))
 }

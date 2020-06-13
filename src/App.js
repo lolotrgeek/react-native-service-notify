@@ -10,14 +10,14 @@ const debug = true
 
 export default function App() {
 
-  const [online, setOnline] = useState([])
+  const [online, setOnline] = useState(false)
   const [status, setStatus] = useState([])
   const [projects, setProjects] = useState([])
   const [timers, setTimers] = useState([])
   const [count, setCount] = useState(0)
 
   const running = useRef({ id: 'none' })
-  // const count = useRef(0)
+  // const projects = useRef(projects[0])
 
   useEffect(() => Heartbeat.get('running'), [online])
 
@@ -49,7 +49,9 @@ export default function App() {
     return () => deviceEmitter.removeAllListeners("put")
 
   }, [])
+
   useEffect(() => {
+
     deviceEmitter.addListener("projects", event => {
       debug && console.log('[react] successful projects get.')
       let item = parse(event)
@@ -77,11 +79,12 @@ export default function App() {
       }
     })
     return () => deviceEmitter.removeAllListeners("projects")
-  }, [])
+  }, [online])
 
   useEffect(() => {
-    deviceEmitter.addListener(`timers/date/${dateToday()}`, event => {
-      debug && console.log('[react] successful timers get.')
+    console.log(`msg listener : timers`)
+    deviceEmitter.addListener("timers", event => {
+      debug && console.log('[react] msg timers get.')
       let item = parse(event)
       debug && console.log('get ' + typeof item + ' ', item)
       if (typeof item === 'object') {
@@ -115,9 +118,28 @@ export default function App() {
 
       }
     })
-    return () => deviceEmitter.removeAllListeners("timers")
-  }, [])
 
+    return () => deviceEmitter.removeAllListeners("timers")
+  }, [online])
+
+  // useEffect(() => {
+  //   if (projects.length > 0 && typeof projects[0] === 'object' && projects[0].id) {
+  //     console.log(`msg listener : timers/project/${projects[0].id}`)
+  //     deviceEmitter.addListener(`timers/project/${projects[0].id}`, event => {
+  //       debug && console.log('[react] msg timers get.')
+  //       let item = parse(event)
+  //       debug && console.log('timers/project get ' + typeof item + ' ', item)
+
+  //       // handle getting a set from gun
+  //       let timerIds = Object.values(item)
+  //       timerIds.map(timerId => {
+  //         Data.getTimer(timerId)
+  //       })
+  //     })
+
+  //     return () => deviceEmitter.removeAllListeners(`timers/project/${projects[0].id}`)
+  //   }
+  // }, [online])
 
   useEffect(() => {
     deviceEmitter.addListener("count", event => {
@@ -138,23 +160,23 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    console.log('Get projects...')
-    Data.getProjects()
+
   }, [online])
 
   useEffect(() => {
-    if (projects.length === 0) {
-      Data.createProject('react project', '#ccc')
-      Data.createProject('test project', '#ccc')
-    }
-  }, [projects])
+    console.log('Get projects...')
+    Data.getProjects()
+  }, [online])
 
 
   useEffect(() => {
     console.log('Get timers...')
     // Data.getTimers()
-    Data.getDayTimers()
-  }, [running])
+    if (projects.length > 0 && typeof projects[0] === 'object' && projects[0].id) {
+      Data.getProjectTimers(projects[0].id)
+    }
+    // Data.getDayTimers()
+  }, [online])
 
   const onRefresh = () => {
 
@@ -186,16 +208,21 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text styles={styles.status}>{status}</Text>
-      {/* <Text>{projects.length > 0 ? projects[0].name : 'first project'}</Text> */}
+      {projects.length === 0 ? <Button title='Begin' onPress={() => {
+        Data.createProject('react project', '#ccc')
+        Data.createProject('test project', '#ccc')
+        setOnline(!online)
+      }} /> : <Button title='Refresh' onPress={() => setOnline(!online)} />}
       <Text>{running.current.name}</Text>
       <Text>{'Project: ' + running.current.project}</Text>
       <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>
       <Text>{count}</Text>
       {running.current.status === 'done' || running.current.id === 'none' ?
         <Text >Not Running</Text> :
-        <Button title='stop' onPress={() => Data.finishTimer(running.current)} />
+        <Button title='stop' onPress={() => { Data.finishTimer(running.current); setOnline(!online) }} />
       }
+
+
       <SafeAreaView style={styles.list}>
         <FlatList
           data={projects}

@@ -160,7 +160,7 @@ public class HeartbeatService extends NodeJS {
     public void routeMessage(String event, JSONObject obj) {
         try {
             JSONObject request = heartbeatPayloadParse(obj);
-            if (DEBUG) Log.i(TAG, "msg from node : " + event);
+            Log.i(TAG, "msg from node : " + event);
             if (DEBUG_PUT) Log.d("CHANNEL ", event + " data: " + request.toString());
             sendMessageToReact(event, request.toString());
         } catch (Exception e) {
