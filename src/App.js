@@ -16,14 +16,14 @@ export default function App() {
   const [timers, setTimers] = useState([])
   const [count, setCount] = useState(0)
 
-  const running = useRef({ id: 'none' })
+  const running = useRef({ id: 'none', name: 'none', project: 'none' })
   // const projects = useRef(projects[0])
 
   useEffect(() => Heartbeat.get('running'), [online])
 
   useEffect(() => {
     deviceEmitter.addListener("put", event => {
-      if(!event) return
+      if (!event) return
       debug && console.log('[react] successful put.')
       let item = parse(event)
       item = Data.trimSoul(item)
@@ -54,7 +54,7 @@ export default function App() {
   useEffect(() => {
 
     deviceEmitter.addListener("projects", event => {
-      if(!event) return
+      if (!event) return
       debug && console.log('[react] successful projects get.')
       let item = parse(event)
       debug && console.log('get ' + typeof item + ' ', item)
@@ -68,15 +68,15 @@ export default function App() {
               if (!alreadyInProjects) {
                 setProjects(projects => [...projects, value])
               }
+              // if (running.current.project && item.id === running.current.project) {
+              //   running.current.color = item.color
+              //   running.current.name = item.name
+              // }
             }
           } catch (error) {
             console.log(error)
           }
-        }
 
-        if (item.id === running.current.project) {
-          running.current.color = item.color
-          running.current.name = item.name
         }
       }
     })
@@ -113,7 +113,7 @@ export default function App() {
   useEffect(() => {
     console.log(`msg listener : timers`)
     deviceEmitter.addListener("timers", event => {
-      if(!event) return
+      if (!event) return
       debug && console.log('[react] msg timers get.')
       let item = parse(event)
       debug && console.log('timers get ' + typeof item + ' ', item)
@@ -164,7 +164,9 @@ export default function App() {
   useEffect(() => {
     deviceEmitter.addListener("running", event => {
       let item = JSON.parse(event)
-      running.current = item
+      if (item && typeof item === 'object' && typeof item === 'object' && item.status === 'running') {
+        running.current = item
+      }
       debug && console.log('[react] running')
       debug && console.log(running)
     })
@@ -172,7 +174,13 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-
+    if (projects.length > 0 && typeof projects[0] === 'object' && projects[0].id && timers.length < 10) {
+      let i = 0
+      while (i < 50) {
+        Data.generateTimer(projects)
+        i++
+      }
+    }
   }, [online])
 
   useEffect(() => {
@@ -183,10 +191,10 @@ export default function App() {
 
   useEffect(() => {
     console.log('Get timers...')
-    // Data.getTimers()
-    if (projects.length > 0 && typeof projects[0] === 'object' && projects[0].id) {
-      Data.getProjectTimers(projects[0].id)
-    }
+    Data.getTimers()
+    // if (projects.length > 0 && typeof projects[0] === 'object' && projects[0].id) {
+    //   Data.getProjectTimers(projects[0].id)
+    // }
     // Data.getDayTimers()
   }, [online])
 
@@ -225,8 +233,8 @@ export default function App() {
         Data.createProject('test project', '#ccc')
         setOnline(!online)
       }} /> : <Button title='Refresh' onPress={() => setOnline(!online)} />}
-      <Text>{running.current.name}</Text>
-      <Text>{'Project: ' + running.current.project}</Text>
+      <Text>{running.current.name ? running.current.name : ''}</Text>
+      <Text>{'Project: ' + running.current.project ? running.current.project : ''}</Text>
       <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>
       <Text>{count}</Text>
       {running.current.status === 'done' || running.current.id === 'none' ?
@@ -241,6 +249,9 @@ export default function App() {
           // refreshing={refresh}
           renderItem={renderRow}
           keyExtractor={project => project.id}
+          onEndReached={() => {
+            
+          }}
         // onRefresh={onRefresh()}
         />
       </SafeAreaView>

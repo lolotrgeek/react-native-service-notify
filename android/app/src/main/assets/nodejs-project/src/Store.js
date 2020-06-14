@@ -36,10 +36,10 @@ const app = gun.get('app')
 const parse = (input) => {
   let output
   if (typeof input === 'string') {
-      try { output = JSON.parse(input) }
-      catch (error) { console.error(error) }
+    try { output = JSON.parse(input) }
+    catch (error) { console.error(error) }
   } else if (typeof input === 'object') {
-      output = input
+    output = input
   }
   return output
 }
@@ -128,13 +128,13 @@ const channelSet = (input) => {
 
 const getOne = (msg) => {
   const input = inputParser(msg)
-  console.log('msg from android' , input)
+  console.log('msg from android', input)
   const chain = chainer(input, app)
   // debug && console.log('[React node] Chain :', chain)
   chain.once((data, key) => {
     const foundData = trimSoul(data)
     debug && console.log('[GUN node] getOne Data Found: ', foundData)
-    console.log('msg found' , foundData)
+    console.log('msg found', foundData)
     eventEmitter.emit(msg, foundData)
     native.channel.post(input, foundData)
   })
@@ -142,34 +142,55 @@ const getOne = (msg) => {
 
 const getAll = (msg) => {
   const input = inputParser(msg)
-  console.log('getAll input' , input)
+  console.log('getAll input', input)
   const chain = chainer(input.key, app)
   const filter = JSON.parse(input.filter)
-  // debug && console.log('[React node] Chain :', chain)
-  // chain.map(item => {
-  //   console.log('getAll item', item)
-  //   console.log('getAll key', item[filter.key])
-  //   return item[filter.key] === filter.value ? item : undefined
-  // }).once((data, key) => {
-  //   data = trimSoul(data)
-  //   console.log('[GUN node] getAll Data Found: ', data)
-  //   native.channel.post(input.key, data)
-  //   eventEmitter.emit(input.key, data)
-  // })
   chain.once((data, key) => {
     const foundData = trimSoul(data)
     console.log('[GUN node] getAll Data Found: ', foundData)
     let dataFiltered = []
-    for(id in foundData) {
+    for (id in foundData) {
       let item = parse(data[id])
       console.log('getAll item', item)
-      if(item[filter.key]) {
-          console.log('getAll key', item[filter.key])
-          if (item[filter.key] === filter.value) {
-            dataFiltered.push(item)
-          }
+      if (item[filter.key]) {
+        console.log('getAll key', item[filter.key])
+        if (item[filter.key] === filter.value) {
+          dataFiltered.push(item)
+        }
       }
     }
+    console.log('[GUN node] getAll Data Sending: ', dataFiltered)
+    native.channel.post(input.key, dataFiltered)
+    eventEmitter.emit(input.key, dataFiltered)
+  })
+}
+
+/**
+ * `NOT WORKING`
+ * Uses Gun map function to filter
+ * 
+ * Could be optimization if getAll is too slow
+ * @param {*} msg 
+ */
+const getAllFilter = (msg) => {
+  const input = inputParser(msg)
+  console.log('getAll input', input)
+  const chain = chainer(input.key, app)
+  const filter = JSON.parse(input.filter)
+  chain.once((data, key) => {
+    debug && console.log('[React node] Chain :', chain)
+    chain.map(found => {
+      console.log('getAll item', item)
+      let item = parse(found)
+      console.log('getAll key', item[filter.key])
+      return item[filter.key] === filter.value ? item : undefined
+    }).once((data, key) => {
+      const foundData = trimSoul(data)
+      console.log('[GUN node] getAll Data Found: ', foundData)
+      native.channel.post(input.key, foundData)
+      eventEmitter.emit(input.key, foundData)
+    })
+
     console.log('[GUN node] getAll Data Sending: ', dataFiltered)
     native.channel.post(input.key, dataFiltered)
     eventEmitter.emit(input.key, dataFiltered)

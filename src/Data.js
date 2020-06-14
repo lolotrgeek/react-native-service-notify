@@ -61,6 +61,31 @@ export const createTimer = (projectId) => {
     return true
 }
 
+
+function randomDate(start, end) {
+    if (start && end) {
+        return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
+    }
+}
+/**
+ * Generates timer for testing
+ * @param {array} projects 
+ */
+export const generateTimer = (projects) => {
+    let projectId = projects[Math.floor(Math.random() * projects.length)]
+    debug && console.log('[react Data] Generating Timer', projectId)
+    let timer = newTimer(projectId)
+    // let start = randomDate(new Date(2020, 1, 1), new Date())
+    // let end = randomDate(start, new Date())
+    timer.started = new Date(2020, 1, 1).toString()
+    timer.ended = new Date().toString()
+    timer.status = 'done'
+    debug && console.log('[react Data] Generated Timer', timer)
+    store.set(`history/timers/${timer.project}/${timer.id}`, timer)
+    store.put(`timers/${timer.id}`, timer)
+    return true
+}
+
 export const runTimer = (timer) => {
     store.put('running/timer', JSON.stringify(timer))
 }
@@ -163,7 +188,7 @@ export const getTimers = () => {
 
 export const getProjectTimers = projectId => {
     // store.get(`timers/project/${projectId}`)
-    store.getAll('timers', {key: 'project', value: projectId})
+    store.getAll('timers', { key: 'project', value: projectId })
 }
 export const getDayTimers = date => {
     if (!date) date = dateToday()
