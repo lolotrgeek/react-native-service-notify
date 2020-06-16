@@ -5,13 +5,10 @@ import { parse } from './Functions'
 
 const debug = false
 
-export const handleEvent = event => Data.trimSoul(parse(event))
-
-
 export const putHandler = (event, state) => {
     if (!event) return
     debug && console.log('[react] successful put.')
-    let item = handleEvent(event)
+    let item = parse(event)
     debug && console.log('put ' + typeof item + ' ', item)
     if (item.type === 'timer') {
         debug && console.log('[react] timer.')
@@ -32,32 +29,38 @@ export const putHandler = (event, state) => {
     }
 }
 
-/**
- * Parsing found timer, updating state
- * @param {*} found 
- */
 export const timerParse = (found, state) => {
-    try {
-        // console.log(`item ${typeof found}`, found)
-        if (found.type === 'timer') {
-            let alreadyFound = state.timers.some(timer => timer.id === found.id)
-            if (!alreadyFound) {
-                state.setTimers(timers => [...timers, found])
+    // duplicate/edit parsing
+    let alreadyInTimers = state.timers.some(timer => timer.id === found.id)
+    if (!alreadyInTimers) {
+        debug && console.log('Listing Timer', found)
+        state.setTimers(timers => [...timers, found])
+    }
+    else if (alreadyInTimers && found.edited && found.edited.length > 0) {
+        debug && console.log('Updating Listed Timer', found)
+        state.setTimers(timers => timers.map(timer => {
+            if (timer.id === found.id) {
+                debug && console.log('Updating Timer', timer)
+                timer = found
             }
-            if (found.status === 'running') {
-                running.current = found
-                debug && console.log('[react] running')
-                debug && console.log(running)
-                // Data.getProject(item.project)
-            }
-            else if (found.status === 'done' && found.id === state.running.current.id) {
-                debug && console.log('[react] STOP')
-                debug && console.log(found)
-                state.running.current = found
-            }
-        }
-    } catch (error) {
-        console.log(error)
+            return timer
+        }))
+    }
+    else if (alreadyInTimers && found.status === 'deleted') {
+        debug && console.log('Updating Removed Timer', found)
+        state.setTimers(timers => timers.filter(timer => timer.id === found.id))
+    }
+    else {
+        debug && console.log(' Found Timer with No Changes', found)
+    }
+    // status parsing
+    if (found.status === 'running') {
+        state.running.current = found
+    }
+    else if (found.status === 'done' && found.id === state.running.current.id) {
+        debug && console.log('[react] Setting last run Timer.')
+        debug && console.log(found)
+        state.running.current = found
     }
 }
 
@@ -90,7 +93,7 @@ export const timersHandler = (event, state) => {
         })
     }
     else if (typeof item === 'object') {
-        for (id in item) {
+        let id; for (id in item) {
             let found = parse(item[id])
             timerParse(parse(found), state)
         }
@@ -132,7 +135,7 @@ export const projectsHandler = (event, state) => {
     let item = parse(event)
     debug && console.log('get ' + typeof item + ' ', item)
     if (typeof item === 'object') {
-        for (id in item) {
+        let id; for (id in item) {
             try {
                 let found = JSON.parse(item[id])
                 // console.log(`item ${typeof found}`, found)

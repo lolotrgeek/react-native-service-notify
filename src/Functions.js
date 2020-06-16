@@ -187,7 +187,7 @@ export const formatTime = t => {
  */
 export const sayRunning = timer => timer.ended === timer.started ? 'running' : timer.ended
 /**
- * 
+ * validator...
  * @param {*} timer 
  */
 export const isRunning = timer => timer && typeof timer === 'object' && timer.status === 'running' ? true : false

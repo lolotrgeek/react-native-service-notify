@@ -3,7 +3,7 @@ import Hashids from 'hashids'
 export const cloneTimer = timer => {
     const hashids = new Hashids()
     let clone = timer
-    timer.id = hashids.encode(Date.now().toString())
+    clone.id = hashids.encode(Date.now().toString())
     return clone
 }
 
@@ -32,17 +32,6 @@ export const doneTimer = (timer) => {
     done.ended = new Date().toString()
     done.status = 'done'
     return done
-}
-
-export const testProject = () => {
-    return {
-        id: 'testproject',
-        created: new Date().toString(),
-        type: 'project',
-        status: 'active',
-        name: 'test project',
-        color: '#ccc',        
-    }
 }
 
 export const newProject = (name, color) => {

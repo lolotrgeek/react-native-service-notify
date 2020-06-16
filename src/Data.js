@@ -1,14 +1,8 @@
-import { cloneTimer, newProject, doneTimer, newTimer, testProject } from './Models'
+import { cloneTimer, newProject, doneTimer, newTimer } from './Models'
 import { isRunning, multiDay, newEntryPerDay, dateSimple, dateTestGen, endRandTestGen, startRandTestGen } from './Functions'
 import * as store from './Store'
 
 const debug = false
-
-export const trimSoul = data => {
-    if (!data || !data['_'] || typeof data['_'] !== 'object') return data
-    delete data['_']
-    return data
-}
 
 export const createProject = (name, color) => {
     const project = newProject(name, color)
@@ -103,7 +97,7 @@ export const updateTimer = (timer) => {
     debug && console.log('[react Data] Updating Timer', editedTimer)
     store.set(`history/timers/${editedTimer.project}/${editedTimer.id}`, editedTimer)
     store.put(`timers/${editedTimer.project}/${editedTimer.id}`, editedTimer)
-    store.put(`timers/project/${projectId}/${editedTimer.id}`, editedTimer)
+    store.put(`timers/project/${timer.project}/${editedTimer.id}`, editedTimer)
     if(timer.started !== editedTimer.started) {
         let timerMoved = timer
         timerMoved.deleted = new Date().toString()
@@ -138,7 +132,7 @@ export const deleteTimer = (timer) => {
     timerDelete.deleted = new Date().toString()
     timerDelete.status = 'deleted'
     store.put(`timers/${timer.id}`, timerDelete)
-    store.put(`timers/project/${projectId}/${timer.id}`, timerDelete)
+    store.put(`timers/project/${timer.project}/${timer.id}`, timerDelete)
     store.put(`timers/date/${dateSimple(timerDelete.started)}/${timer.id}`, timerDelete)
 }
 
@@ -206,6 +200,7 @@ export const getTimer = timerId => {
  * @param {function} handler 
  */
 export const getSomething = (keychain, state, handler) => {
+    let messenger = null
     store.get(keychain)
     messenger.addListener(keychain, event => {
         handler(event, state)
