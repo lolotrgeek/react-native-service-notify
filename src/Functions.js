@@ -1,4 +1,4 @@
-import { isValid, isSameDay, isDate, differenceInSeconds, startOfToday, compareAsc, isToday, isYesterday, addSeconds, endOfDay, addMinutes, parseISO, format } from 'date-fns'
+import { isValid, isSameDay, isDate, differenceInSeconds, startOfToday, compareAsc, isToday, isYesterday, addSeconds, endOfDay, addMinutes, parseISO, format, subHours, subMinutes, subSeconds } from 'date-fns'
 import moment from 'moment'
 
 const debug = false
@@ -52,6 +52,14 @@ export const dateToday = () => {
     const date = moment(today).format('DD-MM-YYYY')
     // const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
     return date;
+}
+
+export const dateTestGen = () => {
+    let randHour = Math.floor(Math.random() * 3)
+    let randMin =Math.floor(Math.random() * 59)
+    let randSec =Math.floor(Math.random() * 59)
+    let today = new Date()
+    return subHours(subMinutes(subSeconds(today, randSec), randMin), randHour)
 }
 /**
  * Convert seconds to string `hh : mm : ss`

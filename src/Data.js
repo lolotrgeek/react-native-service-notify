@@ -1,5 +1,5 @@
 import { cloneTimer, newProject, doneTimer, newTimer, testProject } from './Models'
-import { isRunning, multiDay, newEntryPerDay, dateToday } from './Functions'
+import { isRunning, multiDay, newEntryPerDay, dateToday, dateTestGen } from './Functions'
 import * as store from './Store'
 
 const debug = false
@@ -77,7 +77,7 @@ export const generateTimer = (projects) => {
     let timer = newTimer(projectId)
     // let start = randomDate(new Date(2020, 1, 1), new Date())
     // let end = randomDate(start, new Date())
-    timer.started = new Date(2020, 1, 1).toString()
+    timer.started = dateTestGen().toString()
     timer.ended = new Date().toString()
     timer.status = 'done'
     debug && console.log('[react Data] Generated Timer', timer)
@@ -107,7 +107,7 @@ export const restoreTimer = (timer) => {
         store.set(`history/timers/${restoreTimer.project}/${restoreTimer.id}`, restoredTimer)
     }
     debug && console.log('[react Data] Restoring Timer', restoredTimer)
-    store.put(`timer/${restoreTimer.project}/${restoreTimer.id}/`, restoredTimer)
+    store.put(`timers/${restoreTimer.id}`, restoredTimer)
 }
 
 export const endTimer = (timer) => {
@@ -119,25 +119,12 @@ export const endTimer = (timer) => {
     // store.set(`timers/date/${dateToday()}`, timer.id)
 }
 
-export const endTimerDestructured = (timer) => {
-    debug && console.log('[react Data] Ending', timer)
-    store.set(`history/timers/${timer.project}/${timer.id}`, timer)
-    const keys = Object.keys(timer)
-    debug && console.log('[react Data] destructure', keys)
-    keys.map(key => {
-        debug && console.log('[react Data] Storing', key, timer[key])
-        // timers > projectId > timerId > timerKey > timervalue
-        store.put(`timers/${timer.project}/${timer.id}/${key}`, timer.key)
-        return key
-    })
-}
-
 export const deleteTimer = (timer) => {
     debug && console.log('[react Data] Deleting Timer', timer)
     const timerDelete = timer
     timerDelete.deleted = new Date().toString()
     timerDelete.status = 'deleted'
-    store.put(`timer/${timer.project}/${timer.id}`, timerDelete)
+    store.put(`timers/${timer.id}`, timerDelete)
 }
 
 /**

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, Button, NativeEventEmitter, NativeModules, FlatList } from 'react-native';
-import { parse, dateToday } from './Functions'
+import { parse, dateToday, totalOver, totalTime } from './Functions'
 import * as Data from './Data'
 import { putHandler, projectHandler, projectsHandler, timersHandler, runningHandler } from './Handlers'
 
@@ -8,7 +8,7 @@ const { Heartbeat } = NativeModules;
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
 
 const debug = true
-const test = false
+const test = true
 
 export default function App() {
 
@@ -24,7 +24,7 @@ export default function App() {
   useEffect(() => Heartbeat.get('running'), [online])
 
   useEffect(() => {
-    deviceEmitter.addListener("put", event => putHandler(event, {running, setTimers, running}))
+    deviceEmitter.addListener("put", event => putHandler(event, { running, setTimers, running }))
     return () => deviceEmitter.removeAllListeners("put")
   }, [])
 
@@ -34,15 +34,15 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    deviceEmitter.addListener("running", event => runningHandler(event, {running}))
+    deviceEmitter.addListener("running", event => runningHandler(event, { running }))
     return () => deviceEmitter.removeAllListeners("running")
   }, [])
 
   useEffect(() => {
-    deviceEmitter.addListener("projects", event => projectsHandler(event, {projects, setProjects, running}))
-    deviceEmitter.addListener("project", event => projectHandler(event, {projects, setProjects, running}))
-    deviceEmitter.addListener("timers", event => timersHandler(event, {timers, setTimers, running }))
-    deviceEmitter.addListener("timer", event => timersHandler(event, {timers, setTimers, running }))
+    deviceEmitter.addListener("projects", event => projectsHandler(event, { projects, setProjects, running }))
+    deviceEmitter.addListener("project", event => projectHandler(event, { projects, setProjects, running }))
+    deviceEmitter.addListener("timers", event => timersHandler(event, { timers, setTimers, running }))
+    deviceEmitter.addListener("timer", event => timersHandler(event, { timers, setTimers, running }))
     return () => {
       deviceEmitter.removeAllListeners("projects")
       deviceEmitter.removeAllListeners("project")
@@ -97,7 +97,12 @@ export default function App() {
   const renderTimer = ({ item }) => {
     return (
       <View style={{ flexDirection: 'row', margin: 10 }}>
-        <Text style={{ color: 'red' }}>{item.id}</Text>
+        <View style={{ width: '50%' }}>
+          <Text style={{ color: 'red' }}>{item.id}</Text>
+        </View>
+        <View style={{ width: '50%' }}>
+          <Text style={{ color: 'red' }}>{totalTime(item.started, item.ended)}</Text>
+        </View>
       </View>
     );
   };
@@ -135,7 +140,7 @@ export default function App() {
       <View style={styles.list}>
         <FlatList
           data={timers}
-          style={{height: 250}}
+          style={{ height: 250 }}
           // refreshing={refresh}
           renderItem={renderTimer}
           keyExtractor={timer => timer.id}

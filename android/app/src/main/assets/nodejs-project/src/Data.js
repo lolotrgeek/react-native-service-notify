@@ -33,8 +33,6 @@ const endTimer = (timer) => {
   set(`history/timers/${timer.project}/${timer.id}`)
   put(`timers/${timer.project}/${timer.id}`)
   store.put(`timers/${timer.id}`, timer)
-  store.set(`timers/project/${timer.project}`, timer.id)
-  store.set(`timers/date/${dateToday()}`, timer.id)
   // organizing...
   // put(`${timer.project}/timers`, timer.id)
 }
@@ -49,7 +47,7 @@ const addTimer = (projectId, value) => {
   timer = JSON.stringify(timer)
   debug && console.log('[react Data] Storing Timer', timer)
   set(`history/timers/${projectId}/${timer.id}`, timer)
-  put(`timers/${projectId}/${timer.id}`, timer)
+  put(`timers/${timer.id}`, timer)
 }
 
 const finishTimer = (timer) => {
