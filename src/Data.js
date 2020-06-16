@@ -72,12 +72,14 @@ function randomDate(start, end) {
  * @param {array} projects 
  */
 export const generateTimer = (projects) => {
-    let projectId = projects[Math.floor(Math.random() * projects.length)]
+    let projectId = projects[Math.floor(Math.random() * projects.length)].id
     debug && console.log('[react Data] Generating Timer', projectId)
     let timer = newTimer(projectId)
     // let start = randomDate(new Date(2020, 1, 1), new Date())
     // let end = randomDate(start, new Date())
-    timer.started = dateTestGen().toString()
+    let start = dateTestGen()
+    console.log('start gen: ', start)
+    timer.started = start.toString()
     timer.ended = new Date().toString()
     timer.status = 'done'
     debug && console.log('[react Data] Generated Timer', timer)

@@ -97,10 +97,14 @@ export default function App() {
   const renderTimer = ({ item }) => {
     return (
       <View style={{ flexDirection: 'row', margin: 10 }}>
-        <View style={{ width: '50%' }}>
+        <View style={{ width: '30%' }}>
           <Text style={{ color: 'red' }}>{item.id}</Text>
         </View>
-        <View style={{ width: '50%' }}>
+
+        <View style={{ width: '30%' }}>
+          <Text style={{ color: 'red' }}>{JSON.stringify(item.project)}</Text>
+        </View>
+        <View style={{ width: '30%' }}>
           <Text style={{ color: 'red' }}>{totalTime(item.started, item.ended)}</Text>
         </View>
       </View>
