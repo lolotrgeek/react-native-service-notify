@@ -114,8 +114,9 @@ export const endTimer = (timer) => {
     debug && console.log('[react Data] Ending', timer)
     store.set(`history/timers/${timer.project}/${timer.id}`, timer)
     store.put(`timers/${timer.id}`, timer)
-    // store.set(`timers/project/${timer.project}`, timer.id)
-    // store.set(`timers/date/${dateToday()}`, timer.id) // might be unnecessary
+    // replaced below index sets with filters
+    // store.set(`timers/project/${timer.project}`, timer.id) 
+    // store.set(`timers/date/${dateToday()}`, timer.id)
 }
 
 export const endTimerDestructured = (timer) => {
