@@ -1,5 +1,5 @@
 import { cloneTimer, newProject, doneTimer, newTimer, testProject } from './Models'
-import { isRunning, multiDay, newEntryPerDay, dateToday, dateTestGen } from './Functions'
+import { isRunning, multiDay, newEntryPerDay, dateSimple, dateTestGen, endRandTestGen, startRandTestGen } from './Functions'
 import * as store from './Store'
 
 const debug = false
@@ -77,14 +77,18 @@ export const generateTimer = (projects) => {
     let timer = newTimer(projectId)
     // let start = randomDate(new Date(2020, 1, 1), new Date())
     // let end = randomDate(start, new Date())
-    let start = dateTestGen()
-    console.log('start gen: ', start)
+    // let start = dateTestGen()
+    let start = startRandTestGen()
+    let end = endRandTestGen(start)
+    // console.log('start gen: ', start)
     timer.started = start.toString()
-    timer.ended = new Date().toString()
+    timer.ended = end.toString()
     timer.status = 'done'
     debug && console.log('[react Data] Generated Timer', timer)
     store.set(`history/timers/${timer.project}/${timer.id}`, timer)
     store.put(`timers/${timer.id}`, timer)
+    store.put(`timers/project/${projectId}/${timer.id}`, timer)
+    store.put(`timers/date/${dateSimple(timer.started)}/${timer.id}`, timer)
     return true
 }
 
@@ -99,6 +103,14 @@ export const updateTimer = (timer) => {
     debug && console.log('[react Data] Updating Timer', editedTimer)
     store.set(`history/timers/${editedTimer.project}/${editedTimer.id}`, editedTimer)
     store.put(`timers/${editedTimer.project}/${editedTimer.id}`, editedTimer)
+    store.put(`timers/project/${projectId}/${editedTimer.id}`, editedTimer)
+    if(timer.started !== editedTimer.started) {
+        let timerMoved = timer
+        timerMoved.deleted = new Date().toString()
+        timerMoved.status = 'deleted'
+        store.put(`timers/date/${dateSimple(timer.started)}/${timer.id}`, timerMoved)
+    }
+    store.put(`timers/date/${dateSimple(editedTimer.started)}/${editedTimer.id}`, editedTimer)
 }
 
 export const restoreTimer = (timer) => {
@@ -116,29 +128,29 @@ export const endTimer = (timer) => {
     debug && console.log('[react Data] Ending', timer)
     store.set(`history/timers/${timer.project}/${timer.id}`, timer)
     store.put(`timers/${timer.id}`, timer)
-    // replaced below index sets with filters
-    // store.set(`timers/project/${timer.project}`, timer.id) 
-    // store.set(`timers/date/${dateToday()}`, timer.id)
+    store.put(`timers/project/${timer.project}/${timer.id}`, timer)
+    store.put(`timers/date/${dateSimple(timer.started)}/${timer.id}`, timer)
 }
 
 export const deleteTimer = (timer) => {
     debug && console.log('[react Data] Deleting Timer', timer)
-    const timerDelete = timer
+    let timerDelete = timer
     timerDelete.deleted = new Date().toString()
     timerDelete.status = 'deleted'
     store.put(`timers/${timer.id}`, timerDelete)
+    store.put(`timers/project/${projectId}/${timer.id}`, timerDelete)
+    store.put(`timers/date/${dateSimple(timerDelete.started)}/${timer.id}`, timerDelete)
 }
 
 /**
  * Generates a new timer using the given timer model
  * @param {String} projectId project hashid
- * @param {Object} value a timer object
  */
-export const addTimer = (projectId, value) => {
-    const timer = cloneTimer(value)
-    debug && console.log('[react Data] Storing Timer', timer)
-    endTimer(timer)
-}
+export const addTimer = timer => {
+    const clonedTimer = cloneTimer(timer)
+    debug && console.log('[node Data] Storing Timer', clonedTimer)
+    endTimer(clonedTimer)
+  }
 
 export const finishTimer = (timer) => {
     if (isRunning(timer)) {
@@ -154,7 +166,7 @@ export const finishTimer = (timer) => {
                 splitTimer.ended = dayEntry.end
                 debug && console.log('[react Data] Split', i, splitTimer)
                 if (i === 0) { endTimer(splitTimer) } // use initial timer id for first day
-                else { addTimer(splitTimer.project, splitTimer) }
+                else { addTimer(splitTimer) }
                 return splitTimer
             })
         } else {

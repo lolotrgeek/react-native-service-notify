@@ -28,3 +28,11 @@ exports.doneTimer = (timer) => {
     done.status = 'done'
     return done
 }
+
+
+exports.cloneTimer = timer => {
+    const hashids = new Hashids()
+    let clone = timer
+    timer.id = hashids.encode(Date.now().toString())
+    return clone
+}

@@ -1,4 +1,4 @@
-import { isValid, isSameDay, isDate, differenceInSeconds, startOfToday, compareAsc, isToday, isYesterday, addSeconds, endOfDay, addMinutes, parseISO, format, subHours, subMinutes, subSeconds } from 'date-fns'
+import { isValid, isSameDay, isDate, differenceInSeconds, startOfToday, compareAsc, isToday, isYesterday, addSeconds, endOfDay, addMinutes, parseISO, format, subHours, subMinutes, subSeconds, addHours } from 'date-fns'
 import moment from 'moment'
 
 const debug = false
@@ -44,23 +44,43 @@ export const datetimeCreator = () => {
 }
 
 /**
- * Create a date String of Today
+ * Create a date String of date
  * `MM-DD-YYYY`
  */
-export const dateToday = () => {
-    const today = new Date();
-    const date = moment(today).format('DD-MM-YYYY')
+export const dateSimple = date => {
+    let parsedDate = date ? typeof date === 'string' ? new Date(date) : date : new Date()
     // const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
-    return date;
+    return moment(parsedDate).format('DD-MM-YYYY')
 }
 
 export const dateTestGen = () => {
     let randHour = Math.floor(Math.random() * 3)
-    let randMin =Math.floor(Math.random() * 59)
-    let randSec =Math.floor(Math.random() * 59)
+    let randMin = Math.floor(Math.random() * 59)
+    let randSec = Math.floor(Math.random() * 59)
     let today = new Date()
     return subHours(subMinutes(subSeconds(today, randSec), randMin), randHour)
 }
+
+export const startRandTestGen = () => {
+    const start = new Date(2019, 1, 1)
+    const end = new Date()
+    // let endHour = Math.floor(Math.random() * 23) // 0 - 23
+    // let startHour = Math.floor(Math.random() * endHour) // 0 - end
+    let endHour = 22
+    let startHour = 0
+    var date = new Date(+start + Math.random() * (end - start));
+    var hour = startHour + Math.random() * (endHour - startHour) | 0;
+    date.setHours(hour);
+    return date;
+}
+
+export const endRandTestGen = (start) => {
+    let hours = start.getHours()
+    let range = 23 - hours 
+    let end = addHours(start, Math.random() * range)
+    return end
+}
+
 /**
  * Convert seconds to string `hh : mm : ss`
  * @param {number} seconds 

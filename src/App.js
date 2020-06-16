@@ -53,14 +53,15 @@ export default function App() {
 
   useEffect(() => {
     // TEST GENERATOR
-    if (test && projects.length > 0 && typeof projects[0] === 'object' && projects[0].id && timers.length < 10) {
+    let amount = 100
+    if (test && projects.length > 0 && timers.length < amount) {
       let i = 0
-      while (i < 50) {
+      while (i < amount) {
         Data.generateTimer(projects)
         i++
       }
     }
-  }, [])
+  }, [online])
 
   useEffect(() => {
     console.log('Get projects...')

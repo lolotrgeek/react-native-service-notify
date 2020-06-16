@@ -2,8 +2,8 @@ import Hashids from 'hashids'
 
 export const cloneTimer = timer => {
     const hashids = new Hashids()
-    let key = hashids.encode(Date.now().toString())
-    
+    let clone = timer
+    timer.id = hashids.encode(Date.now().toString())
     return clone
 }
 

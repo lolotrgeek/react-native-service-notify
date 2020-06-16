@@ -144,22 +144,3 @@ export const projectsHandler = (event, state) => {
         }
     }
 }
-
-/**
- * 
- * @deprecated not using indexed sets, replaced with filters
- * @param {*} event 
- * @param {*} state 
- */
-export const projectTimersHandler = (event, state) => {
-    debug && console.log('[react] msg timers get.')
-    let item = parse(event)
-    debug && console.log('timers/project get ' + typeof item + ' ', item)
-
-    // handle getting a set from gun
-    let timerIds = Object.values(item)
-    timerIds.map(timerId => {
-        Data.getTimer(timerId) // triggers timer Listener
-    })
-}
-

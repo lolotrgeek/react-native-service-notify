@@ -1,8 +1,7 @@
 // mini nodeified version of Data.js
-
 const isRunning = require('./Functions').isRunning
 const newEntryPerDay = require('./Functions').newEntryPerDay
-const dateToday = require('./Functions').dateToday
+const dateSimple = require('./Functions').dateSimple
 const doneTimer = require('./Models').doneTimer
 const newTimer = require('./Models').newTimer
 const store = require('./Store')
@@ -33,21 +32,18 @@ const endTimer = (timer) => {
   set(`history/timers/${timer.project}/${timer.id}`)
   put(`timers/${timer.project}/${timer.id}`)
   store.put(`timers/${timer.id}`, timer)
-  // organizing...
-  // put(`${timer.project}/timers`, timer.id)
+  store.put(`timers/project/${timer.project}/${timer.id}`, timer)
+  store.put(`timers/date/${dateSimple(timer.started)}/${timer.id}`, timer)
 }
 
 /**
  * Generates a new timer using the given timer model
  * @param {String} projectId project hashid
- * @param {Object} value a timer object
  */
-const addTimer = (projectId, value) => {
-  let timer = cloneTimer(value)
-  timer = JSON.stringify(timer)
-  debug && console.log('[react Data] Storing Timer', timer)
-  set(`history/timers/${projectId}/${timer.id}`, timer)
-  put(`timers/${timer.id}`, timer)
+const addTimer = timer => {
+  const clonedTimer = cloneTimer(timer)
+  debug && console.log('[node Data] Storing Timer', clonedTimer)
+  endTimer(clonedTimer)
 }
 
 const finishTimer = (timer) => {
@@ -64,7 +60,7 @@ const finishTimer = (timer) => {
         splitTimer.ended = dayEntry.end
         debug && console.log('Split', i, splitTimer)
         if (i === 0) { endTimer(splitTimer) } // use initial timer id for first day
-        else { addTimer(splitTimer.project, splitTimer) }
+        else { addTimer(splitTimer) }
         return splitTimer
       })
     } else { endTimer(done) }
@@ -81,7 +77,42 @@ const getProject = (projectId, handler) => {
   store.channel.addListener(`projects/${projectId}`, handler)
 }
 
-const getTimers = (projectId, handler) => {
+/**
+ * Get timers today, filter out timers not in project
+ * @param {*} projectId 
+ */
+const getTimers = (projectId) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const chain = store.chainer(`timers/date/${dateSimple()}`, store.app)
+      chain.once((data, key) => {
+        const foundData = trimSoul(data)
+        debug && console.log('[GUN node] getTimers Data Found: ', foundData)
+        let dataFiltered = []
+        for (id in foundData) {
+          let item = store.parse(foundData[id])
+          debug && console.log('getTimers item', item)
+          if (item['project'] === projectId) {
+            dataFiltered.push(item)
+          }
+        }
+        debug && console.log('[GUN node] getTimers Data Resolving: ', dataFiltered)
+        resolve(dataFiltered)
+      })
+      // console.log('[React node] Chain :', chain)
+      // chain.once((data, key) => resolve(data))
+    } catch (err) {
+      reject(err)
+    }
+
+  })
+}
+
+/**
+ * Gets every timer in DB, then filters
+ * @param {*} projectId 
+ */
+const getTimersFiltered = (projectId) => {
   return new Promise((resolve, reject) => {
     try {
       const chain = store.chainer('timers', store.app)

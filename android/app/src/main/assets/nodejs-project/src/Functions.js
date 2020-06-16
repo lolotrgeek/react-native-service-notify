@@ -6,14 +6,13 @@ const debug = false
 const formatDate = date => moment(dateTime).format("YYYY-MM-DD")
 
 /**
- * Create a date String of Today
+ * Create a date String of date
  * `MM-DD-YYYY`
  */
-const dateToday = () => {
-    const today = new Date();
-    const date = moment(today).format('DD-MM-YYYY')
+const dateSimple = date => {
+    let parsedDate = date ? typeof date === 'string' ? new Date(date) : date : new Date()
     // const date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
-    return date;
+    return moment(parsedDate).format('DD-MM-YYYY')
 }
 
 /**
@@ -160,5 +159,5 @@ module.exports = {
     sumTimers: sumTimers,
     timerRanToday: timerRanToday,
     formatDate: formatDate,
-    dateToday : dateToday
+    dateSimple : dateSimple
 }
