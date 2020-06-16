@@ -98,7 +98,7 @@ getCount = (data) => new Promise((resolve, reject) => {
             })
             debug && console.log(`count ${count}`)
             resolve(count)
-        }).catch(err => debug && console.error(err))
+        }).catch(err => console.error(err))
 
 
     }

@@ -7,8 +7,8 @@ import { putHandler, projectHandler, projectsHandler, timersHandler, runningHand
 const { Heartbeat } = NativeModules;
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
 
-const debug = true
-const test = true
+const debug = false
+const test = false
 
 export default function App() {
 
@@ -24,7 +24,7 @@ export default function App() {
   useEffect(() => Heartbeat.get('running'), [online])
 
   useEffect(() => {
-    deviceEmitter.addListener("put", event => putHandler(event, { running, setTimers, running }))
+    deviceEmitter.addListener("put", event => putHandler(event, { running, setTimers }))
     return () => deviceEmitter.removeAllListeners("put")
   }, [])
 
@@ -34,7 +34,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    deviceEmitter.addListener("running", event => runningHandler(event, { running }))
+    deviceEmitter.addListener("running", event => runningHandler(event, { running: running }))
     return () => deviceEmitter.removeAllListeners("running")
   }, [])
 
@@ -84,6 +84,7 @@ export default function App() {
           <Button title='start' onPress={() => {
             Data.finishTimer(running.current)
             Data.createTimer(item.id)
+            setOnline(!online)
           }} />
         </View>
       </View>
@@ -129,7 +130,8 @@ export default function App() {
         <View style={{ width: '25%' }}>
           {!running.current || running.current.id === 'none' ?
             <Text>No Running Timer</Text> : running.current.status === 'done' ?
-              <Button title='start' onPress={() => { Data.createTimer(running.current.id); setOnline(!online) }} /> :
+              //TODO: assuming that project exists on start... needs validation
+              <Button title='start' onPress={() => { Data.createTimer(running.current.project); setOnline(!online) }} /> :
               <Button title='stop' onPress={() => { Data.finishTimer(running.current); setOnline(!online) }} />
           }
         </View>

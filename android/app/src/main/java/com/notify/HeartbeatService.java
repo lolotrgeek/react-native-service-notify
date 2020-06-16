@@ -173,7 +173,7 @@ public class HeartbeatService extends NodeJS {
             String request = payloadParse(obj);
             if (DEBUG) Log.i(TAG, "msg from node : " + event);
             if (DEBUG_PUT) Log.d("CHANNEL ", event + " data: " + request);
-            Log.i(TAG, "msg " + event + " : " +  request);
+            if (DEBUG) Log.i(TAG, "msg " + event + " : " +  request);
             sendMessageToReact(event, request);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -211,7 +211,6 @@ public class HeartbeatService extends NodeJS {
                                 TITLE = title;
                                 SUBTITLE = subtitle;
                                 if (DEBUG || DEBUG_COUNT) Log.d(TAG, TITLE + " " + SUBTITLE);
-
                                 notificationUpdate();
                             }
                         } catch (Exception e) {

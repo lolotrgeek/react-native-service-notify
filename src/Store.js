@@ -11,7 +11,6 @@ export const store = Heartbeat
  */
 export function put(key, value) {
     // do validation here...
-    value.status === 'done' ? console.log('[react store STOP] ', value) : console.log('[react store RUN] ', value)
     store.put(key, JSON.stringify(value))
 }
 
@@ -44,6 +43,5 @@ export function get(key) {
  */
 export function getAll(key, filter) {
     // do validation here...
-    console.log(`getAll request: ${key} ,`, JSON.stringify(filter) )
     store.getAll(key, JSON.stringify(filter))
 }

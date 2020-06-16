@@ -75,7 +75,7 @@ public class HeartbeatModule extends ReactContextBaseJavaModule {
     @ReactMethod
     private void get(String key) {
         try {
-            Log.i("HEARTBEAT-MODULE", "msg from react : "+ key);
+            if (DEBUG) Log.i("HEARTBEAT-MODULE", "msg from react : "+ key);
             HeartbeatService.getInstance().sendMessageToNode("get", key);
         } catch (Exception e) {
             Log.e("HEARTBEAT-MODULE", "get - " + e.getMessage());

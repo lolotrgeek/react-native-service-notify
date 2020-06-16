@@ -10,10 +10,10 @@ export const putHandler = (event, state) => {
     debug && console.log('[react] successful put.')
     let item = parse(event)
     debug && console.log('put ' + typeof item + ' ', item)
-    if (item.type === 'timer') {
-        debug && console.log('[react] timer.')
-        timerParse(item, state)
-    }
+    // if (item.type === 'timer') {
+    //     debug && console.log('[react] timer.')
+    //     timerParse(item, state)
+    // }
 }
 
 export const timerParse = (found, state) => {
@@ -54,10 +54,10 @@ export const timerParse = (found, state) => {
 export const runningHandler = (event, state) => {
     let item = JSON.parse(event)
     if (item && typeof item === 'object' && typeof item === 'object' && item.status === 'running') {
-      state.running.current = item
+        
+        state.running.current = item
     }
-    debug && console.log('[react] running')
-    debug && console.log(running)
+    console.log('[react] running', state.running.current)
 }
 
 
@@ -76,15 +76,19 @@ export const timersHandler = (event, state) => {
     debug && console.log('timers get ' + typeof item + ' ', item)
     if (Array.isArray(item)) {
         item.map(found => {
-            timerParse(parse(found), state)
+            if (found.type === 'timer') {
+                timerParse(parse(found), state)
+            }
         })
     }
     else if (typeof item === 'object') {
         let id; for (id in item) {
             let found = parse(item[id])
-            timerParse(parse(found), state)
+            if (found.type === 'timer') {
+                debug && console.log('timers get ' + typeof item + ' ', item)
+                timerParse(parse(found), state)
+            }
         }
-
     }
 }
 export const projectParse = (found, state) => {
