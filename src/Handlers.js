@@ -44,16 +44,16 @@ export const timerParse = (found, state) => {
             if (!alreadyFound) {
                 state.setTimers(timers => [...timers, found])
             }
-            if (timer.status === 'running') {
-                running.current = timer
+            if (found.status === 'running') {
+                running.current = found
                 debug && console.log('[react] running')
                 debug && console.log(running)
                 // Data.getProject(item.project)
             }
-            else if (timer.status === 'done' && timer.id === state.running.current.id) {
+            else if (found.status === 'done' && found.id === state.running.current.id) {
                 debug && console.log('[react] STOP')
-                debug && console.log(timer)
-                state.running.current = timer
+                debug && console.log(found)
+                state.running.current = found
             }
         }
     } catch (error) {

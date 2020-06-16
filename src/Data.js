@@ -191,10 +191,6 @@ export const getProjectTimers = projectId => {
     // store.get(`timers/project/${projectId}`)
     store.getAll('timers', { key: 'project', value: projectId })
 }
-export const getDayTimers = date => {
-    if (!date) date = dateToday()
-    store.get(`timers/date/${date}`)
-}
 
 export const getTimer = timerId => {
     store.get(`timers/${timerId}`)

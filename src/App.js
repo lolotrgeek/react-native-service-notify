@@ -8,6 +8,7 @@ const { Heartbeat } = NativeModules;
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
 
 const debug = true
+const test = false
 
 export default function App() {
 
@@ -52,7 +53,7 @@ export default function App() {
 
   useEffect(() => {
     // TEST GENERATOR
-    if (projects.length > 0 && typeof projects[0] === 'object' && projects[0].id && timers.length < 10) {
+    if (test && projects.length > 0 && typeof projects[0] === 'object' && projects[0].id && timers.length < 10) {
       let i = 0
       while (i < 50) {
         Data.generateTimer(projects)
@@ -132,13 +133,13 @@ export default function App() {
       </SafeAreaView>
       <Text>Timers: </Text>
       <SafeAreaView style={styles.list}>
-        <FlatList
+        {/* <FlatList
           data={timers}
           // refreshing={refresh}
           renderItem={renderTimer}
           keyExtractor={timer => timer.id}
         // onRefresh={onRefresh()}
-        />
+        /> */}
       </SafeAreaView>
 
     </SafeAreaView>
