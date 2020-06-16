@@ -23,7 +23,7 @@ const isToday = date => {
     const today = moment(new Date())
     date = moment(date)
     if (today.isSame(date, 'd')) {
-        console.log('Checking day.')
+        debug && console.log('Checking day.')
         return true
     } else {
         return false

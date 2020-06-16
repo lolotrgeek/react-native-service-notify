@@ -12,20 +12,7 @@ export const putHandler = (event, state) => {
     debug && console.log('put ' + typeof item + ' ', item)
     if (item.type === 'timer') {
         debug && console.log('[react] timer.')
-        if (item.status === 'running') {
-            // state.setRunning(item)
-            state.running.current = item
-            debug && console.log('[react] running')
-            debug && console.log(running)
-            Data.getProject(item.project)
-        }
-        else if (item.status === 'done' && item.id === state.running.current.id) {
-            debug && console.log('[react] STOP')
-            debug && console.log(item)
-            // state.setRunning(item)
-            state.running.current = item
-        }
-        // state.setTimers(timers => [...timers, item])
+        timerParse(item, state)
     }
 }
 

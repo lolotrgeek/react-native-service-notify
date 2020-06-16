@@ -9,7 +9,7 @@ const trimSoul = require('./src/Data').trimSoul
 const { differenceInSeconds, timerRanToday } = require('./src/Functions')
 const native = require('./native-bridge')
 
-const debug = true
+const debug = false
 
 let timer
 let runningTimer
@@ -98,7 +98,7 @@ getCount = (data) => new Promise((resolve, reject) => {
             })
             debug && console.log(`count ${count}`)
             resolve(count)
-        }).catch(err => console.error(err))
+        }).catch(err => debug && console.error(err))
 
 
     }
@@ -161,31 +161,31 @@ native.channel.on('stop', msg => {
     debug && console.log('[React node] incoming Stop: ' + typeof msg, msg)
     try {
         runningTimer.status = 'done'
-        console.log('[NODE_DEBUG_PUT] : Running Timer Stopped ', runningTimer)
+        debug && console.log('[NODE_DEBUG_PUT] : Running Timer Stopped ', runningTimer)
         stopTimer(runningTimer)
         finishTimer(runningTimer)
-        console.log('stop timer: ', timer)
+        debug && console.log('stop timer: ', timer)
     } catch (error) {
         debug && console.log('[Timer node] : Stop failed ' + error)
     }
 })
 
 native.channel.on('start', msg => {
-    console.log('[React node] incoming Start: ' + typeof msg, msg)
+    debug && console.log('[React node] incoming Start: ' + typeof msg, msg)
     try {
         if (runningTimer && runningTimer.status === 'running') finishTimer(runningTimer)
         const runningNew = createTimer(runningTimer.project)
         getCount(runningNew).then(count => {
             runningTimer = runningNew
-            console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
+            debug && console.log('[NODE_DEBUG_PUT] : Running Timer ', runningTimer)
             findRunningProject(runningTimer).then(found => {
                 runningProject = found
                 runTimer(runningTimer, runningProject)
             })
-            console.log('run timer: ', timer)
+            debug && console.log('run timer: ', timer)
         })
 
     } catch (error) {
-        console.log('[Timer node] : Create failed ' + error)
+        debug && console.log('[Timer node] : Create failed ' + error)
     }
 })

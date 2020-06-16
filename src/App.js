@@ -74,11 +74,6 @@ export default function App() {
     // Data.getDayTimers()
   }, [online])
 
-
-  const onRefresh = () => {
-
-  };
-
   const renderRow = ({ item }) => {
     return (
       <View style={{ flexDirection: 'row', margin: 10 }}>
@@ -101,7 +96,6 @@ export default function App() {
         <View style={{ width: '30%' }}>
           <Text style={{ color: 'red' }}>{item.id}</Text>
         </View>
-
         <View style={{ width: '30%' }}>
           <Text style={{ color: 'red' }}>{JSON.stringify(item.project)}</Text>
         </View>
@@ -114,42 +108,47 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
+
       {projects.length === 0 ? <Button title='Begin' onPress={() => {
         Data.createProject('react project', '#ccc')
         Data.createProject('test project', '#ccc')
         setOnline(!online)
       }} /> : <Button title='Refresh' onPress={() => setOnline(!online)} />}
-      <Text>{running.current.name ? running.current.name : ''}</Text>
-      <Text>{'Project: ' + running.current.project ? running.current.project : ''}</Text>
-      <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>
-      <Text>{count}</Text>
-      {running.current.status === 'done' || running.current.id === 'none' ?
-        <Text >Not Running</Text> :
-        <Button title='stop' onPress={() => { Data.finishTimer(running.current); setOnline(!online) }} />
-      }
 
+      <View style={{ flexDirection: 'row', margin: 10 }}>
+        <View style={{ width: '25%' }}>
+          <Text>{'Project: ' + running.current.project ? running.current.project : ''}</Text>
+          <Text>{running.current.name ? running.current.name : ''}</Text>
+        </View>
+        <View style={{ width: '25%' }}>
+          <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>
+        </View>
+        <View style={{ width: '25%' }}>
+          <Text>{count}</Text>
+        </View>
+        <View style={{ width: '25%' }}>
+          {!running.current || running.current.id === 'none' ?
+            <Text>No Running Timer</Text> : running.current.status === 'done' ?
+              <Button title='start' onPress={() => { Data.createTimer(running.current.id); setOnline(!online) }} /> :
+              <Button title='stop' onPress={() => { Data.finishTimer(running.current); setOnline(!online) }} />
+          }
+        </View>
+      </View>
 
-      <SafeAreaView style={styles.list}>
+      <View style={styles.list}>
         <FlatList
           data={projects}
-          // refreshing={refresh}
           renderItem={renderRow}
           keyExtractor={project => project.id}
-          onEndReached={() => {
-
-          }}
-        // onRefresh={onRefresh()}
         />
-      </SafeAreaView>
+      </View>
       <Text>Timers: </Text>
       <View style={styles.list}>
         <FlatList
           data={timers}
-          style={{ height: 250 }}
-          // refreshing={refresh}
+          style={{ height: 150 }}
           renderItem={renderTimer}
           keyExtractor={timer => timer.id}
-        // onRefresh={onRefresh()}
         />
       </View>
 

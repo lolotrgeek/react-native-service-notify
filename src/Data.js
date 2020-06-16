@@ -74,7 +74,7 @@ export const generateTimer = (projects) => {
     // let start = dateTestGen()
     let start = startRandTestGen()
     let end = endRandTestGen(start)
-    // console.log('start gen: ', start)
+    // debug && console.log('start gen: ', start)
     timer.started = start.toString()
     timer.ended = end.toString()
     timer.status = 'done'
@@ -98,7 +98,7 @@ export const updateTimer = (timer) => {
     store.set(`history/timers/${editedTimer.project}/${editedTimer.id}`, editedTimer)
     store.put(`timers/${editedTimer.project}/${editedTimer.id}`, editedTimer)
     store.put(`timers/project/${timer.project}/${editedTimer.id}`, editedTimer)
-    if(timer.started !== editedTimer.started) {
+    if (timer.started !== editedTimer.started) {
         let timerMoved = timer
         timerMoved.deleted = new Date().toString()
         timerMoved.status = 'deleted'
@@ -144,7 +144,7 @@ export const addTimer = timer => {
     const clonedTimer = cloneTimer(timer)
     debug && console.log('[node Data] Storing Timer', clonedTimer)
     endTimer(clonedTimer)
-  }
+}
 
 export const finishTimer = (timer) => {
     if (isRunning(timer)) {
