@@ -132,15 +132,16 @@ export default function App() {
         />
       </SafeAreaView>
       <Text>Timers: </Text>
-      <SafeAreaView style={styles.list}>
-        {/* <FlatList
+      <View style={styles.list}>
+        <FlatList
           data={timers}
+          style={{height: 250}}
           // refreshing={refresh}
           renderItem={renderTimer}
           keyExtractor={timer => timer.id}
         // onRefresh={onRefresh()}
-        /> */}
-      </SafeAreaView>
+        />
+      </View>
 
     </SafeAreaView>
   );

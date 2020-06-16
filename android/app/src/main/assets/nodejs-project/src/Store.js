@@ -150,7 +150,7 @@ const getAll = (msg) => {
     console.log('[GUN node] getAll Data Found: ', foundData)
     let dataFiltered = []
     for (id in foundData) {
-      let item = parse(data[id])
+      let item = parse(foundData[id])
       console.log('getAll item', item)
       if (item[filter.key]) {
         console.log('getAll key', item[filter.key])
@@ -331,5 +331,6 @@ module.exports = {
   set: setAll,
   off: offAll,
   channel: eventEmitter,
+  parse: parse,
 };
 

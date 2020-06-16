@@ -9,7 +9,7 @@ const trimSoul = require('./src/Data').trimSoul
 const { differenceInSeconds, timerRanToday } = require('./src/Functions')
 const native = require('./native-bridge')
 
-const debug = false
+const debug = true
 
 let timer
 let runningTimer
@@ -33,7 +33,7 @@ const runTimer = (running, project) => {
                 clearInterval(timer)
                 return;
             }
-            console.log(`running timer: ${running.id} | project: ${running.project}`)
+            debug && console.log(`running timer: ${running.id} | project: ${running.project}`)
             native.channel.post('count', count.toString())
             // count = count + 1
             count++
@@ -85,26 +85,22 @@ getCount = (data) => new Promise((resolve, reject) => {
     else if (runningTimer && runningTimer.project !== data.project) {
         debug && console.log(`getting count ${runningTimer.project} != ${data.project}`)
         getTimers(data.project).then(timers => {
-            debug && console.log(`Got timers ${typeof timers} `, timers)
+            debug && console.log(`Got count timers ${typeof timers} `, timers)
             count = 0
-            for (timer in timers) {
-                // debug && console.log(`Got timer ${typeof timers[timer]} `, timers[timer] )
-                // let foundTimer = trimSoul(timers[timer])
-                let foundTimer = timers[timer]
-                if (typeof foundTimer === 'string') {
-                    foundTimer = JSON.parse(foundTimer)
-                    // debug && console.log(`Got timer ${typeof foundTimer}`, foundTimer)
-                    if (timerRanToday(foundTimer)) {
-                        let TIMERTOTAL = differenceInSeconds(foundTimer.ended, foundTimer.started)
-                        debug && console.log(`Got count ${foundTimer.project}/${foundTimer.id} , ${TIMERTOTAL}`)
-                        count = count + TIMERTOTAL
-                        debug && console.log('Updating count ', count)
-                    }
+            timers.map(foundTimer => {
+                // debug && console.log(`Got count timer ${typeof foundTimer}`, foundTimer)
+                if (timerRanToday(foundTimer)) {
+                    let TIMERTOTAL = differenceInSeconds(foundTimer.ended, foundTimer.started)
+                    debug && console.log(`Got count ${foundTimer.project}/${foundTimer.id} , ${TIMERTOTAL}`)
+                    count = count + TIMERTOTAL
+                    debug && console.log('Updating count ', count)
                 }
-            }
+            })
             debug && console.log(`count ${count}`)
             resolve(count)
-        })
+        }).catch(err => console.error(err))
+
+
     }
     else if (runningTimer && runningTimer.project === data.project) {
         debug && console.log(`same count ${runningTimer.project} = ${data.project}`)
@@ -155,7 +151,7 @@ store.chainer('running', store.app).on((data, key) => {
             stopTimer(runningTimer)
         }
         else {
-            stopTimer({id: 'none', status: 'done'})
+            stopTimer({ id: 'none', status: 'done' })
         }
     }
 })
@@ -177,7 +173,7 @@ native.channel.on('stop', msg => {
 native.channel.on('start', msg => {
     console.log('[React node] incoming Start: ' + typeof msg, msg)
     try {
-        if(runningTimer && runningTimer.status === 'running') finishTimer(runningTimer)
+        if (runningTimer && runningTimer.status === 'running') finishTimer(runningTimer)
         const runningNew = createTimer(runningTimer.project)
         getCount(runningNew).then(count => {
             runningTimer = runningNew

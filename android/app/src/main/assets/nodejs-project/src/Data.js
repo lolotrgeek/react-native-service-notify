@@ -7,7 +7,7 @@ const doneTimer = require('./Models').doneTimer
 const newTimer = require('./Models').newTimer
 const store = require('./Store')
 
-const debug = true
+const debug = false
 
 const put = (key, value) => store.put({ key: key, value: value })
 const set = (key, value) => store.set({ key: key, value: value })
@@ -34,7 +34,7 @@ const endTimer = (timer) => {
   put(`timers/${timer.project}/${timer.id}`)
   store.put(`timers/${timer.id}`, timer)
   store.set(`timers/project/${timer.project}`, timer.id)
-  store.set(`timers/date/${dateToday()}`, timer.id) 
+  store.set(`timers/date/${dateToday()}`, timer.id)
   // organizing...
   // put(`${timer.project}/timers`, timer.id)
 }
@@ -86,10 +86,24 @@ const getProject = (projectId, handler) => {
 const getTimers = (projectId, handler) => {
   return new Promise((resolve, reject) => {
     try {
-      const chain = store.chainer(`timers/${projectId}`, store.app)
+      const chain = store.chainer('timers', store.app)
+      chain.once((data, key) => {
+        const foundData = trimSoul(data)
+        debug && console.log('[GUN node] getTimers Data Found: ', foundData)
+        let dataFiltered = []
+        for (id in foundData) {
+          let item = store.parse(foundData[id])
+          debug && console.log('getTimers item', item)
+          if (item['project'] === projectId) {
+            dataFiltered.push(item)
+          }
+        }
+        debug && console.log('[GUN node] getTimers Data Resolving: ', dataFiltered)
+        resolve(dataFiltered)
+      })
       // console.log('[React node] Chain :', chain)
-      chain.once((data, key) => resolve(data))
-    } catch(err) {
+      // chain.once((data, key) => resolve(data))
+    } catch (err) {
       reject(err)
     }
 
@@ -113,5 +127,5 @@ module.exports = {
   getProject: getProject,
   getTimers: getTimers,
   getRunning: getRunning,
-  trimSoul : trimSoul
+  trimSoul: trimSoul
 }
