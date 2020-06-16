@@ -40,14 +40,10 @@ export default function App() {
 
   useEffect(() => {
     deviceEmitter.addListener("projects", event => projectsHandler(event, { projects, setProjects, running }))
-    deviceEmitter.addListener("project", event => projectHandler(event, { projects, setProjects, running }))
     deviceEmitter.addListener("timers", event => timersHandler(event, { timers, setTimers, running }))
-    deviceEmitter.addListener("timer", event => timersHandler(event, { timers, setTimers, running }))
     return () => {
       deviceEmitter.removeAllListeners("projects")
-      deviceEmitter.removeAllListeners("project")
       deviceEmitter.removeAllListeners("timers")
-      deviceEmitter.removeAllListeners("timer")
     }
   }, [online])
 

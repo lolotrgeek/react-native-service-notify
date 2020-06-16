@@ -22,18 +22,17 @@ const createTimer = (projectId) => {
   debug && console.log('Created Timer', timer)
   put('running', timerToString, 'running')
   debug && console.log('Success! Created Timer.')
-  set(`history/timers/${projectId}/${timer.id}`, timerToString)
+  set(`history/timers/${timer.id}`, timerToString)
   return timer
 }
 
 const endTimer = (timer) => {
   debug && console.log('Ending', timer)
   timer = JSON.stringify(timer)
-  set(`history/timers/${timer.project}/${timer.id}`)
-  put(`timers/${timer.project}/${timer.id}`)
-  store.put(`timers/${timer.id}`, timer)
-  store.put(`timers/project/${timer.project}/${timer.id}`, timer)
-  store.put(`timers/date/${dateSimple(timer.started)}/${timer.id}`, timer)
+  set(`history/timers/${timer.project}/${timer.id}`, timer)
+  put(`timers/${timer.id}`, timer)
+  put(`project/${timer.project}/${timer.id}`, timer)
+  put(`date/${dateSimple(timer.started)}/${timer.id}`, timer)
 }
 
 /**
@@ -84,7 +83,7 @@ const getProject = (projectId, handler) => {
 const getTimers = (projectId) => {
   return new Promise((resolve, reject) => {
     try {
-      const chain = store.chainer(`timers/date/${dateSimple()}`, store.app)
+      const chain = store.chainer(`date/${dateSimple()}`, store.app)
       chain.once((data, key) => {
         const foundData = trimSoul(data)
         debug && console.log('[GUN node] getTimers Data Found: ', foundData)

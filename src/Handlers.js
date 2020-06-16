@@ -54,7 +54,7 @@ export const timerParse = (found, state) => {
 export const runningHandler = (event, state) => {
     let item = JSON.parse(event)
     if (item && typeof item === 'object' && typeof item === 'object' && item.status === 'running') {
-        
+
         state.running.current = item
     }
     console.log('[react] running', state.running.current)
@@ -82,10 +82,10 @@ export const timersHandler = (event, state) => {
         })
     }
     else if (typeof item === 'object') {
+        console.log('timers get ' + typeof item + ' ', item)
         let id; for (id in item) {
             let found = parse(item[id])
             if (found.type === 'timer') {
-                debug && console.log('timers get ' + typeof item + ' ', item)
                 timerParse(parse(found), state)
             }
         }
