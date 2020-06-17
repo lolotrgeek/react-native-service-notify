@@ -13,7 +13,6 @@ const test = false
 export default function App() {
 
   const [online, setOnline] = useState(false)
-  const [status, setStatus] = useState([])
   const [projects, setProjects] = useState([])
   const [timers, setTimers] = useState([])
   const [timerHistory, setTimerHistory] = useState([])
@@ -110,12 +109,20 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={{ flexDirection: 'row', margin: 10 }}>
+        {projects.length === 0 ? <Button title='Begin' onPress={() => {
+          Data.createProject('react project', '#ccc')
+          Data.createProject('test project', '#ccc')
+          setOnline(!online)
+        }} /> : <Button title='Refresh' onPress={() => setOnline(!online)} />}
+        <Button title='Clear' onPress={() => {
+          running.current = { id: 'none', name: 'none', project: 'none' }
+          setTimers([])
+          setTimerHistory([])
+          setOnline(!online)
+          }} />
+      </View>
 
-      {projects.length === 0 ? <Button title='Begin' onPress={() => {
-        Data.createProject('react project', '#ccc')
-        Data.createProject('test project', '#ccc')
-        setOnline(!online)
-      }} /> : <Button title='Refresh' onPress={() => setOnline(!online)} />}
 
       <View style={{ flexDirection: 'row', margin: 10 }}>
         <View style={{ width: '25%' }}>
@@ -151,7 +158,7 @@ export default function App() {
           data={timerHistory}
           style={{ height: 150 }}
           renderItem={renderTimer}
-          keyExtractor={timer => timer.id}
+          keyExtractor={timer => timer.key}
         />
       </View>
       <Text>Timers: </Text>

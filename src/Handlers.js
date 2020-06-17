@@ -143,7 +143,6 @@ export const projectsHandler = (event, state) => {
  * 
  * @param {*} event 
  * @param {*} state 
- * @TODO need a clear state function if multiple timer histories are mixing
  */
 export const timerHistoryHandler = (event, state) => {
     if (!event) return
@@ -154,8 +153,13 @@ export const timerHistoryHandler = (event, state) => {
         let id; for (id in item) {
             try {
                 let found = JSON.parse(item[id])
-                debug && console.log('history ' + typeof found + ' ', found)
-                state.setTimerHistory(timers => [...timers, found])
+                if (found.type === 'timer') {
+                    found.key = found.edited.length > 0 ? found.id+'_'+found.edited : found.id+'_'+found.status
+                    let alreadyInProjects = state.timerHistory.some(timer => timer.key === found.key)
+                    if (!alreadyInProjects) {
+                        state.setTimerHistory(timers => [...timers, found])
+                    }
+                }
             } catch (error) {
                 console.log(error)
             }
@@ -163,3 +167,5 @@ export const timerHistoryHandler = (event, state) => {
         }
     }
 }
+
+
