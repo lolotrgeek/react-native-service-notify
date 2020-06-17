@@ -8,8 +8,6 @@
     "fs": false
   },
   "dependencies": {
-    "@lolotrgeek/gun-react-native-sqlite": "0.0.7",
-    "@react-native-community/async-storage": "^1.9.0",
     "date-fns": "^2.14.0",
     "gun": "^0.2020.421",
     "hashids": "^2.2.1",
