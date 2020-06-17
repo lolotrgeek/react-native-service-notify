@@ -55,12 +55,6 @@ export const createTimer = (projectId) => {
     return true
 }
 
-
-function randomDate(start, end) {
-    if (start && end) {
-        return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
-    }
-}
 /**
  * Generates timer for testing
  * @param {array} projects 

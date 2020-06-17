@@ -34,6 +34,20 @@ export const doneTimer = (timer) => {
     return done
 }
 
+export const editedTimer = timer => {
+    let editedTimer = timer
+    if (editedTimer.deleted) { editedTimer.deleted = null }
+    editedTimer.edited = new Date().toString()
+    return editedTimer
+}
+
+export const deletedTimer = timer => {
+    let timerDelete = timer
+    timerDelete.deleted = new Date().toString()
+    timerDelete.status = 'deleted'
+    return timerDelete
+}
+
 export const newProject = (name, color) => {
     const hashids = new Hashids()
     const key = hashids.encode(Date.now().toString())
@@ -55,4 +69,11 @@ export const editedProject = (project, updates) => {
     update = Object.assign(project, updates)
     update.edited = new Date().toString()
     return update
+}
+
+export const deletedProject = project => {
+    let projectDeleted = project
+    projectDeleted.deleted = new Date().toString()
+    projectDeleted.status = 'deleted'
+    return projectDeleted
 }
