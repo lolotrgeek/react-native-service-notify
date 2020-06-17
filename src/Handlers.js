@@ -138,3 +138,28 @@ export const projectsHandler = (event, state) => {
         }
     }
 }
+
+/**
+ * 
+ * @param {*} event 
+ * @param {*} state 
+ * @TODO need a clear state function if multiple timer histories are mixing
+ */
+export const timerHistoryHandler = (event, state) => {
+    if (!event) return
+    debug && console.log('[react] successful projects get.')
+    let item = parse(event)
+    // debug && console.log('history ' + typeof item + ' ', item)
+    if (typeof item === 'object') {
+        let id; for (id in item) {
+            try {
+                let found = JSON.parse(item[id])
+                debug && console.log('history ' + typeof found + ' ', found)
+                state.setTimerHistory(timers => [...timers, found])
+            } catch (error) {
+                console.log(error)
+            }
+
+        }
+    }
+}

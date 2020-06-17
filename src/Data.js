@@ -191,6 +191,10 @@ export const getTimer = timerId => {
     store.get(`timers/${timerId}`)
 }
 
+export const getTimerHistory = timerId => {
+    store.get(`history/timers/${timerId}`)
+}
+
 /**
  * PATTERN FUNCTION
  * 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, Button, NativeEventEmitter, NativeModules, FlatList } from 'react-native';
 import { parse, dateToday, totalOver, totalTime } from './Functions'
 import * as Data from './Data'
-import { putHandler, projectHandler, projectsHandler, timersHandler, runningHandler } from './Handlers'
+import { putHandler, projectHandler, projectsHandler, timersHandler, runningHandler, timerHistoryHandler } from './Handlers'
 
 const { Heartbeat } = NativeModules;
 const deviceEmitter = new NativeEventEmitter(Heartbeat)
@@ -16,6 +16,7 @@ export default function App() {
   const [status, setStatus] = useState([])
   const [projects, setProjects] = useState([])
   const [timers, setTimers] = useState([])
+  const [timerHistory, setTimerHistory] = useState([])
   const [count, setCount] = useState(0)
 
   const running = useRef({ id: 'none', name: 'none', project: 'none' })
@@ -41,9 +42,11 @@ export default function App() {
   useEffect(() => {
     deviceEmitter.addListener("projects", event => projectsHandler(event, { projects, setProjects, running }))
     deviceEmitter.addListener("timers", event => timersHandler(event, { timers, setTimers, running }))
+    deviceEmitter.addListener(`history/timers/${running.current.id}`, event => timerHistoryHandler(event, { timerHistory, setTimerHistory }))
     return () => {
       deviceEmitter.removeAllListeners("projects")
       deviceEmitter.removeAllListeners("timers")
+      deviceEmitter.removeAllListeners(`history/timers/${running.current.id}`)
     }
   }, [online])
 
@@ -64,6 +67,8 @@ export default function App() {
     Data.getProjects()
     console.log('Get timers...')
     Data.getTimers()
+
+    Data.getTimerHistory(running.current.id)
     // if (projects.length > 0 && typeof projects[0] === 'object' && projects[0].id) {
     //   Data.getProjectTimers(projects[0].id)
     // }
@@ -140,6 +145,15 @@ export default function App() {
           keyExtractor={project => project.id}
         />
       </View>
+      <Text>Running Timer History: </Text>
+      <View style={styles.list}>
+        <FlatList
+          data={timerHistory}
+          style={{ height: 150 }}
+          renderItem={renderTimer}
+          keyExtractor={timer => timer.id}
+        />
+      </View>
       <Text>Timers: </Text>
       <View style={styles.list}>
         <FlatList
@@ -162,7 +176,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   list: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    backgroundColor: '#ccc'
   },
   button: {
     margin: 20,
