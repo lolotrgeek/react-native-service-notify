@@ -195,19 +195,6 @@ export const getTimerHistory = timerId => {
     store.get(`history/timers/${timerId}`)
 }
 
-/**
- * PATTERN FUNCTION
- * 
- * query store with keychain, listen for keychain events, handle events, update state, cleanup
- * @param {string} keychain
- * @param {object | array} state 
- * @param {function} handler 
- */
-export const getSomething = (keychain, state, handler) => {
-    let messenger = null
-    store.get(keychain)
-    messenger.addListener(keychain, event => {
-        handler(event, state)
-    })
-    return () => messenger.removeAllListeners(keychain)
+export const getProjectHistory = projectId => {
+    store.get(`history/projects/${projectId}`)
 }

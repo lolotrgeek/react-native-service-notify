@@ -93,15 +93,15 @@ export const timersHandler = (event, state) => {
 }
 export const projectParse = (found, state) => {
     try {
-        if (found.type === 'project') {
+        if (found.type === 'project' && found.status !== 'deleted') {
             let alreadyInProjects = state.projects.some(project => project.id === found.id)
             if (!alreadyInProjects) {
                 state.setProjects(projects => [...projects, found])
             }
-            // if (state.running.current.project && item.id === state.running.current.project) {
-            //   state.running.current.color = item.color
-            //   state.running.current.name = item.name
-            // }
+            if (state.running.current.project && item.id === state.running.current.project) {
+                state.running.current.color = item.color
+                state.running.current.name = item.name
+            }
 
         }
     } catch (error) {
@@ -111,7 +111,6 @@ export const projectParse = (found, state) => {
 
 export const projectHandler = (event, state) => {
     if (!event) return
-    debug && console.log('[react] msg project get.')
     let item = parse(event)
     debug && console.log('project get ' + typeof item + ' ', item)
     if (typeof item === 'object') {
@@ -122,15 +121,36 @@ export const projectHandler = (event, state) => {
 
 export const projectsHandler = (event, state) => {
     if (!event) return
-    debug && console.log('[react] successful projects get.')
     let item = parse(event)
-    debug && console.log('get ' + typeof item + ' ', item)
+    debug && console.log('projects get ' + typeof item + ' ', item)
     if (typeof item === 'object') {
         let id; for (id in item) {
             try {
                 let found = JSON.parse(item[id])
                 // console.log(`item ${typeof found}`, found)
                 projectParse(found, state)
+            } catch (error) {
+                console.log(error)
+            }
+
+        }
+    }
+}
+
+export const projectsDeletedHandler = (event, state) => {
+    if (!event) return
+    let item = parse(event)
+    debug && console.log('get deleted projects ' + typeof item + ' ', item)
+    if (typeof item === 'object') {
+        let id; for (id in item) {
+            try {
+                let found = JSON.parse(item[id])
+                if (found.type === 'project' && found.status === 'deleted') {
+                    let alreadyInProjects = state.projects.some(project => project.id === found.id)
+                    if (!alreadyInProjects) {
+                        state.setProjects(projects => [...projects, found])
+                    }
+                }
             } catch (error) {
                 console.log(error)
             }
@@ -154,7 +174,7 @@ export const timerHistoryHandler = (event, state) => {
             try {
                 let found = JSON.parse(item[id])
                 if (found.type === 'timer') {
-                    found.key = found.edited.length > 0 ? found.id+'_'+found.edited : found.id+'_'+found.status
+                    found.key = found.edited.length > 0 ? found.id + '_' + found.edited : found.id + '_' + found.status
                     let alreadyInProjects = state.timerHistory.some(timer => timer.key === found.key)
                     if (!alreadyInProjects) {
                         state.setTimerHistory(timers => [...timers, found])
@@ -184,7 +204,7 @@ export const projectHistoryHandler = (event, state) => {
             try {
                 let found = JSON.parse(item[id])
                 if (found.type === 'project') {
-                    found.key = found.edited.length > 0 ? found.id+'_'+found.edited : found.id+'_'+found.status
+                    found.key = found.edited.length > 0 ? found.id + '_' + found.edited : found.id + '_' + found.status
                     let alreadyInProjects = state.projectHistory.some(project => project.key === found.key)
                     if (!alreadyInProjects) {
                         state.setTimerHistory(projects => [...projects, found])

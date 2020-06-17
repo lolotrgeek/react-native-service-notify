@@ -18,7 +18,7 @@ export const newTimer = projectId => {
         ended: '',
         type: 'timer',
         project: projectId,
-        status: 'running',
+        status: 'running', // done | deleted
         edited: '',
         total: 0,
         mood: 'good',
@@ -41,7 +41,7 @@ export const newProject = (name, color) => {
         id: key,
         created: new Date().toString(),
         type: 'project',
-        status: 'active',
+        status: 'active', // deleted
         name: name,
         color: color,
         edited: '',
