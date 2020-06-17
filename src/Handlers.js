@@ -16,6 +16,7 @@ export const putHandler = (event, state) => {
     // }
 }
 
+///////////////////// TIMERS \\\\\\\\\\\\\\\\\\\\\\\
 export const timerParse = (found, state) => {
     // duplicate/edit parsing
     let alreadyInTimers = state.timers.some(timer => timer.id === found.id)
@@ -66,7 +67,9 @@ export const timerHandler = (event, state) => {
     debug && console.log('[react] msg timer get.')
     let item = parse(event)
     debug && console.log('timer get ' + typeof item + ' ', item)
-    timerParse(item, state)
+    if (found.type === 'timer') {
+        timerParse(item, state)
+    }
 }
 
 export const timersHandler = (event, state) => {
@@ -91,6 +94,45 @@ export const timersHandler = (event, state) => {
         }
     }
 }
+export const timerForEditHandler = (event, state) => {
+    if (!event) return
+    debug && console.log('[react] msg timer get.')
+    let item = parse(event)
+    debug && console.log('timer get ' + typeof item + ' ', item)
+    if (found.type === 'timer') {
+        state.setStarted(new Date(found.started))
+        state.setEnded(new Date(found.ended))
+        state.setMood(found.mood)
+        state.setEnergy(found.energy)
+        state.setTotal(found.total === 0 ? totalTime(state.started, state.ended) : found.total)
+        state.setTimer(found)
+    }
+}
+
+export const timersDeletedHandler = (event, state) => {
+    if (!event) return
+    let item = parse(event)
+    debug && console.log('get deleted timers ' + typeof item + ' ', item)
+    if (typeof item === 'object') {
+        let id; for (id in item) {
+            try {
+                let found = JSON.parse(item[id])
+                if (found.type === 'timer' && found.status === 'deleted') {
+                    let alreadyInProjects = state.timers.some(timer => timer.id === found.id)
+                    if (!alreadyInProjects) {
+                        state.setProjects(timers => [...timers, found])
+                    }
+                }
+            } catch (error) {
+                console.log(error)
+            }
+
+        }
+    }
+}
+
+
+/////////////////// PROJECTS\\\\\\\\\\\\\\\\\\\\\\\
 export const projectParse = (found, state) => {
     try {
         if (found.type === 'project' && found.status !== 'deleted') {
@@ -116,6 +158,20 @@ export const projectHandler = (event, state) => {
     if (typeof item === 'object') {
         let found = parse(item)
         projectParse(parse(found), state)
+    }
+}
+
+export const lastProjectHandler = (projects, state) => {
+    if (typeof projects === 'object') {
+        let keys = Object.keys(projects)
+        const lastKey = keys[keys.length - 1]
+        if (lastKey === '_') return false // TODO: keep walking up tree?
+        let found = parse(projects[lastKey])
+        debug && console.log('Project Key ', lastKey)
+        debug && console.log('Project Found', found)
+        if (found && found.type === 'project' && found.status !== 'deleted') {
+            state.setProjects(projects => [...projects, found])
+        }
     }
 }
 
@@ -158,6 +214,8 @@ export const projectsDeletedHandler = (event, state) => {
         }
     }
 }
+
+////////////////////// HISTORY \\\\\\\\\\\\\\\\\\\\\\\
 
 /**
  * 
@@ -217,3 +275,4 @@ export const projectHistoryHandler = (event, state) => {
         }
     }
 }
+
