@@ -1,5 +1,5 @@
-// Handlers for event listeners
-// A Handler consumes an event and some state, applies conditions, then updates state 
+// Handlers for event listeners - A Handler consumes an event and some state, applies conditions, then updates state 
+
 import * as Data from './Data'
 import { parse } from './Functions'
 
@@ -10,10 +10,6 @@ export const putHandler = (event, state) => {
     debug && console.log('[react] successful put.')
     let item = parse(event)
     debug && console.log('put ' + typeof item + ' ', item)
-    // if (item.type === 'timer') {
-    //     debug && console.log('[react] timer.')
-    //     timerParse(item, state)
-    // }
 }
 
 ///////////////////// TIMERS \\\\\\\\\\\\\\\\\\\\\\\
@@ -53,9 +49,9 @@ export const timerParse = (found, state) => {
 }
 
 export const runningHandler = (event, state) => {
+    if (!event) return
     let item = JSON.parse(event)
-    if (item && typeof item === 'object' && typeof item === 'object' && item.status === 'running') {
-
+    if (item && typeof item === 'object' && item.status === 'running') {
         state.running.current = item
     }
     console.log('[react] running', state.running.current)
@@ -85,7 +81,7 @@ export const timersHandler = (event, state) => {
         })
     }
     else if (typeof item === 'object') {
-        console.log('timers get ' + typeof item + ' ', item)
+        debug && console.log('timers get ' + typeof item + ' ', item)
         let id; for (id in item) {
             let found = parse(item[id])
             if (found.type === 'timer') {
@@ -140,9 +136,9 @@ export const projectParse = (found, state) => {
             if (!alreadyInProjects) {
                 state.setProjects(projects => [...projects, found])
             }
-            if (state.running.current.project && item.id === state.running.current.project) {
-                state.running.current.color = item.color
-                state.running.current.name = item.name
+            if (state.running.current.project && found.id === state.running.current.project) {
+                state.running.current.color = found.color
+                state.running.current.name = found.name
             }
 
         }
