@@ -146,7 +146,7 @@ export const projectsHandler = (event, state) => {
  */
 export const timerHistoryHandler = (event, state) => {
     if (!event) return
-    debug && console.log('[react] successful projects get.')
+    debug && console.log('[react] successful timer history get.')
     let item = parse(event)
     // debug && console.log('history ' + typeof item + ' ', item)
     if (typeof item === 'object') {
@@ -169,3 +169,31 @@ export const timerHistoryHandler = (event, state) => {
 }
 
 
+/**
+ * 
+ * @param {*} event 
+ * @param {*} state 
+ */
+export const projectHistoryHandler = (event, state) => {
+    if (!event) return
+    debug && console.log('[react] successful project history get.')
+    let item = parse(event)
+    // debug && console.log('history ' + typeof item + ' ', item)
+    if (typeof item === 'object') {
+        let id; for (id in item) {
+            try {
+                let found = JSON.parse(item[id])
+                if (found.type === 'project') {
+                    found.key = found.edited.length > 0 ? found.id+'_'+found.edited : found.id+'_'+found.status
+                    let alreadyInProjects = state.projectHistory.some(project => project.key === found.key)
+                    if (!alreadyInProjects) {
+                        state.setTimerHistory(projects => [...projects, found])
+                    }
+                }
+            } catch (error) {
+                console.log(error)
+            }
+
+        }
+    }
+}

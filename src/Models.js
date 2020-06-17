@@ -44,6 +44,7 @@ export const newProject = (name, color) => {
         status: 'active',
         name: name,
         color: color,
+        edited: '',
         // time: typeof time === 'string' && time.length > 0 ? parseInt(time) : time
     }
     return project
