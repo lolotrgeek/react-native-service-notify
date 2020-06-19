@@ -5,7 +5,6 @@ const finishTimer = require('./src/Data').finishTimer
 const getProject = require('./src/Data').getProject
 const getTimers = require('./src/Data').getTimers
 const getRunning = require('./src/Data').getRunning
-const trimSoul = require('./src/Data').trimSoul
 const { differenceInSeconds, timerRanToday } = require('./src/Functions')
 const native = require('./native-bridge')
 

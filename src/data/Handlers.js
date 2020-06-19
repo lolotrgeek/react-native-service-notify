@@ -1,7 +1,5 @@
 // Handlers for event listeners - A Handler consumes an event and some state, applies conditions, then updates state 
-
-import * as Data from './Data'
-import { parse } from './Functions'
+import { parse, totalTime } from '../constants/Functions'
 
 const debug = false
 
@@ -53,8 +51,11 @@ export const runningHandler = (event, state) => {
     let item = JSON.parse(event)
     if (item && typeof item === 'object' && item.status === 'running') {
         state.running.current = item
+        if (state.setMood) state.setMood(item.mood)
+        if (state.setEnergy) state.setEnergy(item.energy)
     }
     console.log('[react] running', state.running.current)
+
 }
 
 
@@ -63,8 +64,8 @@ export const timerHandler = (event, state) => {
     debug && console.log('[react] msg timer get.')
     let item = parse(event)
     debug && console.log('timer get ' + typeof item + ' ', item)
-    if (found.type === 'timer') {
-        timerParse(item, state)
+    if (item.type === 'timer') {
+        state.setTimer(item)
     }
 }
 
@@ -95,13 +96,13 @@ export const timerForEditHandler = (event, state) => {
     debug && console.log('[react] msg timer get.')
     let item = parse(event)
     debug && console.log('timer get ' + typeof item + ' ', item)
-    if (found.type === 'timer') {
-        state.setStarted(new Date(found.started))
-        state.setEnded(new Date(found.ended))
-        state.setMood(found.mood)
-        state.setEnergy(found.energy)
-        state.setTotal(found.total === 0 ? totalTime(state.started, state.ended) : found.total)
-        state.setTimer(found)
+    if (item.type === 'timer') {
+        state.setStarted(new Date(item.started))
+        state.setEnded(new Date(item.ended))
+        state.setMood(item.mood)
+        state.setEnergy(item.energy)
+        state.setTotal(item.total === 0 ? totalTime(state.started, state.ended) : item.total)
+        state.setTimer(item)
     }
 }
 
@@ -114,9 +115,9 @@ export const timersDeletedHandler = (event, state) => {
             try {
                 let found = JSON.parse(item[id])
                 if (found.type === 'timer' && found.status === 'deleted') {
-                    let alreadyInProjects = state.timers.some(timer => timer.id === found.id)
-                    if (!alreadyInProjects) {
-                        state.setProjects(timers => [...timers, found])
+                    let alreadyInTimers = state.timers.some(timer => timer.id === found.id)
+                    if (!alreadyInTimers) {
+                        state.setTimers(timers => [...timers, found])
                     }
                 }
             } catch (error) {
@@ -147,14 +148,24 @@ export const projectParse = (found, state) => {
     }
 }
 
+/**
+ * 
+ * @param {*} event 
+ * @param {*} state 
+ * @param {*} state.projects
+ * @param {*} state.setProjects 
+ */
 export const projectHandler = (event, state) => {
     if (!event) return
     let item = parse(event)
     debug && console.log('project get ' + typeof item + ' ', item)
     if (typeof item === 'object') {
         let found = parse(item)
-        projectParse(parse(found), state)
+        state.project.current = found
+
     }
+    console.log(typeof state.project.current , state.project.current)
+
 }
 
 export const lastProjectHandler = (projects, state) => {
@@ -247,6 +258,8 @@ export const timerHistoryHandler = (event, state) => {
  * 
  * @param {*} event 
  * @param {*} state 
+ * @param {*} state.edits 
+ * @param {*} state.setEdits
  */
 export const projectHistoryHandler = (event, state) => {
     if (!event) return
@@ -259,9 +272,9 @@ export const projectHistoryHandler = (event, state) => {
                 let found = JSON.parse(item[id])
                 if (found.type === 'project') {
                     found.key = found.edited.length > 0 ? found.id + '_' + found.edited : found.id + '_' + found.status
-                    let alreadyInProjects = state.projectHistory.some(project => project.key === found.key)
+                    let alreadyInProjects = state.edits.some(project => project.key === found.key)
                     if (!alreadyInProjects) {
-                        state.setTimerHistory(projects => [...projects, found])
+                        state.setEdits(projects => [...projects, found])
                     }
                 }
             } catch (error) {

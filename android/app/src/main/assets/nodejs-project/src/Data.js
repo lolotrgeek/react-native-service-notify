@@ -5,11 +5,12 @@ const dateSimple = require('./Functions').dateSimple
 const doneTimer = require('./Models').doneTimer
 const newTimer = require('./Models').newTimer
 const store = require('./Store')
+const chain = require('./Chains')
 
 const debug = false
 
-const put = (key, value) => store.put({ key: key, value: value })
-const set = (key, value) => store.set({ key: key, value: value })
+const put = (key, value) => store.put({ key: key, value: JSON.stringify(value) })
+const set = (key, value) => store.set({ key: key, value: JSON.stringify(value) })
 const get = (key) => store.get(key)
 const getAll = (key) => store.getAll(key)
 const getAllOnce = (key) => store.getAllOnce(key)
@@ -18,21 +19,19 @@ const createTimer = (projectId) => {
   if (!projectId || typeof projectId !== 'string' || projectId.length < 9) return false
   debug && console.log('Creating Timer', projectId)
   let timer = newTimer(projectId)
-  let timerToString = JSON.stringify(timer)
   debug && console.log('Created Timer', timer)
-  put('running', timerToString, 'running')
+  put(chain.running(), timer)
   debug && console.log('Success! Created Timer.')
-  set(`history/timers/${timer.id}`, timerToString)
+  set(chain.timerHistory(timer.id), timer)
   return timer
 }
 
 const endTimer = (timer) => {
   debug && console.log('Ending', timer)
-  timer = JSON.stringify(timer)
-  set(`history/timers/${timer.project}/${timer.id}`, timer)
-  put(`timers/${timer.id}`, timer)
-  put(`project/${timer.project}/${timer.id}`, timer)
-  put(`date/${dateSimple(timer.started)}/${timer.id}`, timer)
+  set(chain.timerHistory(timer.id), timer)
+  put(chain.timer(timer.id), timerToString)
+  put(chain.projectTimer(timer.project, timer.id), timer)
+  put(chain.dateTimer(timer.started, timer.id), timer)
 }
 
 /**
@@ -49,7 +48,7 @@ const finishTimer = (timer) => {
   if (isRunning(timer)) {
     let done = doneTimer(timer)
     debug && console.log('[node Data STOP]', done)
-    put('running', JSON.stringify(done))
+    put(chain.running(), done)
     // Danger of data loss until endTimer is called
     if (multiDay(done.started, done.ended)) {
       const dayEntries = newEntryPerDay(done.started, done.ended)
@@ -72,8 +71,8 @@ const finishTimer = (timer) => {
  * @param {function} handler 
  */
 const getProject = (projectId, handler) => {
-  get(`projects/${projectId}`)
-  store.channel.addListener(`projects/${projectId}`, handler)
+  get(chain.project(projectId))
+  store.channel.addListener(chain.project(projectId), handler)
 }
 
 /**
@@ -83,7 +82,7 @@ const getProject = (projectId, handler) => {
 const getTimers = (projectId) => {
   return new Promise((resolve, reject) => {
     try {
-      const chain = store.chainer(`date/${dateSimple()}`, store.app)
+      const chain = store.chainer(chain.timers(), store.app)
       chain.once((data, key) => {
         const foundData = trimSoul(data)
         debug && console.log('[GUN node] getTimers Data Found: ', foundData)
@@ -114,7 +113,7 @@ const getTimers = (projectId) => {
 const getTimersFiltered = (projectId) => {
   return new Promise((resolve, reject) => {
     try {
-      const chain = store.chainer('timers', store.app)
+      const chain = store.chainer(chain.timers(), store.app)
       chain.once((data, key) => {
         const foundData = trimSoul(data)
         debug && console.log('[GUN node] getTimers Data Found: ', foundData)
@@ -139,15 +138,10 @@ const getTimersFiltered = (projectId) => {
 }
 
 const getRunning = handler => {
-  getAll('running')
-  store.channel.addListener('running', handler)
+  getAll(chain.running())
+  store.channel.addListener(chain.running(), handler)
 }
 
-const trimSoul = data => {
-  if (!data || !data['_'] || typeof data['_'] !== 'object') return data
-  delete data['_']
-  return data
-}
 
 module.exports = {
   finishTimer: finishTimer,
@@ -155,5 +149,4 @@ module.exports = {
   getProject: getProject,
   getTimers: getTimers,
   getRunning: getRunning,
-  trimSoul: trimSoul
 }

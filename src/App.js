@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, Button, NativeEventEmitter, NativeModules, FlatList } from 'react-native';
-import { parse, dateToday, totalOver, totalTime } from './Functions'
-import * as Data from './Data'
-import { putHandler, projectHandler, projectsHandler, timersHandler, runningHandler, timerHistoryHandler } from './Handlers'
+import { parse, dateToday, totalOver, totalTime } from './constants/Functions'
+import * as Data from './data/Data'
+import { putHandler, projectHandler, projectsHandler, timersHandler, runningHandler, timerHistoryHandler } from './data/Handlers'
 
 const { Heartbeat } = NativeModules;
-const deviceEmitter = new NativeEventEmitter(Heartbeat)
+const messenger = new NativeEventEmitter(Heartbeat)
 
 const debug = false
 const test = false
@@ -21,31 +21,31 @@ export default function App() {
   const running = useRef({ id: 'none', name: 'none', project: 'none' })
   // const projects = useRef(projects[0])
 
-  useEffect(() => Heartbeat.get('running'), [online])
+  useEffect(() => Data.getRunning(), [online])
 
   useEffect(() => {
-    deviceEmitter.addListener("put", event => putHandler(event, { running, setTimers }))
-    return () => deviceEmitter.removeAllListeners("put")
+    messenger.addListener("put", event => putHandler(event, { running, setTimers }))
+    return () => messenger.removeAllListeners("put")
   }, [])
 
   useEffect(() => {
-    deviceEmitter.addListener("count", event => setCount(event))
-    return () => deviceEmitter.removeAllListeners("count")
+    messenger.addListener("count", event => setCount(event))
+    return () => messenger.removeAllListeners("count")
   }, [])
 
   useEffect(() => {
-    deviceEmitter.addListener("running", event => runningHandler(event, { running: running }))
-    return () => deviceEmitter.removeAllListeners("running")
+    messenger.addListener("running", event => runningHandler(event, { running: running }))
+    return () => messenger.removeAllListeners("running")
   }, [])
 
   useEffect(() => {
-    deviceEmitter.addListener("projects", event => projectsHandler(event, { projects, setProjects, running }))
-    deviceEmitter.addListener("timers", event => timersHandler(event, { timers, setTimers, running }))
-    deviceEmitter.addListener(`history/timers/${running.current.id}`, event => timerHistoryHandler(event, { timerHistory, setTimerHistory }))
+    messenger.addListener("projects", event => projectsHandler(event, { projects, setProjects, running }))
+    messenger.addListener("timers", event => timersHandler(event, { timers, setTimers, running }))
+    messenger.addListener(`history/timers/${running.current.id}`, event => timerHistoryHandler(event, { timerHistory, setTimerHistory }))
     return () => {
-      deviceEmitter.removeAllListeners("projects")
-      deviceEmitter.removeAllListeners("timers")
-      deviceEmitter.removeAllListeners(`history/timers/${running.current.id}`)
+      messenger.removeAllListeners("projects")
+      messenger.removeAllListeners("timers")
+      messenger.removeAllListeners(`history/timers/${running.current.id}`)
     }
   }, [online])
 
@@ -120,14 +120,15 @@ export default function App() {
           setTimers([])
           setTimerHistory([])
           setOnline(!online)
-          }} />
+        }} />
       </View>
 
 
       <View style={{ flexDirection: 'row', margin: 10 }}>
         <View style={{ width: '25%' }}>
-          <Text>{'Project: ' + running.current.project ? running.current.project : ''}</Text>
-          <Text>{running.current.name ? running.current.name : ''}</Text>
+          <Text>{running.current.name ? running.current.name : 'no Project'}</Text>
+          <Text>{running.current.project ? running.current.project : ''}</Text>
+
         </View>
         <View style={{ width: '25%' }}>
           <Text>{running.current.status === 'done' || running.current.id === 'none' ? 'Last Run: ' + running.current.id : 'Running: ' + running.current.id}</Text>

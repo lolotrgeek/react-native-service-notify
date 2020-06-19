@@ -1,6 +1,7 @@
-import { cloneTimer, newProject, doneTimer, newTimer } from './Models'
-import { isRunning, multiDay, newEntryPerDay, dateSimple, dateTestGen, endRandTestGen, startRandTestGen } from './Functions'
-import * as store from './Store'
+import { cloneTimer, newProject, doneTimer, newTimer } from '../Models'
+import { isRunning, multiDay, newEntryPerDay, dateSimple, dateTestGen, endRandTestGen, startRandTestGen } from '../constants/Functions'
+import * as store from './Store.native'
+import * as chain from './Chains'
 
 const debug = false
 
@@ -8,8 +9,8 @@ export const createProject = (name, color) => {
     const project = newProject(name, color)
     if (!project) return false
     debug && console.log('[react Data] Creating Project', project)
-    store.set(`history/projects/${project.id}`, project)
-    store.put(`projects/${project.id}`, project)
+    store.set(chain.projectHistory(project.id), project)
+    store.put(chain.project(project.id), project)
 }
 
 export const updateProject = (project, updates) => {
@@ -18,8 +19,8 @@ export const updateProject = (project, updates) => {
     if (projectEdit.deleted) { projectEdit.deleted = null }
     projectEdit.edited = new Date().toString()
     debug && console.log('[react Data] Updating Project', projectEdit)
-    store.set(`history/projects/${project.id}`, projectEdit)
-    store.put(`projects/${projectEdit.id}`, projectEdit)
+    store.set(chain.projectHistory(project.id), projectEdit)
+    store.put(chain.project(projectEdit.id), projectEdit)
 }
 
 export const restoreProject = (project) => {
@@ -28,7 +29,7 @@ export const restoreProject = (project) => {
         restoredProject.status = 'active'
     }
     debug && console.log('[react Data] Restoring Project', restoredProject)
-    store.put(`projects/${restoreProject.id}`, restoreProject)
+    store.put(chain.project(restoreProject.id), restoreProject)
 }
 
 
@@ -36,9 +37,9 @@ export const deleteProject = (project) => {
     debug && console.log('[react Data] Deleting Project', project)
     let projectDelete = project
     projectDelete.deleted = new Date().toString()
-    store.set(`history/projects/${projectDelete.id}`, projectDelete)
+    store.set(chain.projectHistory(projectDelete.id), projectDelete)
     projectDelete.status = 'deleted'
-    store.put(`projects/${project.id}`, projectDelete)
+    store.put(chain.project(project.id), projectDelete)
 }
 /**
  * Generates a new timer using the standard timer model
@@ -51,7 +52,7 @@ export const createTimer = (projectId) => {
     const timer = newTimer(projectId)
     debug && console.log('[react Data] Created Timer', timer)
     store.put('running', timer)
-    store.set(`history/timers/${timer.id}`, timer)
+    store.set(chain.timerHistory(timer.id), timer)
     return true
 }
 
@@ -73,10 +74,10 @@ export const generateTimer = (projects) => {
     timer.ended = end.toString()
     timer.status = 'done'
     debug && console.log('[react Data] Generated Timer', timer)
-    store.set(`history/timers/${timer.id}`, timer)
-    store.put(`timers/${timer.id}`, timer)
-    store.put(`project/${projectId}/${timer.id}`, timer)
-    store.put(`date/${dateSimple(timer.started)}/${timer.id}`, timer)
+    store.set(chain.timerHistory(timer.id), timer)
+    store.put(chain.timer(timer.id), timer)
+    store.put(chain.projectTimer(projectId, timer.id), timer)
+    store.put(chain.dateTimer(timer.started, timer.id), timer)
     return true
 }
 
@@ -89,16 +90,16 @@ export const updateTimer = (timer) => {
     if (editedTimer.deleted) { editedTimer.deleted = null }
     editedTimer.edited = new Date().toString()
     debug && console.log('[react Data] Updating Timer', editedTimer)
-    store.set(`history/timers/${editedTimer.id}`, editedTimer)
-    store.put(`timers/${editedTimer.id}`, editedTimer)
-    store.put(`project/${timer.project}/${editedTimer.id}`, editedTimer)
+    store.set(chain.timerHistory(editedTimer.id), editedTimer)
+    store.put(chain.timer(editedTimer.id), editedTimer)
+    store.put(chain.projectTimer(editedTimer.project, editedTimer.id), editedTimer)
     if (timer.started !== editedTimer.started) {
         let timerMoved = timer
         timerMoved.deleted = new Date().toString()
         timerMoved.status = 'deleted'
-        store.put(`date/${dateSimple(timer.started)}/${timer.id}`, timerMoved)
+        store.put(chain.dateTimer(timer.started, timer.id), timerMoved)
     }
-    store.put(`date/${dateSimple(editedTimer.started)}/${editedTimer.id}`, editedTimer)
+    store.put(chain.dateTimer(editedTimer.started, editedTimer.id), editedTimer)
 }
 
 export const restoreTimer = (timer) => {
@@ -106,18 +107,20 @@ export const restoreTimer = (timer) => {
     // restoredTimer.restored = new Date().toString()
     if (restoredTimer.status === 'deleted') {
         restoredTimer.status = 'done'
-        store.set(`history/timers/${restoreTimer.project}/${restoreTimer.id}`, restoredTimer)
+        store.set(chain.timerHistory(restoredTimer.id), restoredTimer)
     }
     debug && console.log('[react Data] Restoring Timer', restoredTimer)
-    store.put(`timers/${restoreTimer.id}`, restoredTimer)
+    store.put(chain.timer(restoredTimer.id), restoredTimer)
+    store.put(chain.projectTimer(restoredTimer.project), restoredTimer)
+    store.put(chain.dateTimer(restoredTimer.started, restoredTimer.id), restoredTimer)
 }
 
 export const endTimer = (timer) => {
     debug && console.log('[react Data] Ending', timer)
-    store.set(`history/timers/${timer.id}`, timer)
-    store.put(`timers/${timer.id}`, timer)
-    store.put(`project/${timer.project}/${timer.id}`, timer)
-    store.put(`date/${dateSimple(timer.started)}/${timer.id}`, timer)
+    store.set(chain.timerHistory(timer.id), timer)
+    store.put(chain.timer(timer.id), timer)
+    store.put(chain.projectTimer(timer.project, timer.id), timer)
+    store.put(chain.dateTimer(timer.started, timer.id), timer)
 }
 
 export const deleteTimer = (timer) => {
@@ -125,9 +128,10 @@ export const deleteTimer = (timer) => {
     let timerDelete = timer
     timerDelete.deleted = new Date().toString()
     timerDelete.status = 'deleted'
-    store.put(`timers/${timer.id}`, timerDelete)
-    store.put(`project/${timer.project}/${timer.id}`, timerDelete)
-    store.put(`date/${dateSimple(timerDelete.started)}/${timer.id}`, timerDelete)
+    store.set(chain.timerHistory(timer.id), timerDelete)
+    store.put(chain.timer(timer.id), timerDelete)
+    store.put(chain.projectTimer(timer.project, timer.id), timerDelete)
+    store.put(chain.dateTimer(timer.started, timer.id), timerDelete)
 }
 
 /**
@@ -164,31 +168,39 @@ export const finishTimer = (timer) => {
 }
 
 export const getProjects = () => {
-    store.get('projects')
+    store.get(chain.projects())
     // return store.off('projects')
 }
 
 export const getProject = projectId => {
-    store.get(`projects/${projectId}`)
+    store.get(chain.project(projectId))
 }
 
 export const getTimers = () => {
-    store.get('timers')
+    store.get(chain.timers())
+}
+
+export const getDayTimers = () => {
+    store.get(chain.dateTimers())
 }
 
 export const getProjectTimers = projectId => {
-    // store.get(`timers/project/${projectId}`)
-    store.getAll('timers', { key: 'project', value: projectId })
+    store.get(chain.projectTimers(projectId))
+    // store.getAll('timers', { key: 'project', value: projectId })
 }
 
 export const getTimer = timerId => {
-    store.get(`timers/${timerId}`)
+    store.get(chain.timer(timerId))
 }
 
 export const getTimerHistory = timerId => {
-    store.get(`history/timers/${timerId}`)
+    store.get(chain.timerHistory(timerId))
 }
 
 export const getProjectHistory = projectId => {
-    store.get(`history/projects/${projectId}`)
+    store.get(chain.projectHistory(projectId))
+}
+
+export const getRunning = () => {
+    store.get(chain.running())
 }
